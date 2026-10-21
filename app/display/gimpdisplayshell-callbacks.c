@@ -31,7 +31,6 @@
 
 #include "menus/menus.h"
 
-#include "widgets/gimpcairo-wilber.h"
 #include "widgets/gimpmenufactory.h"
 #include "widgets/gimpuimanager.h"
 
@@ -641,8 +640,6 @@ gimp_display_shell_canvas_draw_drop_zone (GimpDisplayShell *shell,
   cairo_save (cr);
 
   gimp_display_shell_draw_background (shell, cr);
-
-  gimp_cairo_draw_drop_wilber (shell->canvas, cr, shell->blink);
 
   cairo_restore (cr);
 }

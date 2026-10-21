@@ -45,7 +45,7 @@ libscriptfu_sources = [
 # Instead, this library installs in same place as libgimp
 # install_dir: gimpplugindir / 'lib',
 
-libscriptfu = library('gimp-scriptfu-'+ gimp_api_version,
+libscriptfu = library('clay-scriptfu-'+ gimp_api_version,
   libscriptfu_sources,
   include_directories: [
     rootInclude,

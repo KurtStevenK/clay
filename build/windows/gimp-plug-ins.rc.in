@@ -4,7 +4,7 @@
 #define _QUOTE(x) #x
 #define QUOTE(x) _QUOTE(x)
 
-#define VER_COMPANYNAME_STR         "Spencer Kimball, Peter Mattis and the GIMP Development Team"
+#define VER_COMPANYNAME_STR         "ClayDesign"
 
 #define VER_PRODUCTVERSION          @GIMP_MAJOR_VERSION@,@GIMP_MINOR_VERSION@,@GIMP_MICRO_VERSION@,0
 #define VER_PRODUCTVERSION_STR      "@GIMP_MAJOR_VERSION@.@GIMP_MINOR_VERSION@.@GIMP_MICRO_VERSION@\0"
@@ -17,7 +17,7 @@
 #define VER_INTERNALNAME_STR        QUOTE(INTERNALNAME_STR)
 #define VER_ORIGINALFILENAME_STR    QUOTE(ORIGINALFILENAME_STR)
 
-#define VER_LEGALCOPYRIGHT_STR      "Copyright © 1995-" GIMP_GIT_LAST_COMMIT_YEAR
+#define VER_LEGALCOPYRIGHT_STR      "© 2026 ClayDesign Contributors."
 
 #ifndef DEBUG
 #define VER_DEBUG                   0

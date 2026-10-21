@@ -39,7 +39,7 @@ libgimpcolor_def = configure_file(
   copy: true
 )
 
-libgimpcolor = library('gimpcolor-' + gimp_api_version,
+libgimpcolor = library('claycolor-' + gimp_api_version,
   libgimpcolor_sources,
   include_directories: rootInclude,
   dependencies: [

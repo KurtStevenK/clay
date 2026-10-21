@@ -416,7 +416,7 @@ libgimp_def = configure_file(
 )
 
 
-libgimp = library('gimp-'+ gimp_api_version,
+libgimp = library('clay-'+ gimp_api_version,
   libgimp_sources,
   include_directories: rootInclude,
   dependencies: [
@@ -472,7 +472,7 @@ libgimpui_def = configure_file(
   copy: true
 )
 
-libgimpui = library('gimpui-'+ gimp_api_version,
+libgimpui = library('clayui-'+ gimp_api_version,
   libgimpui_sources,
   dependencies: [
     libgimp_dep,

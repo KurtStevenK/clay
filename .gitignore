@@ -1,9 +1,26 @@
+# Local secrets — commit only .env.example (see SECURITY.md)
+.env
+.env.*
+!.env.example
+
+# Local / machine-specific
 _build/
 _install/
 _ico-preview-config/
+_theme-verify-config/
 _clay-launch.err
 _clay-launch.out
 _pacman.log
 website/.firebase/
+
+# Build artifacts
 *.obj
 *.pdb
+
+# Common credential filenames (belt-and-suspenders for a public repo)
+*.pem
+*.p12
+*.pfx
+credentials.json
+serviceAccount*.json
+**/secrets.json

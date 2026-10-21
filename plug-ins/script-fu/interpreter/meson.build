@@ -1,7 +1,7 @@
 
 scriptfuInclude = include_directories('..')
 
-executable_name = 'gimp-script-fu-interpreter-' + gimp_api_version
+executable_name = 'clay-script-fu-interpreter-' + gimp_api_version
 
 plugin_sourcecode = [
   'script-fu-interpreter.c',

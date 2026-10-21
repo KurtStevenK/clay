@@ -2169,8 +2169,8 @@ prefs_dialog_new (Gimp       *gimp,
           }
         else if (themes_theme_is_default (gimp, themes[i]))
           {
-            /* TRANSLATORS: this is the name of GIMP's "Default" theme. */
-            name_label = gtk_label_new (C_("theme-name", "Default"));
+            /* TRANSLATORS: this is the name of Clay's default theme. */
+            name_label = gtk_label_new (C_("theme-name", "Clay"));
           }
         else
           {

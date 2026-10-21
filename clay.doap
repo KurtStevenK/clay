@@ -1,0 +1,76 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+  <name xml:lang="en">Clay</name>
+
+  <shortdesc xml:lang="en">Clay Image Beautification Program</shortdesc>
+
+  <description xml:lang="en">
+      Clay is the Clay Image Beautification Program. It is a
+      freely distributed program for photo retouching,
+      image composition and image authoring.
+      It has many capabilities. It can be used as a simple paint
+      program, an expert quality photo retouching program, an online
+      batch processing system, a mass production image renderer, an
+      image format converter, etc.
+      Clay is expandable and extensible. It is designed to be
+      augmented with plug-ins and extensions to do just about
+      anything. The advanced scripting interface allows everything
+      from the simplest task to the most complex image manipulation
+      procedures to be easily scripted. Clay is available for Linux,
+      Windows and macOS.
+  </description>
+  <description xml:lang="de">
+      Clay ist das Clay Image Beautification Program.
+      Es ist ein frei verfügbares Programm für Aufgaben wie Fotoretusche,
+      Bildgestaltung und Bildbearbeitung.
+      Clay hat viele Fähigkeiten. Sie können es verwenden für einfache
+      Zeichenaufgaben, professionelle Fotoretuschen, die Online-
+      Stapelverarbeitung, Bildrendering in der Massenproduktion,
+      die Umwandlung von Grafikdateien und vieles mehr.
+      Clay ist durch Plug-ins erweiterungsfähig.
+      Mithilfe der Programmierschnittstelle von Clay können Sie einfache
+      Aufgaben wie auch komplexe Bildverarbeitungsprozeduren automatisieren.
+      Clay steht Ihnen unter Linux, Windows und macOS zur Verfügung.
+  </description>
+  <description xml:lang="it">
+      Clay è il Clay Image Beautification Program. È un
+      programma distribuito liberamente adatto al foto ritocco,
+      alla composizione e alla creazione di immagini.
+      È molto flessibile. Può essere usato come semplice programma
+      di disegno, come programma per il fotoritocco professionale,
+      come sistema di elaborazione batch in linea, come generatore
+      di immagini prodotte automaticamente, come convertitore tra
+      diversi formati immagine e altro ancora.
+      Clay è espandibile ed estensibile. È stato progettato per
+      essere ampliato con plug-in ed estensioni per poter aggiungere
+      praticamente qualunque comando. L'interfaccia avanzata di
+      scripting semplifica la conversione in procedura dal compito
+      più semplice fino all'elaborazione di immagini più complessa.
+      Clay è disponibile per Linux, Windows e macOS.
+  </description>
+
+  <homepage rdf:resource="https://claydesign.web.app" />
+
+  <category rdf:resource="http://api.gnome.org/doap-extensions#apps" />
+
+  <download-page rdf:resource="https://github.com/KurtStevenK/clay" />
+
+  <bug-database
+    rdf:resource="https://github.com/KurtStevenK/clay/issues"
+  />
+
+  <programming-language>C</programming-language>
+  <programming-language>Python</programming-language>
+  <programming-language>Scheme</programming-language>
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>ClayDesign Contributors</foaf:name>
+    </foaf:Person>
+  </maintainer>
+
+</Project>

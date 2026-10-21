@@ -20,6 +20,10 @@ If you have a concern about attribution, a contribution, or the license, write i
 
 GIMP and the Wilber mascot are names of the upstream project. This fork is Clay.
 
+## Verify downloads
+
+Every GitHub release is scanned on [VirusTotal](https://www.virustotal.com). The release notes list each installer's detection count and link to its full multi-engine report. Heuristic flags on large native GTK apps are common, so read the whole report rather than a single detection. See [SECURITY.md](SECURITY.md).
+
 ## Building
 
 Desktop builds use the Meson files already in this tree: [build/windows](build/windows), [build/linux](build/linux), and [build/macos](build/macos). See [INSTALL](INSTALL) for the upstream build instructions.

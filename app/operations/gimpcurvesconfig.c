@@ -558,7 +558,7 @@ gimp_curves_config_load_cruft (GimpCurvesConfig  *config,
   if (! line)
     return FALSE;
 
-  if (strcmp (line, "# Clay Curves File") != 0)
+  if (strcmp (line, "# GIMP Curves File") != 0)
     {
       g_set_error_literal (error, GIMP_CONFIG_ERROR, GIMP_CONFIG_ERROR_PARSE,
                            _("not a Clay Curves file"));
@@ -658,7 +658,7 @@ gimp_curves_config_save_cruft (GimpCurvesConfig  *config,
   g_return_val_if_fail (G_IS_OUTPUT_STREAM (output), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  string = g_string_new ("# Clay Curves File\n");
+  string = g_string_new ("# GIMP Curves File\n");
 
   for (i = 0; i < 5; i++)
     {

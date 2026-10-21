@@ -124,7 +124,7 @@ gimp_palette_load (GimpContext   *context,
   if (! str)
     goto failed;
 
-  if (! g_str_has_prefix (str, "Clay Palette"))
+  if (! g_str_has_prefix (str, "GIMP Palette"))
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Missing magic header."));
@@ -2490,7 +2490,7 @@ gimp_palette_load_detect_format (GFile        *file,
         {
           format = GIMP_PALETTE_FILE_FORMAT_RIFF_PAL;
         }
-      else if (g_str_has_prefix (header, "Clay Palette"))
+      else if (g_str_has_prefix (header, "GIMP Palette"))
         {
           format = GIMP_PALETTE_FILE_FORMAT_GPL;
         }

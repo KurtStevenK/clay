@@ -43,7 +43,6 @@
 
 #include "core/gimp-utils.h"
 
-#include "widgets/gimphelp-ids.h"
 #include "widgets/gimpwidgets-utils.h"
 
 #include "about.h"
@@ -351,16 +350,6 @@ about_dialog_create (Gimp           *gimp,
       g_list_free (children);
     }
 
-  if (GIMP_GUI_CONFIG (config)->show_help_button)
-    {
-      gimp_help_connect (dialog.dialog, NULL, gimp_standard_help_func,
-                         GIMP_HELP_ABOUT_DIALOG, NULL, NULL);
-
-      gtk_dialog_add_buttons (GTK_DIALOG (dialog.dialog),
-                              _("_Help"), GTK_RESPONSE_HELP,
-                              NULL);
-    }
-
   gtk_style_context_add_class (gtk_widget_get_style_context (dialog.dialog),
                                "gimp-about-dialog");
 
@@ -372,10 +361,10 @@ about_dialog_response (GtkDialog *dialog,
                        gint       response_id,
                        gpointer   user_data)
 {
-  if (response_id == GTK_RESPONSE_HELP)
-    gimp_standard_help_func (GIMP_HELP_ABOUT_DIALOG, NULL);
-  else
-    gtk_widget_destroy (GTK_WIDGET (dialog));
+  (void) response_id;
+  (void) user_data;
+
+  gtk_widget_destroy (GTK_WIDGET (dialog));
 }
 
 #if defined(G_OS_WIN32) || defined(PLATFORM_OSX)

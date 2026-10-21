@@ -70,7 +70,7 @@ gimp_brush_generated_load (GimpContext   *context,
   if (! string)
     goto failed;
 
-  if (! g_str_has_prefix (string, "Clay-VBR"))
+  if (! g_str_has_prefix (string, "GIMP-VBR"))
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Not a Clay brush file."));

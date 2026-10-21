@@ -583,7 +583,7 @@ themes_apply_theme (Gimp          *gimp,
           gchar *tmp;
 
           tmp = g_build_filename (gimp_data_directory (),
-                                  "themes", "Default", "gimp.css",
+                                  "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp.css",
                                   NULL);
           css_files = g_slist_prepend (css_files, g_file_new_for_path (tmp));
           g_free (tmp);
@@ -592,17 +592,17 @@ themes_apply_theme (Gimp          *gimp,
             {
             case GIMP_THEME_LIGHT:
               tmp = g_build_filename (gimp_data_directory (),
-                                      "themes", "Default", "gimp-light.css",
+                                      "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp-light.css",
                                       NULL);
               break;
             case GIMP_THEME_GRAY:
               tmp = g_build_filename (gimp_data_directory (),
-                                      "themes", "Default", "gimp-gray.css",
+                                      "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp-gray.css",
                                       NULL);
               break;
             case GIMP_THEME_DARK:
               tmp = g_build_filename (gimp_data_directory (),
-                                      "themes", "Default", "gimp-dark.css",
+                                      "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp-dark.css",
                                       NULL);
               break;
             case GIMP_THEME_SYSTEM:

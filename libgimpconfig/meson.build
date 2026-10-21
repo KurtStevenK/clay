@@ -73,7 +73,7 @@ libgimpconfig_def = configure_file(
   copy: true
 )
 
-libgimpconfig = library('gimpconfig-' + gimp_api_version,
+libgimpconfig = library('clayconfig-' + gimp_api_version,
   libgimpconfig_sources,
   include_directories: rootInclude,
   dependencies: [

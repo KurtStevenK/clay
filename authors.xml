@@ -8,6 +8,7 @@
 
 <gimp-authors xmlns="http://purl.org/dc/elements/1.1/">
 
+  <creator role="author" last-active="3.36">Kurt Steven Kainzmayer</creator>
   <creator role="author" last-active="2.2">Spencer Kimball</creator>
   <creator role="author" last-active="1.0">Peter Mattis</creator>
 

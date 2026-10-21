@@ -117,14 +117,19 @@ for df in def_files:
       continue
    directory, name = path.split (df)
    basename, extension = name.split (".")
-   libname = path.join(os.getcwd(), directory, libprefix + basename + "-*" + libextension)
+   # Installed library filenames use the Clay prefix. The .def files
+   # still carry the upstream basename.
+   lib_basename = basename
+   if lib_basename.startswith("gimp"):
+      lib_basename = "clay" + lib_basename[4:]
+   libname = path.join(os.getcwd(), directory, libprefix + lib_basename + "-*" + libextension)
    matches = glob.glob(libname)
    lib_is_win32 = platform_win32
    if matches:
      libname = matches[0]
    elif libextension != ".dll":
      # Linux-hosted MinGW cross builds still produce Windows DLLs.
-     libname = path.join(os.getcwd(), directory, libprefix + basename + "-*.dll")
+     libname = path.join(os.getcwd(), directory, libprefix + lib_basename + "-*.dll")
      matches = glob.glob(libname)
      if matches:
        libname = matches[0]

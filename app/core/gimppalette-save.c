@@ -41,7 +41,7 @@ gimp_palette_save (GimpData       *data,
   GString     *string;
   GList       *list;
 
-  string = g_string_new ("Clay Palette\n");
+  string = g_string_new ("GIMP Palette\n");
 
   g_string_append_printf (string,
                           "Name: %s\n"

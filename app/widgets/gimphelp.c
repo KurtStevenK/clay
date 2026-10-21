@@ -69,8 +69,6 @@ struct _GimpIdleHelp
   gchar        *help_domain;
   gchar        *help_locales;
   gchar        *help_id;
-
-  GtkDialog    *query_dialog;
 };
 
 
@@ -92,11 +90,6 @@ static gchar    * gimp_help_get_default_domain_uri   (Gimp    *gimp);
 static gchar    * gimp_help_get_locales              (Gimp    *gimp);
 
 static GFile    * gimp_help_get_user_manual_basedir  (void);
-
-static void       gimp_help_query_alt_user_manual    (GimpIdleHelp *idle_help);
-
-static void       gimp_help_language_combo_changed   (GtkComboBox  *combo,
-                                                      GimpIdleHelp *idle_help);
 
 /*  public functions  */
 
@@ -276,10 +269,7 @@ gimp_idle_help (GimpIdleHelp *idle_help)
       ! config->user_manual_online   &&
       ! gimp_help_user_manual_is_installed (idle_help->gimp))
     {
-      /*  The user manual is not installed locally, propose alternative
-       *  manuals (other installed languages or online version).
-       */
-      gimp_help_query_alt_user_manual (idle_help);
+      gimp_idle_help_free (idle_help);
 
       return FALSE;
     }
@@ -550,141 +540,3 @@ gimp_help_get_user_manual_basedir (void)
   return sys_dir;
 }
 
-static void
-gimp_help_query_online_response (GtkWidget    *dialog,
-                                 gint          response,
-                                 GimpIdleHelp *idle_help)
-{
-  gtk_widget_destroy (dialog);
-
-  if (response == GTK_RESPONSE_ACCEPT)
-    {
-      g_object_set (idle_help->gimp->config,
-                    "user-manual-online", TRUE,
-                    NULL);
-    }
-  if (response != GTK_RESPONSE_YES)
-    {
-      g_object_set (idle_help->gimp->config,
-                    "help-locales", "",
-                    NULL);
-    }
-
-  if (response == GTK_RESPONSE_ACCEPT ||
-      response == GTK_RESPONSE_YES)
-    {
-      gimp_help_show (idle_help->gimp,
-                      idle_help->progress,
-                      idle_help->help_domain,
-                      idle_help->help_id);
-    }
-
-  gimp_idle_help_free (idle_help);
-}
-
-static void
-gimp_help_query_alt_user_manual (GimpIdleHelp *idle_help)
-{
-  GtkWidget *dialog;
-  GList     *manuals;
-
-  dialog = gimp_message_dialog_new (_("GIMP user manual is missing"),
-                                    GIMP_ICON_HELP_USER_MANUAL,
-                                    NULL, 0, NULL, NULL,
-                                    _("_Cancel"), GTK_RESPONSE_CANCEL,
-                                    NULL);
-  idle_help->query_dialog = GTK_DIALOG (dialog);
-
-  if (idle_help->progress)
-    gimp_window_set_transient_for (GTK_WINDOW (dialog), idle_help->progress);
-
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
-                                     _("The GIMP user manual is not installed "
-                                       "in your language."));
-
-  /* Add a list of available manuals instead, if any. */
-  manuals = gimp_help_get_installed_languages ();
-  if (manuals != NULL)
-    {
-      GtkWidget *lang_combo;
-
-      /* Add an additional button. */
-      gtk_dialog_add_button (GTK_DIALOG (dialog),
-                             _("Read Selected _Language"),
-                             GTK_RESPONSE_YES);
-      /* And a dropdown list of available manuals. */
-      lang_combo = gimp_language_combo_box_new (TRUE,
-                                                _("Available manuals..."));
-      gtk_combo_box_set_active (GTK_COMBO_BOX (lang_combo), 0);
-      gtk_dialog_set_response_sensitive (idle_help->query_dialog,
-                                         GTK_RESPONSE_YES, FALSE);
-      g_signal_connect (lang_combo, "changed",
-                        G_CALLBACK (gimp_help_language_combo_changed),
-                        idle_help);
-      gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
-                          lang_combo, TRUE, TRUE, 0);
-      gtk_widget_set_visible (lang_combo, TRUE);
-
-      gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
-                                 _("You may either select a manual in another "
-                                   "language or read the online version."));
-    }
-  else
-    {
-      gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
-                                 _("You may either install the additional help "
-                                   "package or change your preferences to use "
-                                   "the online version."));
-    }
-  gtk_dialog_add_button (GTK_DIALOG (dialog),
-                         _("Read _Online"), GTK_RESPONSE_ACCEPT);
-  gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
-  if (manuals != NULL)
-    {
-      gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                               GTK_RESPONSE_ACCEPT,
-                                               GTK_RESPONSE_YES,
-                                               GTK_RESPONSE_CANCEL,
-                                               -1);
-      g_list_free_full (manuals, g_free);
-    }
-  else
-    {
-      gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
-                                               GTK_RESPONSE_ACCEPT,
-                                               GTK_RESPONSE_CANCEL,
-                                               -1);
-    }
-  g_signal_connect (dialog, "response",
-                    G_CALLBACK (gimp_help_query_online_response),
-                    idle_help);
-  gtk_widget_set_visible (dialog, TRUE);
-}
-
-static void
-gimp_help_language_combo_changed (GtkComboBox  *combo,
-                                  GimpIdleHelp *idle_help)
-{
-  gchar *help_locales = NULL;
-  gchar *code;
-
-  code = gimp_language_combo_box_get_code (GIMP_LANGUAGE_COMBO_BOX (combo));
-  if (code && g_strcmp0 ("", code) != 0)
-    {
-      help_locales = g_strdup_printf ("%s:", code);
-      gtk_dialog_set_response_sensitive (idle_help->query_dialog,
-                                         GTK_RESPONSE_YES, TRUE);
-    }
-  else
-    {
-      gtk_dialog_set_response_sensitive (idle_help->query_dialog,
-                                         GTK_RESPONSE_YES, FALSE);
-    }
-  g_object_set (idle_help->gimp->config,
-                "help-locales", help_locales? help_locales : "",
-                NULL);
-
-  g_free (code);
-  if (help_locales)
-    g_free (help_locales);
-}

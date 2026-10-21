@@ -68,7 +68,7 @@ libgimpthumb_def = configure_file(
   copy: true
 )
 
-libgimpthumb = library('gimpthumb-'+ gimp_api_version,
+libgimpthumb = library('claythumb-'+ gimp_api_version,
   libgimpthumb_sources,
   include_directories: rootInclude,
   dependencies: [

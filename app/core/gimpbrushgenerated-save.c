@@ -46,7 +46,7 @@ gimp_brush_generated_save (GimpData       *data,
   g_return_val_if_fail (name != NULL && *name != '\0', FALSE);
 
   /* write magic header */
-  string = g_string_new ("Clay-VBR\n");
+  string = g_string_new ("GIMP-VBR\n");
 
   /* write version */
   if (brush->shape != GIMP_BRUSH_GENERATED_CIRCLE || brush->spikes > 2)

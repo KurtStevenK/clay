@@ -67,7 +67,7 @@ gimp_gradient_load (GimpContext   *context,
   if (! line)
     goto failed;
 
-  if (! g_str_has_prefix (line, "Clay Gradient"))
+  if (! g_str_has_prefix (line, "GIMP Gradient"))
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Not a Clay gradient file."));

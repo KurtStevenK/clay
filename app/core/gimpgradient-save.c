@@ -50,7 +50,7 @@ gimp_gradient_save (GimpData       *data,
    *   ...
    */
 
-  string = g_string_new ("Clay Gradient\n");
+  string = g_string_new ("GIMP Gradient\n");
 
   g_string_append_printf (string, "Name: %s\n",
                           gimp_object_get_name (gradient));

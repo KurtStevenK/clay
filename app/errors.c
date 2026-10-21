@@ -362,17 +362,17 @@ gimp_eek (const gchar *reason,
 #ifdef G_OS_WIN32
 #ifdef ENABLE_RELOCATABLE_RESOURCES
           const gchar *gimpdebug = g_build_filename (gimp_installation_directory (), "bin",
-                                                     "gimp-debug-tool-" GIMP_TOOL_VERSION ".exe", NULL);
+                                                     "clay-debug-tool-" GIMP_TOOL_VERSION ".exe", NULL);
 #else
-          const gchar *gimpdebug = BINDIR "/gimp-debug-tool-" GIMP_TOOL_VERSION ".exe";
+          const gchar *gimpdebug = BINDIR "/clay-debug-tool-" GIMP_TOOL_VERSION ".exe";
 #endif
 #elif defined (PLATFORM_OSX)
-          const gchar *gimpdebug = "gimp-debug-tool-" GIMP_TOOL_VERSION;
+          const gchar *gimpdebug = "clay-debug-tool-" GIMP_TOOL_VERSION;
 #elif !defined (G_OS_WIN32) && !defined (PLATFORM_OSX) && defined ENABLE_RELOCATABLE_RESOURCES
           const gchar *gimpdebug = g_build_filename (gimp_installation_directory (),
-                                                     "libexec", "gimp-debug-tool-" GIMP_TOOL_VERSION, NULL);
+                                                     "libexec", "clay-debug-tool-" GIMP_TOOL_VERSION, NULL);
 #else
-          const gchar *gimpdebug = LIBEXECDIR "/gimp-debug-tool-" GIMP_TOOL_VERSION;
+          const gchar *gimpdebug = LIBEXECDIR "/clay-debug-tool-" GIMP_TOOL_VERSION;
 #endif
           gchar *args[9] = { (gchar *) gimpdebug, full_prog_name, NULL,
                              (gchar *) reason, (gchar *) message,

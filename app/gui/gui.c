@@ -206,36 +206,42 @@ clay_startup_monitor (Gimp *gimp)
 }
 
 static gboolean
-clay_place_main_window_idle (gpointer data)
+clay_place_on_configure (GtkWidget         *widget,
+                         GdkEventConfigure *event,
+                         ClayPlaceData     *place)
 {
-  ClayPlaceData *place = data;
-  GdkRectangle   work;
-  gint           width;
-  gint           height;
+  GdkRectangle work;
+  gint         width;
+  gint         height;
 
-  if (GTK_IS_WINDOW (place->window) && GDK_IS_MONITOR (place->monitor))
-    {
-      gdk_monitor_get_workarea (place->monitor, &work);
+  if (! GDK_IS_MONITOR (place->monitor))
+    return FALSE;
 
-      width  = MAX (work.width  - 10, 640);
-      height = MAX (work.height - 10, 480);
+  gdk_monitor_get_workarea (place->monitor, &work);
 
-      gtk_window_unmaximize (GTK_WINDOW (place->window));
-      gtk_window_set_position (GTK_WINDOW (place->window), GTK_WIN_POS_NONE);
-      gtk_window_set_gravity (GTK_WINDOW (place->window), GDK_GRAVITY_NORTH_WEST);
-      gtk_window_move (GTK_WINDOW (place->window), work.x + 5, work.y + 5);
-      gtk_window_resize (GTK_WINDOW (place->window), width, height);
+  if (event->width < 1000)
+    return FALSE;
 
-      if (gtk_widget_get_window (place->window))
-        gdk_window_move_resize (gtk_widget_get_window (place->window),
-                                work.x + 5, work.y + 5, width, height);
-    }
+  /* Leave a 32 px desktop margin. On a 2560x1440 screen the window is
+   * about 2496 wide, and shorter than 1400 so it stays above the taskbar.
+   */
+  width  = MAX (work.width  - 64, 640);
+  height = MAX (work.height - 64, 480);
+
+  g_signal_handlers_disconnect_by_func (widget, clay_place_on_configure, place);
+
+  gtk_window_unmaximize (GTK_WINDOW (widget));
+  gtk_window_set_position (GTK_WINDOW (widget), GTK_WIN_POS_NONE);
+  gtk_window_set_geometry_hints (GTK_WINDOW (widget), NULL, NULL, 0);
+  gtk_window_set_gravity (GTK_WINDOW (widget), GDK_GRAVITY_NORTH_WEST);
+  gtk_window_move (GTK_WINDOW (widget), work.x + 32, work.y + 32);
+  gtk_window_resize (GTK_WINDOW (widget), width, height);
 
   g_clear_object (&place->window);
   g_clear_object (&place->monitor);
   g_free (place);
 
-  return G_SOURCE_REMOVE;
+  return FALSE;
 }
 
 
@@ -774,7 +780,7 @@ gui_restore_after_callback (Gimp               *gimp,
 
       /* Session restore runs on "show" and would put this window back
        * on whichever screen it occupied last. Place it after that, on
-       * the configured startup screen, inset by 5px on every edge.
+       * the configured startup screen, with a 20 px margin.
        */
       if (GTK_IS_WINDOW (toplevel) && GDK_IS_MONITOR (initial_monitor))
         {
@@ -782,7 +788,9 @@ gui_restore_after_callback (Gimp               *gimp,
 
           place->window  = g_object_ref (toplevel);
           place->monitor = g_object_ref (initial_monitor);
-          g_idle_add (clay_place_main_window_idle, place);
+          g_signal_connect (toplevel, "configure-event",
+                            G_CALLBACK (clay_place_on_configure),
+                            place);
         }
     }
 

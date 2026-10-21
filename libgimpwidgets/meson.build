@@ -212,7 +212,7 @@ libgimpwidgets_def = configure_file(
   copy: true
 )
 
-libgimpwidgets = library('gimpwidgets-'+ gimp_api_version,
+libgimpwidgets = library('claywidgets-'+ gimp_api_version,
   libgimpwidgets_sources,
   include_directories: rootInclude,
   dependencies: [

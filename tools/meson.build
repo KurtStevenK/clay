@@ -35,8 +35,8 @@ if platform_windows
   gimptool_rc = windows.compile_resources(
     gimptool_rc_in,
     args: [
-      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'gimptool' + exec_ver + '.exe'),
-      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'gimptool' + exec_ver),
+      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'claytool' + exec_ver + '.exe'),
+      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'claytool' + exec_ver),
     ],
     include_directories: [
       rootInclude, appInclude,
@@ -51,8 +51,8 @@ if platform_windows
   gimp_test_clipboard_rc = windows.compile_resources(
     gimp_test_clipboard_rc_in,
     args: [
-      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'gimp-test-clipboard' + exec_ver + '.exe'),
-      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'gimp-test-clipboard' + exec_ver),
+      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'clay-test-clipboard' + exec_ver + '.exe'),
+      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'clay-test-clipboard' + exec_ver),
     ],
     include_directories: [
       rootInclude, appInclude,
@@ -65,7 +65,7 @@ else
 endif
 
 
-gimptool = executable('gimptool' + exec_ver,
+gimptool = executable('claytool' + exec_ver,
   'gimptool.c',
   gimptool_rc,
   include_directories: rootInclude,
@@ -81,7 +81,7 @@ gimptool = executable('gimptool' + exec_ver,
   install: true,
 )
 
-gimp_test_clipboard = executable('gimp-test-clipboard' + exec_ver,
+gimp_test_clipboard = executable('clay-test-clipboard' + exec_ver,
   'gimp-test-clipboard.c',
   gimp_test_clipboard_rc,
   include_directories: rootInclude,

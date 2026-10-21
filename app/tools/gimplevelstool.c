@@ -811,7 +811,7 @@ gimp_levels_tool_settings_import (GimpFilterTool  *filter_tool,
 
   g_seekable_seek (G_SEEKABLE (input), 0, G_SEEK_SET, NULL, NULL);
 
-  if (g_str_has_prefix (header, "# Clay Levels File\n"))
+  if (g_str_has_prefix (header, "# GIMP Levels File\n"))
     return gimp_levels_config_load_cruft (config, input, error);
 
   /* Check if we're loading a Photoshop Levels preset .alv file */

@@ -22,7 +22,7 @@ libgimpmodule_def = configure_file(
   copy: true
 )
 
-libgimpmodule = library('gimpmodule-' + gimp_api_version,
+libgimpmodule = library('claymodule-' + gimp_api_version,
   libgimpmodule_sources,
   include_directories: rootInclude,
   dependencies: [

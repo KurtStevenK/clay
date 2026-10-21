@@ -31,7 +31,7 @@ libgimpmath_def = configure_file(
   copy: true
 )
 
-libgimpmath = library('gimpmath-' + gimp_api_version,
+libgimpmath = library('claymath-' + gimp_api_version,
   libgimpmath_sources,
   include_directories: rootInclude,
   dependencies: [

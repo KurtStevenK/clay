@@ -120,7 +120,7 @@ libgimpbase_def = configure_file(
   copy: true
 )
 
-libgimpbase = library('gimpbase-' + gimp_api_version,
+libgimpbase = library('claybase-' + gimp_api_version,
   libgimpbase_sources,
   include_directories: rootInclude,
   dependencies: [
