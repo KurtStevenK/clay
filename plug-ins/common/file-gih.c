@@ -159,14 +159,14 @@ gih_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
 
-      gimp_procedure_set_menu_label (procedure, _("GIMP brush (animated)"));
+      gimp_procedure_set_menu_label (procedure, _("Clay brush (animated)"));
       gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
 
       gimp_procedure_set_documentation (procedure,
-                                        _("Exports images in GIMP Brush Pipe "
+                                        _("Exports images in Clay Brush Pipe "
                                           "format"),
                                         _("This plug-in exports an image in "
-                                          "the GIMP brush pipe format. For a "
+                                          "the Clay brush pipe format. For a "
                                           "colored brush pipe, RGBA layers are "
                                           "used, otherwise the layers should be "
                                           "grayscale masks. The image can be "
@@ -204,7 +204,7 @@ gih_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_add_string_argument (procedure, "description",
                                           _("_Description"),
                                           _("Short description of the GIH brush pipe"),
-                                          "GIMP Brush Pipe",
+                                          "Clay Brush Pipe",
                                           GIMP_PARAM_READWRITE);
 
       gimp_procedure_add_int_argument (procedure, "cell-width",

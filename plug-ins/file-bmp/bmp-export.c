@@ -8,7 +8,7 @@
 /* Alexander.Schulz@stud.uni-karlsruhe.de                        */
 
 /*
- * GIMP - The GNU Image Manipulation Program
+ * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1051,9 +1051,9 @@ export_dialog (GimpProcedure *procedure,
                                              GTK_TYPE_CHECK_BUTTON);
   gimp_help_set_help_data (toggle,
                            _("Some applications can not read BMP images that "
-                             "include color space information. GIMP writes "
+                             "include color space information. Clay writes "
                              "color space information by default. Disabling "
-                             "this option will cause GIMP to not write color "
+                             "this option will cause Clay to not write color "
                              "space information to the file."),
                            NULL);
   gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),

@@ -106,7 +106,7 @@ _gimp_shm_open (gint shm_ID)
       wchar_t *w_fileMapName;
 
       /* From the id, derive the file map name */
-      g_snprintf (fileMapName, sizeof (fileMapName), "GIMP%d.SHM", _shm_ID);
+      g_snprintf (fileMapName, sizeof (fileMapName), "Clay%d.SHM", _shm_ID);
 
       w_fileMapName = g_utf8_to_utf16 (fileMapName, -1, NULL, NULL, NULL);
       if (!w_fileMapName)

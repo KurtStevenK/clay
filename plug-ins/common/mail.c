@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  * Copyright (C) 1997 Daniel Risacher
  *
@@ -916,7 +916,7 @@ sendmail_create_headers (FILE    *mailpipe,
   if (from != NULL && strlen (from) > 0)
     fprintf (mailpipe, "From: %s \n", from);
 
-  fprintf (mailpipe, "X-Mailer: GIMP Useless Mail plug-in %s\n", GIMP_VERSION);
+  fprintf (mailpipe, "X-Mailer: Clay Useless Mail plug-in %s\n", GIMP_VERSION);
 
   fprintf (mailpipe, "MIME-Version: 1.0\n");
   fprintf (mailpipe, "Content-type: multipart/mixed; "

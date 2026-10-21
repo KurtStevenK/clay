@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * file-pdf-export.c - PDF file exporter, based on the cairo PDF surface
  *

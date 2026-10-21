@@ -1,4 +1,4 @@
-﻿/* GIMP - The GNU Image Manipulation Program
+﻿/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -181,7 +181,7 @@ static const GOptionEntry main_entries[] =
   {
     "new-instance", 'n', 0,
     G_OPTION_ARG_NONE, &new_instance,
-    N_("Start a new GIMP instance"), NULL
+    N_("Start a new Clay instance"), NULL
   },
   {
     "as-new", 'a', 0,
@@ -224,7 +224,7 @@ static const GOptionEntry main_entries[] =
   {
     "no-shm", 0, G_OPTION_FLAG_REVERSE,
     G_OPTION_ARG_NONE, &use_shm,
-    N_("Do not use shared memory between GIMP and plug-ins"), NULL
+    N_("Do not use shared memory between Clay and plug-ins"), NULL
   },
   {
     "no-cpu-accel", 0, G_OPTION_FLAG_REVERSE,
@@ -394,7 +394,7 @@ gimp_macos_setenv (const char * progname)
          Various libraries create their cache directory very early at startup,
          before GIMP gets a chance to check if the config directory already exists,
          so various dirs like e.g. "brushes" get skipped. See: #4958. */
-      tmp = g_strdup_printf ("%s/Library/Caches/GIMP/%s",
+      tmp = g_strdup_printf ("%s/Library/Caches/Clay/%s",
                              g_getenv ("HOME"), GIMP_APP_VERSION);
       g_setenv ("XDG_CACHE_HOME", tmp, TRUE);
       g_free (tmp);
@@ -437,7 +437,7 @@ gimp_macos_setenv (const char * progname)
       /* Detect if we are running from bundle or from prefix */
       if (g_str_has_suffix (bin_dir, "MacOS"))
         {
-          g_printerr ("GIMP is started as MacOS application\n");
+          g_printerr ("Clay is started as MacOS application\n");
         }
       else
         {
@@ -448,7 +448,7 @@ gimp_macos_setenv (const char * progname)
             {
               g_free (share_dir);
 
-              g_print ("GIMP is started in the build directory\n");
+              g_print ("Clay is started in the build directory\n");
 
               tmp = g_strdup_printf ("%s", gimp_installation_directory()); /* running in build dir */
               share_dir = g_canonicalize_filename (tmp, NULL);
@@ -732,7 +732,7 @@ main (int    argc,
 
 #ifdef G_OS_WIN32
   /* Make Inno aware of gimp process avoiding broken install/unninstall */
-  utf8_name = g_strdup_printf ("GIMP-%s", GIMP_MUTEX_VERSION);
+  utf8_name = g_strdup_printf ("Clay-%s", GIMP_MUTEX_VERSION);
   name      = g_utf8_to_utf16 (utf8_name, -1, NULL, NULL, NULL);
 
   CreateMutexW (NULL, FALSE, name);
@@ -815,7 +815,7 @@ main (int    argc,
       (t_SetCurrentProcessExplicitAppUserModelID) GetProcAddress (GetModuleHandleW (L"shell32.dll"),
                                                                   "SetCurrentProcessExplicitAppUserModelID");
     if (p_SetCurrentProcessExplicitAppUserModelID)
-      (*p_SetCurrentProcessExplicitAppUserModelID) (L"gimp.GimpApplication");
+      (*p_SetCurrentProcessExplicitAppUserModelID) (L"clay.ClayApplication");
   }
 #endif
 
@@ -911,7 +911,7 @@ main (int    argc,
       else
         {
           g_print ("%s\n",
-                   _("GIMP could not initialize the graphical user interface.\n"
+                   _("Clay could not initialize the graphical user interface.\n"
                      "Make sure a proper setup for your display environment "
                      "exists."));
         }
@@ -1015,7 +1015,7 @@ main (int    argc,
 
           if (be_verbose)
             g_print ("%s\n",
-                     _("Another GIMP instance is already running."));
+                     _("Another Clay instance is already running."));
 
           if (batch_commands &&
               ! gimp_unique_batch_run (batch_interpreter, batch_commands))
@@ -1108,7 +1108,7 @@ gimp_attach_console_window (void)
   /* If run on non-native shell, do nothing */
   if (g_getenv ("TERM") || g_getenv ("SHELL"))
     {
-      g_printerr ("Non-native shell detected, GIMP may "
+      g_printerr ("Non-native shell detected, Clay may "
                   "behave unexpectedly on Unix shells in Windows.\n");
       return;
     }

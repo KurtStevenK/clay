@@ -1,5 +1,5 @@
 {
-    "app-id": "org.gimp.GIMP.Nightly",
+    "app-id": "xyz.kainzmayer.ClayDesign",
     "branch": "master",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
@@ -14,8 +14,8 @@
         "cxxflags": "-fdiagnostics-color=always"
     },
     "separate-locales": false,
-    "rename-appdata-file": "org.gimp.GIMP.appdata.xml",
-    "rename-desktop-file": "gimp.desktop",
+    "rename-appdata-file": "xyz.kainzmayer.ClayDesign.appdata.xml",
+    "rename-desktop-file": "xyz.kainzmayer.ClayDesign.desktop",
     "rename-icon": "gimp",
     "copy-icon": true,
     "finish-args": [
@@ -901,7 +901,7 @@
                 "-Dgi-docgen=disabled",
                 "-Dcheck-update=no",
                 "-Denable-default-bin=enabled",
-                "-Dbuild-id=org.gimp.GIMP.flatpak.nightly"
+                "-Dbuild-id=xyz.kainzmayer.ClayDesign"
             ]
         }
     ]

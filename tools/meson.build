@@ -2,14 +2,72 @@
 subdir('gimptool-tests')
 
 if platform_windows
+  # Each compile_resources() of the same .rc needs its own output name.
+  # Meson names the resource target from that filename, and this directory
+  # builds more than one executable.
+  gimp_debug_resume_rc_in = custom_target(
+    'gimp-debug-resume-rc-in',
+    input: gimp_plugins_rc,
+    output: 'gimp-debug-resume.rc',
+    command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
+  )
+  gimp_debug_resume_rc = windows.compile_resources(
+    gimp_debug_resume_rc_in,
+    args: [
+      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'gimp-debug-resume.exe'),
+      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'gimp-debug-resume'),
+    ],
+    include_directories: [
+      rootInclude, appInclude,
+    ],
+  )
   gimp_debug_resume = executable('gimp-debug-resume',
     'gimp-debug-resume.c',
+    gimp_debug_resume_rc,
   )
+
+  gimptool_rc_in = custom_target(
+    'gimptool-rc-in',
+    input: gimp_plugins_rc,
+    output: 'gimptool.rc',
+    command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
+  )
+  gimptool_rc = windows.compile_resources(
+    gimptool_rc_in,
+    args: [
+      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'gimptool' + exec_ver + '.exe'),
+      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'gimptool' + exec_ver),
+    ],
+    include_directories: [
+      rootInclude, appInclude,
+    ],
+  )
+  gimp_test_clipboard_rc_in = custom_target(
+    'gimp-test-clipboard-rc-in',
+    input: gimp_plugins_rc,
+    output: 'gimp-test-clipboard.rc',
+    command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
+  )
+  gimp_test_clipboard_rc = windows.compile_resources(
+    gimp_test_clipboard_rc_in,
+    args: [
+      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'gimp-test-clipboard' + exec_ver + '.exe'),
+      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'gimp-test-clipboard' + exec_ver),
+    ],
+    include_directories: [
+      rootInclude, appInclude,
+    ],
+  )
+else
+  gimp_debug_resume_rc = []
+  gimptool_rc = []
+  gimp_test_clipboard_rc = []
 endif
 
 
 gimptool = executable('gimptool' + exec_ver,
   'gimptool.c',
+  gimptool_rc,
   include_directories: rootInclude,
   dependencies: [
     gegl, gtk3, gexiv2
@@ -25,6 +83,7 @@ gimptool = executable('gimptool' + exec_ver,
 
 gimp_test_clipboard = executable('gimp-test-clipboard' + exec_ver,
   'gimp-test-clipboard.c',
+  gimp_test_clipboard_rc,
   include_directories: rootInclude,
   dependencies: [
     gegl, gtk3, gexiv2

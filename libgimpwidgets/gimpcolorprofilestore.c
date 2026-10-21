@@ -776,7 +776,7 @@ gimp_color_profile_store_save (GimpColorProfileStore  *store,
 
   writer = gimp_config_writer_new_from_file (file,
                                              TRUE,
-                                             "GIMP color profile history",
+                                             "Clay color profile history",
                                              error);
   if (! writer)
     return FALSE;

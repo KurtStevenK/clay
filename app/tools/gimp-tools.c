@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-2001 Spencer Kimball, Peter Mattis and others
  *
  * This program is free software: you can redistribute it and/or modify
@@ -378,7 +378,7 @@ gimp_tools_save (Gimp     *gimp,
   if (gimp->be_verbose)
     g_print ("Writing '%s'\n", gimp_file_get_utf8_name (file));
 
-  writer = gimp_config_writer_new_from_file (file, TRUE, "GIMP toolrc", NULL);
+  writer = gimp_config_writer_new_from_file (file, TRUE, "Clay toolrc", NULL);
 
   if (writer)
     {

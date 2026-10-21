@@ -1,0 +1,103 @@
+from gi.repository import Pango
+import os
+import sys
+
+images = Gimp.get_images()
+if len(images) == 0:
+  msg = f'{__file__}: ERROR: no input images'
+  sys.stderr.write('v' * len(msg) + '\n')
+  sys.stderr.write(f'{msg}\n')
+  sys.stderr.write('^' * len(msg) + '\n')
+  sys.exit(70)
+
+image = images[0]
+
+def layer_plain_text(layer):
+  text = layer.get_text()
+  if text is not None:
+    return text
+  markup = layer.get_markup()
+  if not markup:
+    return ''
+  _, _, text, _ = Pango.parse_markup(markup, -1, '_')
+  return text or ''
+
+def find_rc_layer(layers):
+  for layer in layers:
+    if type(layer) is Gimp.TextLayer:
+      if layer_plain_text(layer).strip() == 'RC':
+        return layer
+    elif type(layer) is Gimp.GroupLayer:
+      child = find_rc_layer(layer.get_children())
+      if child is not None:
+        return child
+  return None
+
+def rebrand_text_layers(layers):
+  version = f'{Gimp.MAJOR_VERSION}.{Gimp.MINOR_VERSION}'
+  for layer in layers:
+    if type(layer) is Gimp.TextLayer:
+      markup = layer.get_markup() or ''
+      stripped = layer_plain_text(layer).strip()
+      if stripped == 'RC' or not markup:
+        continue
+      new_markup = markup
+      if '>GIMP<' in new_markup:
+        new_markup = new_markup.replace('>GIMP<', '>Clay<')
+      for old in ('>3.2<', '>3.3<'):
+        if old in new_markup:
+          new_markup = new_markup.replace(old, f'>{version}<')
+      if 'IMAGE  MANIPULATION  PROGRAM' in new_markup:
+        new_markup = new_markup.replace(
+            'GNU  IMAGE  MANIPULATION  PROGRAM',
+            'CLAY  IMAGE  BEAUTIFICATION  PROGRAM')
+        new_markup = new_markup.replace(
+            'CLAY  IMAGE  MANIPULATION  PROGRAM',
+            'CLAY  IMAGE  BEAUTIFICATION  PROGRAM')
+      if new_markup != markup:
+        layer.set_markup(new_markup)
+    elif type(layer) is Gimp.GroupLayer:
+      rebrand_text_layers(layer.get_children())
+
+rebrand_text_layers(image.get_layers())
+
+rc_layer = find_rc_layer(image.get_layers())
+if Gimp.MINOR_VERSION % 2 == 0 and 'RC' in Gimp.VERSION:
+  if rc_layer is None:
+    msg = 'ERROR: a text layer containing the text "RC" is mandatory for RC and stable splash images.'
+    sys.stderr.write('v' * len(msg) + '\n')
+    sys.stderr.write(f'{msg}\n')
+    sys.stderr.write('^' * len(msg) + '\n')
+    sys.exit(70)
+
+if rc_layer is not None and 'RC' not in Gimp.VERSION:
+  # This is not a release candidate.
+  # Drop the mandatory "RC" layer.
+  image.remove_layer(rc_layer)
+
+procedure = Gimp.get_pdb().lookup_procedure("file-png-export")
+config    = procedure.create_config()
+image.undo_disable()
+image.flatten()
+if not image.convert_color_profile(None, Gimp.ColorRenderingIntent.RELATIVE_COLORIMETRIC, True):
+  msg = f'ERROR: converting the image to built-in profile failed: {Gimp.get_pdb().get_last_error()}'
+  sys.stderr.write('v' * len(msg) + '\n')
+  sys.stderr.write(f'{msg}\n')
+  sys.stderr.write('^' * len(msg) + '\n')
+  sys.exit(70)
+
+if image.get_width() > 1920 or image.get_height() > 1080:
+  factor = max(image.get_width() / 1920, image.get_height() / 1080)
+  new_width  = image.get_width() / factor
+  new_height = image.get_height() / factor
+  image.scale(new_width, new_height)
+
+drawables = image.get_selected_drawables()
+config.set_property("image", image)
+config.set_property("file", Gio.file_new_for_path("gimp-data/images/gimp-splash.png"))
+config.set_property("time", False)
+config.set_property("include-color-profile", False)
+config.set_property("format", "rgb8")
+retval = procedure.run(config)
+if retval.index(0) != Gimp.PDBStatusType.SUCCESS:
+  sys.exit(70)

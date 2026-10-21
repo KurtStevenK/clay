@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GimpGuiConfig class
@@ -51,6 +51,7 @@ enum
   PROP_SAVE_SESSION_INFO,
   PROP_RESTORE_SESSION,
   PROP_RESTORE_MONITOR,
+  PROP_STARTUP_MONITOR,
   PROP_SAVE_TOOL_OPTIONS,
   PROP_CAN_CHANGE_ACCELS,
   PROP_SAVE_ACCELS,
@@ -189,6 +190,13 @@ gimp_gui_config_class_init (GimpGuiConfigClass *klass)
                             RESTORE_MONITOR_BLURB,
                             FALSE,
                             GIMP_PARAM_STATIC_STRINGS);
+
+  GIMP_CONFIG_PROP_INT (object_class, PROP_STARTUP_MONITOR,
+                        "startup-monitor",
+                        "Startup screen",
+                        STARTUP_MONITOR_BLURB,
+                        -1, 32, -1,
+                        GIMP_PARAM_STATIC_STRINGS);
 
   GIMP_CONFIG_PROP_BOOLEAN (object_class, PROP_SAVE_TOOL_OPTIONS,
                             "save-tool-options",
@@ -565,6 +573,9 @@ gimp_gui_config_set_property (GObject      *object,
     case PROP_RESTORE_MONITOR:
       gui_config->restore_monitor = g_value_get_boolean (value);
       break;
+    case PROP_STARTUP_MONITOR:
+      gui_config->startup_monitor = g_value_get_int (value);
+      break;
     case PROP_SAVE_TOOL_OPTIONS:
       gui_config->save_tool_options = g_value_get_boolean (value);
       break;
@@ -733,6 +744,9 @@ gimp_gui_config_get_property (GObject    *object,
       break;
     case PROP_RESTORE_MONITOR:
       g_value_set_boolean (value, gui_config->restore_monitor);
+      break;
+    case PROP_STARTUP_MONITOR:
+      g_value_set_int (value, gui_config->startup_monitor);
       break;
     case PROP_SAVE_TOOL_OPTIONS:
       g_value_set_boolean (value, gui_config->save_tool_options);

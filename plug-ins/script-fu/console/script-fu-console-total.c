@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -90,7 +90,7 @@ console_total_append_welcome (GtkTextBuffer *self)
       NULL,       "\n",
       "emphasis", "Copyright (c) Dimitrios Souflis",
       NULL,       "\n",
-      "emphasis", N_("Scripting GIMP in the Scheme language"),
+      "emphasis", N_("Scripting Clay in the Scheme language"),
       NULL,       "\n"
     };
 

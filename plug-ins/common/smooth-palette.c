@@ -2,7 +2,7 @@
  * smooth palette - derive smooth palette from image
  * Copyright (C) 1997  Scott Draves <spot@cs.cmu.edu>
  *
- * GIMP - The GNU Image Manipulation Program
+ * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify

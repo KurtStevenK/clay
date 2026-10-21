@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationlightenonlylegacy.c
@@ -50,7 +50,7 @@ gimp_operation_lighten_only_legacy_class_init (GimpOperationLightenOnlyLegacyCla
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:lighten-only-legacy",
-                                 "description", "GIMP lighten only legacy operation",
+                                 "description", "Clay lighten only legacy operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_lighten_only_legacy_process;

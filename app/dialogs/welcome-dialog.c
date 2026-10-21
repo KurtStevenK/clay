@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * welcome-dialog.c
@@ -197,7 +197,7 @@ welcome_dialog_new (Gimp       *gimp,
   gchar         **accels;
 
   /* Translators: the %s string will be the version, e.g. "3.0". */
-  title = g_strdup_printf (_("Welcome to GIMP %s"), GIMP_VERSION);
+  title = g_strdup_printf (_("Welcome to Clay %s"), GIMP_VERSION);
   windows = gimp_get_image_windows (gimp);
   dialog = gimp_dialog_new (title,
                             "gimp-welcome-dialog",
@@ -425,7 +425,7 @@ welcome_dialog_response (GtkWidget *widget,
     {
       GString *string;
 
-      string = g_string_new (_("You will have to restart GIMP for "
+      string = g_string_new (_("You will have to restart Clay for "
                                "the following changes to take effect:"));
       g_string_append (string, "\n\n");
 
@@ -488,7 +488,7 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
   gtk_widget_set_visible (grid, TRUE);
 
   /* Translators: the %s string will be the version, e.g. "3.0". */
-  tmp = g_strdup_printf (_("You installed GIMP %s"), GIMP_VERSION);
+  tmp = g_strdup_printf (_("You installed Clay %s"), GIMP_VERSION);
   widget = gtk_label_new (NULL);
   /* XXX For GTK4, we may just replace with gtk_widget_add_css_class() AFAICS. */
   gtk_style_context_add_class (gtk_widget_get_style_context (widget), "title-3");
@@ -502,7 +502,7 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
 
   /* Welcome message: left */
 
-  markup = _("GIMP is Free Software for image authoring and manipulation.\n"
+  markup = _("Clay is Free Software for image authoring and manipulation.\n"
              "Want to know more?");
 
   widget = gtk_label_new (NULL);
@@ -533,7 +533,7 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
   welcome_add_link (GTK_GRID (grid), size_group, 0, &row,
                     /* "globe with meridians" emoticone in UTF-8. */
                     "\xf0\x9f\x8c\x90",
-                    _("GIMP website"), "https://www.gimp.org/");
+                    _("Clay website"), "https://www.gimp.org/");
   welcome_add_link (GTK_GRID (grid), size_group, 0, &row,
                     /* "open book" emoticone in UTF-8. */
                     "\xf0\x9f\x93\x96",
@@ -550,7 +550,7 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
 
   /* Welcome message: right */
 
-  markup = _("GIMP is Community Software under the GNU general public license v3.\n"
+  markup = _("Clay is Community Software under the GNU general public license v3.\n"
              "Want to contribute?");
 
   widget = gtk_label_new (NULL);
@@ -855,7 +855,7 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
 
   vbox = prefs_frame_new (_("Report Bugs"), GTK_CONTAINER (main_vbox), FALSE);
 
-  label = gtk_label_new (_("As any application, GIMP is not bug-free, so "
+  label = gtk_label_new (_("As any application, Clay is not bug-free, so "
                            "reporting bugs that you encounter is very "
                            "important to the development."));
   gtk_label_set_max_width_chars (GTK_LABEL (label), 30);
@@ -898,14 +898,14 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
 
   vbox = prefs_frame_new (_("Donate"), GTK_CONTAINER (main_vbox), FALSE);
 
-  label = gtk_label_new (_("Donating money is important: it makes GIMP "
+  label = gtk_label_new (_("Donating money is important: it makes Clay "
                            "sustainable."));
   gtk_label_set_max_width_chars (GTK_LABEL (label), 30);
   gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
-  button = gtk_link_button_new_with_label ("https://liberapay.com/GIMP/donate",
+  button = gtk_link_button_new_with_label ("https://liberapay.com/Clay/donate",
                                            _("Donate via Liberapay"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
@@ -944,7 +944,7 @@ welcome_dialog_create_release_page (Gimp      *gimp,
       gtk_widget_set_visible (hbox, TRUE);
 
       /* Translators: the %s string will be the version, e.g. "3.0". */
-      tmp = g_strdup_printf (_("GIMP %s Release Notes"), GIMP_VERSION);
+      tmp = g_strdup_printf (_("Clay %s Release Notes"), GIMP_VERSION);
       markup = g_strdup_printf ("<b><big>%s</big></b>", tmp);
       g_free (tmp);
       widget = gtk_label_new (NULL);

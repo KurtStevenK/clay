@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -820,7 +820,7 @@ language_init (const gchar  *language,
 
   /* localize the native parts of the menu bar (the "Window" menu items,
      the "Help" search field etc). (NOTE: the "About/Hide"/"Quit" entries of
-     GIMP app menu are from GTK (see: build/macos/2_bundle-gimp-uni_base.py) */
+     Clay app menu are from GTK (see: build/macos/2_bundle-gimp-uni_base.py) */
   language_set_macos_menu_bar_lang (language);
 #endif
 
@@ -848,9 +848,9 @@ language_get_system_lang_id (void)
 
   /* In macOS, the user sets a list of preferred languages and the
    * software respects this preference order. I.e. that just storing the
-   * top-prefered lang would not be enough. What if GIMP didn't have
+   * top-prefered lang would not be enough. What if Clay didn't have
    * translations for it, then it would fallback to the second lang. If
-   * this second lang changed, GIMP localization would change but we
+   * this second lang changed, Clay localization would change but we
    * would not be aware of it. Instead, let's use the whole list as our
    * language identifier. If this list changes in any way, we consider
    * the lang may have potentially changed.
@@ -928,7 +928,7 @@ language_set_macos_menu_bar_lang (const gchar *language)
       CFStringRef   cf_identifier;
       CFArrayRef    cf_managed_languages;
 
-      /* turn the GIMP/gettext language code into one that macOS understand */
+      /* turn the Clay/gettext language code into one that macOS understand */
       if (! g_ascii_strcasecmp (parts[1] ? parts[1] : "", "latin"))
         script = "-Latn";
       else if (! g_ascii_strcasecmp (parts[1] ? parts[1] : "", "cyrillic"))

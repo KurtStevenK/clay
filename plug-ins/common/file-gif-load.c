@@ -1347,7 +1347,7 @@ ReadImage (FILE        *fd,
 
   if (len > (G_MAXSIZE / height / (alpha_frame ? (promote_to_rgb ? 4 : 2) : 1)))
     {
-      g_message ("'%s' has a larger image size than GIMP can handle.",
+      g_message ("'%s' has a larger image size than Clay can handle.",
                  gimp_file_get_utf8_name (file));
       gimp_image_delete (*image);
       *image = NULL;

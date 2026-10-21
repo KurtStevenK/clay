@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -241,7 +241,7 @@ typedef enum  /*< pdb-skip >*/
   GIMP_DEBUG_POLICY_WARNING,    /*< desc="Debug warnings, critical errors and crashes" >*/
   GIMP_DEBUG_POLICY_CRITICAL,   /*< desc="Debug critical errors and crashes"           >*/
   GIMP_DEBUG_POLICY_FATAL,      /*< desc="Debug crashes only"                          >*/
-  GIMP_DEBUG_POLICY_NEVER       /*< desc="Never debug GIMP"                            >*/
+  GIMP_DEBUG_POLICY_NEVER       /*< desc="Never debug Clay"                            >*/
 } GimpDebugPolicy;
 
 

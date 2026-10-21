@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -345,25 +345,25 @@ static const GimpStringActionEntry dialogs_toplevel_actions[] =
   { "dialogs-tips", GIMP_ICON_DIALOG_INFORMATION,
     NC_("dialogs-action", "_Tip of the Day"), NULL,
     { NULL },
-    NC_("dialogs-action", "Show some helpful tips on using GIMP"),
+    NC_("dialogs-action", "Show some helpful tips on using Clay"),
     "gimp-tips-dialog",
     GIMP_HELP_TIPS_DIALOG },
 
   { "dialogs-welcome", GIMP_ICON_DIALOG_INFORMATION,
     NC_("dialogs-action", "Welcome Dialog"), NULL,
     { NULL },
-    NC_("dialogs-action", "Show information on running GIMP release"),
+    NC_("dialogs-action", "Show information on running Clay release"),
     "gimp-welcome-dialog",
     GIMP_HELP_WELCOME_DIALOG },
 
   { "dialogs-about", GIMP_ICON_HELP_ABOUT,
 #if defined(G_OS_WIN32)
-    NC_("dialogs-action", "About GIMP"),
+    NC_("dialogs-action", "About Clay"),
 #else /* UNIX: use GNOME HIG */
     NC_("dialogs-action", "_About"),
 #endif
     NULL, { NULL },
-    NC_("dialogs-action", "About GIMP"),
+    NC_("dialogs-action", "About Clay"),
     "gimp-about-dialog",
       GIMP_HELP_ABOUT_DIALOG },
 

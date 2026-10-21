@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationdividemode.c
@@ -52,7 +52,7 @@ gimp_operation_divide_legacy_class_init (GimpOperationDivideLegacyClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:divide-legacy",
-                                 "description", "GIMP divide mode operation",
+                                 "description", "Clay divide mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_divide_legacy_process;

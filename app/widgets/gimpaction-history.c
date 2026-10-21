@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpaction-history.c
@@ -221,7 +221,7 @@ gimp_action_history_exit (Gimp *gimp)
   if (gimp->be_verbose)
     g_print ("Writing '%s'\n", gimp_file_get_utf8_name (file));
 
-  writer = gimp_config_writer_new_from_file (file, TRUE, "GIMP action-history",
+  writer = gimp_config_writer_new_from_file (file, TRUE, "Clay action-history",
                                              NULL);
   g_object_unref (file);
 

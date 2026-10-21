@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationdarkenonlymode.c
@@ -50,7 +50,7 @@ gimp_operation_darken_only_legacy_class_init (GimpOperationDarkenOnlyLegacyClass
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:darken-only-legacy",
-                                 "description", "GIMP darken only mode operation",
+                                 "description", "Clay darken only mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_darken_only_legacy_process;

@@ -327,7 +327,7 @@ gimp_color_select_class_init (GimpColorSelectClass *klass)
 
   object_class->finalize                = gimp_color_select_finalize;
 
-  selector_class->name                  = "GIMP";
+  selector_class->name                  = "Clay";
   selector_class->help_id               = "gimp-colorselector-gimp";
   selector_class->icon_name             = GIMP_ICON_WILBER;
   selector_class->set_toggles_visible   = gimp_color_select_togg_visible;

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GIMP PSD Plug-in
@@ -230,7 +230,7 @@ psd_create_procedure (GimpPlugIn  *plug_in,
                                             _("This plug-in exports files of Adobe "
                                               "Photoshop (TM) native PSD format. "
                                               "These files may be of any image type "
-                                              "supported by GIMP, with or without "
+                                              "supported by Clay, with or without "
                                               "layers, layer masks, aux channels "
                                               "and guides."),
                                             name);
@@ -251,7 +251,7 @@ psd_create_procedure (GimpPlugIn  *plug_in,
                                             _("This plug-in exports files of Adobe "
                                               "Photoshop (TM) Large native PSB format. "
                                               "These files may be of any image type "
-                                              "supported by GIMP, with or without "
+                                              "supported by Clay, with or without "
                                               "layers, layer masks, aux channels "
                                               "and guides."),
                                             name);

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -767,7 +767,7 @@ gimp_curves_tool_settings_import (GimpFilterTool  *filter_tool,
 
   g_seekable_seek (G_SEEKABLE (input), 0, G_SEEK_SET, NULL, NULL);
 
-  if (g_str_has_prefix (header, "# GIMP Curves File\n"))
+  if (g_str_has_prefix (header, "# Clay Curves File\n"))
     return gimp_curves_config_load_cruft (config, input, error);
 
   if (bytes_read > 2 && header[0] == 0 &&

@@ -1,4 +1,4 @@
-/*   GIMP - The GNU Image Manipulation Program
+/*   xyz.kainzmayer.ClayDesign
  *   Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  *   Windows Shortcut (.lnk) plug-in
@@ -126,7 +126,7 @@ lnk_create_procedure (GimpPlugIn  *plug_in,
                                         _("Follows a link to an image in a "
                                           ".lnk file"),
                                         _("Opens a .lnk file and if it points "
-                                          "to an image, it asks GIMP to open "
+                                          "to an image, it asks Clay to open "
                                           "the linked image."),
                                         name);
       gimp_procedure_set_attribution (procedure,

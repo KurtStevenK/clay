@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * gimpwarpoptions.h
  * Copyright (C) 2011 Michael Muré <batolettre@gmail.com>

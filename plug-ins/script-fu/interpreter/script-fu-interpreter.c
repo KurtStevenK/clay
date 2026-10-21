@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -249,7 +249,7 @@ script_fu_get_plugin_parent_path (const gchar *path_to_this_script)
 
   /* A libgimp GimpPlugin does not know its path,
    * but its path was passed in argv to this interpreter.
-   * The path is to a file being queried e.g. "~/.config/GIMP/2.99/plug-ins/fu/fu.scm"
+   * The path is to a file being queried e.g. "~/.config/Clay/2.99/plug-ins/fu/fu.scm"
    */
   g_debug ("path to this plugin %s", path_to_this_script);
   path = g_file_new_for_path (path_to_this_script);

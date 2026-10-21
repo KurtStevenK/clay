@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimppluginhsm.c
@@ -141,7 +141,7 @@ gimp_plug_in_shm_new (void)
     pid = GetCurrentProcessId ();
 
     /* From the id, derive the file map name */
-    g_snprintf (fileMapName, sizeof (fileMapName), "GIMP%d.SHM", pid);
+    g_snprintf (fileMapName, sizeof (fileMapName), "Clay%d.SHM", pid);
 
     w_fileMapName = g_utf8_to_utf16 (fileMapName, -1, NULL, NULL, NULL);
 

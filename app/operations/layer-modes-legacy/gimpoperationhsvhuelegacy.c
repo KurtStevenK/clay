@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationhuemode.c
@@ -55,7 +55,7 @@ gimp_operation_hsv_hue_legacy_class_init (GimpOperationHsvHueLegacyClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:hsv-hue-legacy",
-                                 "description", "GIMP hue mode operation",
+                                 "description", "Clay hue mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_hsv_hue_legacy_process;

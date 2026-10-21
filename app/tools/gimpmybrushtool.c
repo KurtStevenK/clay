@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -76,7 +76,7 @@ gimp_mybrush_tool_register (GimpToolRegisterCallback  callback,
                 GIMP_CONTEXT_PROP_MASK_EXPAND,
                 "gimp-mypaint-brush-tool",
                 _("MyPaint Brush"),
-                _("MyPaint Brush Tool: Use MyPaint brushes in GIMP"),
+                _("MyPaint Brush Tool: Use MyPaint brushes in Clay"),
                 N_("M_yPaint Brush"), "Y",
                 NULL, GIMP_HELP_TOOL_MYPAINT_BRUSH,
                 GIMP_ICON_TOOL_MYPAINT_BRUSH,

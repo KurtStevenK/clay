@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * gimpoperationcagecoefcalc.c
  * Copyright (C) 2010 Michael Muré <batolettre@gmail.com>
@@ -66,7 +66,7 @@ gimp_operation_cage_coef_calc_class_init (GimpOperationCageCoefCalcClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:cage-coef-calc",
                                  "categories",  "transform",
-                                 "description", _("Compute a set of coefficient buffer for the GIMP cage tool"),
+                                 "description", _("Compute a set of coefficient buffer for the Clay cage tool"),
                                  NULL);
 
   operation_class->prepare            = gimp_operation_cage_coef_calc_prepare;

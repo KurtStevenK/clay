@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -124,7 +124,7 @@ gimp_palette_load (GimpContext   *context,
   if (! str)
     goto failed;
 
-  if (! g_str_has_prefix (str, "GIMP Palette"))
+  if (! g_str_has_prefix (str, "Clay Palette"))
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Missing magic header."));
@@ -747,7 +747,7 @@ gimp_palette_load_acb (GimpContext   *context,
   if (version != 1)
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
-                   _("GIMP only supports version 1 ACB palettes"));
+                   _("Clay only supports version 1 ACB palettes"));
       return NULL;
     }
 
@@ -2490,7 +2490,7 @@ gimp_palette_load_detect_format (GFile        *file,
         {
           format = GIMP_PALETTE_FILE_FORMAT_RIFF_PAL;
         }
-      else if (g_str_has_prefix (header, "GIMP Palette"))
+      else if (g_str_has_prefix (header, "Clay Palette"))
         {
           format = GIMP_PALETTE_FILE_FORMAT_GPL;
         }

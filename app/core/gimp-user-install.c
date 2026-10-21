@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimp-user-install.c
@@ -177,7 +177,7 @@ gimp_user_install_new (GObject  *gimp,
 
 #ifdef PLATFORM_OSX
   /* The config path on OSX has for a very short time frame (2.8.2 only)
-     been "~/Library/GIMP". It changed to "~/Library/Application Support"
+     been "~/Library/Clay". It changed to "~/Library/Application Support"
      in 2.8.4 and was in the home folder (as was other UNIX) before. */
 
   if (! install->old_dir)
@@ -235,15 +235,15 @@ gimp_user_install_run (GimpUserInstall *install,
                          * will be a series version (e.g. 2.10). The %s
                          * replacement will be a directory.
                          */
-                        _("It seems you have used GIMP %d.%d before.  "
-                          "GIMP will now migrate your user settings to '%s'."),
+                        _("It seems you have used Clay %d.%d before.  "
+                          "Clay will now migrate your user settings to '%s'."),
                         install->old_major, install->old_minor, dirname);
     }
   else
     {
       user_install_log (install,
-                        _("It appears that you are using GIMP for the "
-                          "first time.  GIMP will now create a folder "
+                        _("It appears that you are using Clay for the "
+                          "first time.  Clay will now create a folder "
                           "named '%s' and copy some files to it."),
                         dirname);
     }
@@ -365,7 +365,7 @@ user_install_detect_old (GimpUserInstall *install,
                        * config dir from a flatpak GIMP 3+.
                        */
                       g_free (flatpak_dir);
-                      flatpak_dir = g_build_filename ("/var/config/GIMP/", version, NULL);
+                      flatpak_dir = g_build_filename ("/var/config/Clay/", version, NULL);
 
                       migrate = g_file_test (flatpak_dir, G_FILE_TEST_IS_DIR);
                     }
@@ -412,7 +412,7 @@ user_install_detect_old (GimpUserInstall *install,
                        * config dir from a snap GIMP 3.2+.
                        */
                       g_free (snap_dir);
-                      snap_dir = g_build_filename (g_getenv ("SNAP_USER_DATA"), ".config/GIMP/", version, NULL);
+                      snap_dir = g_build_filename (g_getenv ("SNAP_USER_DATA"), ".config/Clay/", version, NULL);
 
                       migrate = g_file_test (snap_dir, G_FILE_TEST_IS_DIR);
                     }
@@ -514,7 +514,7 @@ user_install_flatpak_gimpdir (gint minor)
      * environment variable.
      */
     gimp_dir = g_build_filename (home_dir,
-                                 ".var/app/org.gimp.GIMP/config/GIMP/",
+                                 ".var/app/org.gimp.Clay/config/Clay/",
                                  version, NULL);
 
   g_free (version);
@@ -531,7 +531,7 @@ user_install_snap_gimpdir (gint minor)
 
   if (home_dir)
     gimp_dir = g_build_filename (home_dir,
-                                 "snap/gimp/current/.config/GIMP/",
+                                 "snap/gimp/current/.config/Clay/",
                                  version, NULL);
 
   g_free (version);

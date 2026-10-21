@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -96,7 +96,7 @@ errors_init (Gimp               *gimp,
   g_return_if_fail (full_prog_name == NULL);
 
 #ifdef GIMP_UNSTABLE
-  g_printerr ("This is a development version of GIMP.  "
+  g_printerr ("This is a development version of Clay.  "
               "Debug messages may appear here.\n\n");
 #endif /* GIMP_UNSTABLE */
 
@@ -462,7 +462,7 @@ gimp_eek (const gchar *reason,
       wchar_t *utf16 = g_utf8_to_utf16 (utf8, -1, NULL, NULL, NULL);
 
       MessageBoxW (NULL, utf16 ? utf16 : L"Generic error",
-                   L"GIMP", MB_OK | MB_ICONERROR);
+                   L"Clay", MB_OK | MB_ICONERROR);
 
       g_free (utf16);
       g_free (utf8);

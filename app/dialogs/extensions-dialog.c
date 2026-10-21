@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
  * extension-dialog.c
@@ -73,7 +73,7 @@ extensions_dialog_new (Gimp *gimp)
   GtkWidget   *widget;
   GtkTreeIter  top_iter;
 
-  dialog = gimp_dialog_new (C_("GIMP extensions", "Extensions"), "gimp-extensions",
+  dialog = gimp_dialog_new (C_("Clay extensions", "Extensions"), "gimp-extensions",
                             NULL, 0, NULL,
                             GIMP_HELP_EXTENSIONS_DIALOG,
                             _("_OK"), GTK_RESPONSE_OK,

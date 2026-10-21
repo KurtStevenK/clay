@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GIMP PSD Plug-in
@@ -111,7 +111,7 @@ load_thumbnail_image (GFile   *file,
   gimp_progress_update (0.6);
 
   /* ----- Create GIMP image ----- */
-  IFDBG(2) g_debug ("Create GIMP image");
+  IFDBG(2) g_debug ("Create Clay image");
   image = create_gimp_image (&img_a, file);
   if (! image)
     goto load_error;

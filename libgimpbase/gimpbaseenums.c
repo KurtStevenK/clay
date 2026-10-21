@@ -1252,9 +1252,9 @@ gimp_pdb_proc_type_get_type (void)
 
   static const GimpEnumDesc descs[] =
   {
-    { GIMP_PDB_PROC_TYPE_INTERNAL, NC_("pdb-proc-type", "Internal GIMP procedure"), NULL },
-    { GIMP_PDB_PROC_TYPE_PLUGIN, NC_("pdb-proc-type", "GIMP Plug-In"), NULL },
-    { GIMP_PDB_PROC_TYPE_PERSISTENT, NC_("pdb-proc-type", "GIMP Persistent Plug-In"), NULL },
+    { GIMP_PDB_PROC_TYPE_INTERNAL, NC_("pdb-proc-type", "Internal Clay procedure"), NULL },
+    { GIMP_PDB_PROC_TYPE_PLUGIN, NC_("pdb-proc-type", "Clay Plug-In"), NULL },
+    { GIMP_PDB_PROC_TYPE_PERSISTENT, NC_("pdb-proc-type", "Clay Persistent Plug-In"), NULL },
     { GIMP_PDB_PROC_TYPE_TEMPORARY, NC_("pdb-proc-type", "Temporary Procedure"), NULL },
     { 0, NULL, NULL }
   };

@@ -1,4 +1,4 @@
-; GIMP - The GNU Image Manipulation Program
+; xyz.kainzmayer.ClayDesign
 ; Copyright (C) 1995 Spencer Kimball and Peter Mattis
 ;
 ; This program is free software: you can redistribute it and/or modify
@@ -263,7 +263,7 @@
   "2004/03/28"
   "RGB GRAY"
   SF-ONE-OR-MORE-DRAWABLE
-  SF-STRING   _"Text"          "GIMP"
+  SF-STRING   _"Text"          "Clay"
   SF-STRING   _"Number"        "32"
   SF-FONT     _"Font"          "Serif"
   SF-COLOR    _"Font color"    '(255 180 0)

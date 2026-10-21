@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ static const GimpActionEntry help_actions[] =
 {
   { "help-help", "gimp-prefs-help-system",
     NC_("help-action", "_Help"), NULL, { "F1", NULL },
-    NC_("help-action", "Open the GIMP user manual"),
+    NC_("help-action", "Open the Clay user manual"),
     help_help_cmd_callback,
     GIMP_HELP_HELP },
 
@@ -52,8 +52,8 @@ static const GimpStringActionEntry help_online_actions[] =
 {
   { "help-online-main-web-site", GIMP_ICON_WEB,
     NC_("help-action", "_Main Web Site"), NULL, { NULL },
-    NC_("help-action", "Bookmark to the GIMP web site"),
-    "https://www.gimp.org/",
+    NC_("help-action", "Bookmark to the Clay web site"),
+    "https://claydesign.web.app",
     GIMP_HELP_HELP },
 
   { "help-online-docs-web-site", GIMP_ICON_WEB,
@@ -64,14 +64,14 @@ static const GimpStringActionEntry help_online_actions[] =
 
   { "help-online-bug-tracker", GIMP_ICON_WEB,
     NC_("help-action", "_Bug Reports"), NULL, { NULL },
-    NC_("help-action", "Bookmark to the bug tracker of GIMP"),
-    "https://gitlab.gnome.org/GNOME/gimp/issues",
+    NC_("help-action", "Bookmark to the bug tracker of Clay"),
+    "https://github.com/KurtStevenK/clay/issues",
     GIMP_HELP_HELP },
 
   { "help-online-developer-web-site", GIMP_ICON_WEB,
     NC_("help-action", "_Developer Web Site"), NULL, { NULL },
-    NC_("help-action", "Bookmark to the Developer web site"),
-    "https://developer.gimp.org/",
+    NC_("help-action", "Bookmark to the Clay source repository"),
+    "https://github.com/KurtStevenK/clay",
     GIMP_HELP_HELP }
 };
 

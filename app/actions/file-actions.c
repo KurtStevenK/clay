@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -126,7 +126,7 @@ static const GimpActionEntry file_actions[] =
 
   { "file-quit", GIMP_ICON_APPLICATION_EXIT,
     NC_("file-action", "_Quit"), NULL, { "<primary>Q", NULL },
-    NC_("file-action", "Quit the GNU Image Manipulation Program"),
+    NC_("file-action", "Quit the Clay Image Beautification Program"),
     file_quit_cmd_callback,
     GIMP_HELP_FILE_QUIT }
 };

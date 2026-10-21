@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimppalettemru.c
@@ -158,7 +158,7 @@ gimp_palette_mru_save (GimpPaletteMru *mru,
 
   writer = gimp_config_writer_new_from_file (file,
                                              TRUE,
-                                             "GIMP colorrc\n\n"
+                                             "Clay colorrc\n\n"
                                              "This file holds a list of "
                                              "recently used colors.",
                                              NULL);

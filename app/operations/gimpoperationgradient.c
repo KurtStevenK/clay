@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * Largely based on gimpdrawable-gradient.c
@@ -202,7 +202,7 @@ gimp_operation_gradient_class_init (GimpOperationGradientClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:gradient",
                                  "categories",  "gimp",
-                                 "description", "GIMP Gradient operation",
+                                 "description", "Clay Gradient operation",
                                  NULL);
 
   g_object_class_install_property (object_class, PROP_CONTEXT,

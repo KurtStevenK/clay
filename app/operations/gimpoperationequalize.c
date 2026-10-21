@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationequalize.c
@@ -86,7 +86,7 @@ gimp_operation_equalize_class_init (GimpOperationEqualizeClass *klass)
                                   * histogram on changes.
                                   */
                                  "categories",  "color:hidden",
-                                 "description", "GIMP Equalize operation",
+                                 "description", "Clay Equalize operation",
                                  NULL);
 
   point_class->process = gimp_operation_equalize_process;

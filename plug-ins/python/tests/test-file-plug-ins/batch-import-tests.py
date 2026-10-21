@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-#   GIMP - The GNU Image Manipulation Program
+#   xyz.kainzmayer.ClayDesign
 #   Copyright (C) 1995 Spencer Kimball and Peter Mattis
 #
 #   batch-import-tests.py

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationhistogramsink.c
@@ -79,7 +79,7 @@ gimp_operation_histogram_sink_class_init (GimpOperationHistogramSinkClass *klass
   gegl_operation_class_set_keys (operation_class,
                                  "name"       , "gimp:histogram-sink",
                                  "categories" , "color",
-                                 "description", "GIMP Histogram sink operation",
+                                 "description", "Clay Histogram sink operation",
                                  NULL);
 
   operation_class->attach                  = gimp_operation_histogram_sink_attach;

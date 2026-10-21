@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GimpCoreConfig class
@@ -49,7 +49,7 @@
 #define GIMP_DEFAULT_TOOL_PRESET   "Current Options"
 #define GIMP_DEFAULT_FONT          "Sans-serif"
 #define GIMP_DEFAULT_MYPAINT_BRUSH "Fixme"
-#define GIMP_DEFAULT_COMMENT       "Created with GIMP"
+#define GIMP_DEFAULT_COMMENT       "Created with Clay"
 
 
 enum
@@ -210,7 +210,7 @@ gimp_core_config_class_init (GimpCoreConfigClass *klass)
    */
   GIMP_CONFIG_PROP_STRING (object_class, PROP_CONFIG_VERSION,
                            "config-version",
-                           "Version of GIMP config files",
+                           "Version of Clay config files",
                            CONFIG_VERSION_BLURB,
                            NULL,
                            GIMP_PARAM_STATIC_STRINGS);
@@ -694,7 +694,7 @@ gimp_core_config_class_init (GimpCoreConfigClass *klass)
 
   GIMP_CONFIG_PROP_STRING (object_class, PROP_LAST_KNOWN_RELEASE,
                            "last-known-release",
-                           "last known release of GIMP",
+                           "last known release of Clay",
                            LAST_KNOWN_RELEASE_BLURB,
                            NULL,
                            GIMP_PARAM_STATIC_STRINGS);

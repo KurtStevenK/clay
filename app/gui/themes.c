@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -624,9 +624,9 @@ themes_apply_theme (Gimp          *gimp,
 
       g_output_stream_printf (
         output, NULL, NULL, &error,
-        "/* GIMP theme.css\n"
+        "/* Clay theme.css\n"
         " *\n"
-        " * This file is written on GIMP startup and on every theme change.\n"
+        " * This file is written on Clay startup and on every theme change.\n"
         " * It is NOT supposed to be edited manually. Edit your personal\n"
         " * gimp.css file instead (%s).\n"
         " */\n"

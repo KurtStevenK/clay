@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -50,7 +50,7 @@ gimp_gradient_save (GimpData       *data,
    *   ...
    */
 
-  string = g_string_new ("GIMP Gradient\n");
+  string = g_string_new ("Clay Gradient\n");
 
   g_string_append_printf (string, "Name: %s\n",
                           gimp_object_get_name (gradient));
@@ -135,7 +135,7 @@ gimp_gradient_save_pov (GimpGradient  *gradient,
   if (! output)
     return FALSE;
 
-  string = g_string_new ("/* color_map file created by GIMP */\n"
+  string = g_string_new ("/* color_map file created by Clay */\n"
                          "/* https://www.gimp.org/          */\n"
                          "color_map {\n");
 

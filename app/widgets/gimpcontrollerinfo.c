@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Peter Mattis and Spencer Kimball
  *
  * gimpcontrollerinfo.c

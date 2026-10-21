@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -77,6 +77,7 @@ typedef struct
   gdouble         last_time;
 
   gboolean        release_splash;
+  GdkMonitor     *monitor;
   gboolean        alt;
   guint           alt_timeout_id;
   gint32          alt_x;
@@ -131,6 +132,10 @@ static GdkPixbufAnimation *
                                                 gboolean        be_verbose);
 
 static void        splash_timer_elapsed        (void);
+static void        splash_center_on_monitor    (GimpSplash     *splash);
+static gboolean    splash_map_event            (GtkWidget      *widget,
+                                                GdkEventAny    *event,
+                                                GimpSplash     *splash);
 
 
 /*  public functions  */
@@ -200,9 +205,9 @@ splash_create (Gimp         *gimp,
     g_object_new (GTK_TYPE_APPLICATION_WINDOW,
                   "type",            GTK_WINDOW_TOPLEVEL,
                   "type-hint",       GDK_WINDOW_TYPE_HINT_SPLASHSCREEN,
-                  "title",           _("GIMP Startup"),
+                  "title",           _("Clay Startup"),
                   "role",            "gimp-startup",
-                  "window-position", GTK_WIN_POS_CENTER,
+                  "window-position", GTK_WIN_POS_NONE,
                   "resizable",       FALSE,
                   "application",     GTK_APPLICATION (app),
                   NULL);
@@ -225,6 +230,7 @@ splash_create (Gimp         *gimp,
                             GINT_TO_POINTER (0));
 
   splash->release_splash = release_splash;
+  splash->monitor        = monitor;
   splash->alt            = FALSE;
   splash->alt_x          = -1;
   splash->alt_y          = -1;
@@ -307,8 +313,12 @@ splash_create (Gimp         *gimp,
   g_signal_connect (splash->window, "focus",
                     G_CALLBACK (splash_window_focus),
                     gimp);
+  g_signal_connect (splash->window, "map-event",
+                    G_CALLBACK (splash_map_event),
+                    splash);
 
   gtk_widget_set_visible (splash->window, TRUE);
+  splash_center_on_monitor (splash);
 
 #ifdef G_OS_WIN32
   if (StartupInfo.wShowWindow == SW_SHOWMINIMIZED   ||
@@ -898,6 +908,43 @@ splash_image_pick_from_dirs (GList    *dirs,
     }
 
   return animation;
+}
+
+static void
+splash_center_on_monitor (GimpSplash *splash)
+{
+  GdkRectangle workarea;
+  gint         width;
+  gint         height;
+
+  if (! splash || ! splash->monitor || ! GTK_IS_WINDOW (splash->window))
+    return;
+
+  gdk_monitor_get_workarea (splash->monitor, &workarea);
+  gtk_window_get_size (GTK_WINDOW (splash->window), &width, &height);
+
+  if (width < 2 || height < 2)
+    {
+      GtkRequisition req;
+
+      gtk_widget_get_preferred_size (splash->window, NULL, &req);
+      width  = req.width;
+      height = req.height;
+    }
+
+  gtk_window_move (GTK_WINDOW (splash->window),
+                   workarea.x + (workarea.width  - width)  / 2,
+                   workarea.y + (workarea.height - height) / 2);
+}
+
+static gboolean
+splash_map_event (GtkWidget   *widget,
+                  GdkEventAny *event,
+                  GimpSplash  *splash)
+{
+  splash_center_on_monitor (splash);
+
+  return FALSE;
 }
 
 static void

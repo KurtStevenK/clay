@@ -923,7 +923,7 @@
       </section>
       <section>
         <submenu>
-          <attribute name="label" translatable="yes" context="help-action">_GIMP Online</attribute>
+          <attribute name="label" translatable="yes" context="help-action">_Clay Online</attribute>
           <item><attribute name="action">app.help-online-main-web-site</attribute></item>
           <item><attribute name="action">app.help-online-docs-web-site</attribute></item>
           <item><attribute name="action">app.help-online-bug-tracker</attribute></item>

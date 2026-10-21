@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * Session-managment stuff
@@ -370,13 +370,13 @@ session_save (Gimp     *gimp,
   writer =
     gimp_config_writer_new_from_file (file,
                                       TRUE,
-                                      "GIMP sessionrc\n\n"
+                                      "Clay sessionrc\n\n"
                                       "This file takes session-specific info "
                                       "(that is info, you want to keep between "
-                                      "two GIMP sessions).  You are not supposed "
+                                      "two Clay sessions).  You are not supposed "
                                       "to edit it manually, but of course you "
                                       "can do.  The sessionrc will be entirely "
-                                      "rewritten every time you quit GIMP.  "
+                                      "rewritten every time you quit Clay.  "
                                       "If this file isn't found, defaults are "
                                       "used.",
                                       NULL);

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,6 +34,7 @@
 #include "gimp-version.h"
 
 #include "config/gimprc.h"
+#include "config/gimpguiconfig.h"
 
 #include "core/gimp.h"
 #include "core/gimptemplate.h"
@@ -148,6 +149,8 @@ static void   prefs_theme_reset_callback           (GObject      *config,
 static void   prefs_icon_theme_reset_callback      (GObject      *config,
                                                     GParamSpec   *pspec,
                                                     GtkWidget    *widget);
+static void   prefs_startup_monitor_add            (GObject      *config,
+                                                    GtkBox       *vbox);
 
 
 /*  private variables  */
@@ -155,6 +158,79 @@ static void   prefs_icon_theme_reset_callback      (GObject      *config,
 static GtkWidget *prefs_dialog = NULL;
 static GtkWidget *tool_editor  = NULL;
 
+
+static void
+prefs_startup_monitor_changed (GtkComboBox *combo,
+                               GObject     *config)
+{
+  const gchar *id = gtk_combo_box_get_active_id (combo);
+
+  if (id)
+    g_object_set (config, "startup-monitor",
+                  (gint) g_ascii_strtoll (id, NULL, 10), NULL);
+}
+
+static void
+prefs_startup_monitor_add (GObject *config,
+                           GtkBox  *vbox)
+{
+  GtkWidget  *hbox;
+  GtkWidget  *label;
+  GtkWidget  *combo;
+  GdkDisplay *display;
+  gint        n_monitors;
+  gint        i;
+  gint        current;
+  gchar       id[16];
+
+  display = gdk_display_get_default ();
+  n_monitors = gdk_display_get_n_monitors (display);
+  current = GIMP_GUI_CONFIG (config)->startup_monitor;
+
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_pack_start (vbox, hbox, FALSE, FALSE, 0);
+  gtk_widget_set_visible (hbox, TRUE);
+
+  label = gtk_label_new_with_mnemonic (_("Startup _screen:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+  gtk_widget_set_visible (label, TRUE);
+
+  combo = gtk_combo_box_text_new ();
+  gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo);
+  gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
+  gtk_widget_set_visible (combo, TRUE);
+
+  gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (combo),
+                             "-1", _("Primary display"));
+
+  for (i = 0; i < n_monitors; i++)
+    {
+      GdkMonitor   *monitor = gdk_display_get_monitor (display, i);
+      GdkRectangle  geo;
+      const gchar  *model;
+      gchar        *text;
+
+      gdk_monitor_get_geometry (monitor, &geo);
+      model = gdk_monitor_get_model (monitor);
+      text = g_strdup_printf (_("Display %d — %s (%d×%d)"),
+                              i + 1,
+                              model ? model : _("unknown"),
+                              geo.width, geo.height);
+      g_snprintf (id, sizeof (id), "%d", i);
+      gtk_combo_box_text_append (GTK_COMBO_BOX_TEXT (combo), id, text);
+      g_free (text);
+    }
+
+  if (current < -1 || current >= n_monitors)
+    current = -1;
+
+  g_snprintf (id, sizeof (id), "%d", current);
+  gtk_combo_box_set_active_id (GTK_COMBO_BOX (combo), id);
+
+  g_signal_connect (combo, "changed",
+                    G_CALLBACK (prefs_startup_monitor_changed),
+                    config);
+}
 
 /*  public function  */
 
@@ -302,7 +378,7 @@ prefs_response (GtkWidget *widget,
           {
             GString *string;
 
-            string = g_string_new (_("You will have to restart GIMP for "
+            string = g_string_new (_("You will have to restart Clay for "
                                      "the following changes to take effect:"));
             g_string_append (string, "\n\n");
 
@@ -588,7 +664,7 @@ prefs_menus_clear_callback (GtkWidget *widget,
 
       prefs_message (prefs_dialog, GTK_MESSAGE_INFO, TRUE,
                      _("Your keyboard shortcuts will be reset to "
-                       "default values the next time you start GIMP."));
+                       "default values the next time you start Clay."));
     }
 }
 
@@ -662,7 +738,7 @@ prefs_session_clear_callback (GtkWidget *widget,
 
       prefs_message (prefs_dialog, GTK_MESSAGE_INFO, TRUE,
                      _("Your window setup will be reset to "
-                       "default values the next time you start GIMP."));
+                       "default values the next time you start Clay."));
     }
 }
 
@@ -697,7 +773,7 @@ prefs_devices_clear_callback (GtkWidget *widget,
 
       prefs_message (prefs_dialog, GTK_MESSAGE_INFO, TRUE,
                      _("Your input device settings will be reset to "
-                       "default values the next time you start GIMP."));
+                       "default values the next time you start Clay."));
     }
 }
 
@@ -777,7 +853,7 @@ prefs_tool_options_clear_callback (GtkWidget *widget,
 
       prefs_message (prefs_dialog, GTK_MESSAGE_INFO, TRUE,
                      _("Your tool options will be reset to "
-                       "default values the next time you start GIMP."));
+                       "default values the next time you start Clay."));
     }
 }
 
@@ -1317,7 +1393,7 @@ prefs_dialog_new (Gimp       *gimp,
   hbox = g_object_new (GIMP_TYPE_HINT_BOX,
                        "icon-name", GIMP_ICON_DIALOG_WARNING,
                        "hint",      _("We hope you will never need these "
-                                      "settings, but as all software, GIMP "
+                                      "settings, but as all software, Clay "
                                       "has bugs, and crashes can occur. If it "
                                       "happens, you can help us by reporting "
                                       "bugs."),
@@ -1705,7 +1781,7 @@ prefs_dialog_new (Gimp       *gimp,
       hbox = g_object_new (GIMP_TYPE_HINT_BOX,
                            "icon-name", GIMP_ICON_DIALOG_WARNING,
                            "hint",      _("These features are unfinished, buggy "
-                                          "and may crash GIMP. It is unadvised to "
+                                          "and may crash Clay. It is unadvised to "
                                           "use them unless you really know what "
                                           "you are doing or you intend to contribute "
                                           "patches."),
@@ -2371,7 +2447,7 @@ prefs_dialog_new (Gimp       *gimp,
                            GTK_CONTAINER (vbox), FALSE);
 
   prefs_check_button_add_with_icon (object, "toolbox-wilber",
-                                    _("Show GIMP _logo (drag-and-drop target)"),
+                                    _("Show Clay _logo (drag-and-drop target)"),
                                     GIMP_ICON_WILBER,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "toolbox-color-area",
@@ -3036,6 +3112,8 @@ prefs_dialog_new (Gimp       *gimp,
   /* Window Positions */
   vbox2 = prefs_frame_new (_("Window Positions"), GTK_CONTAINER (vbox), FALSE);
 
+  prefs_startup_monitor_add (G_OBJECT (object), GTK_BOX (vbox2));
+
   prefs_check_button_add (object, "save-session-info",
                           _("_Save window positions on exit"),
                           GTK_BOX (vbox2));
@@ -3185,7 +3263,7 @@ prefs_dialog_new (Gimp       *gimp,
                           _("Merge menu and title bar"),
                           GTK_BOX (vbox2));
   hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
-                             _("GIMP will try to convince your system not to decorate image windows. "
+                             _("Clay will try to convince your system not to decorate image windows. "
                                "If it doesn't work properly on your system "
                                "(i.e. you get 2 title bars), please report."));
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);

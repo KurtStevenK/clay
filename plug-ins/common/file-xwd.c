@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  * XWD reading and writing code Copyright (C) 1996 Peter Kirchgessner
  * (email: peter@kirchgessner.net, WWW: http://www.kirchgessner.net)
@@ -575,7 +575,7 @@ load_image (GFile   *file,
       xwdhdr.l_bytes_per_line > GIMP_MAX_IMAGE_SIZE * 3)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   _("'%s':\nImage width is larger than GIMP can handle"),
+                   _("'%s':\nImage width is larger than Clay can handle"),
                    gimp_file_get_utf8_name (file));
       goto out;
     }
@@ -591,7 +591,7 @@ load_image (GFile   *file,
   if (xwdhdr.l_pixmap_height > GIMP_MAX_IMAGE_SIZE)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   _("'%s':\nImage height is larger than GIMP can handle"),
+                   _("'%s':\nImage height is larger than Clay can handle"),
                    gimp_file_get_utf8_name (file));
       goto out;
     }
@@ -1210,7 +1210,7 @@ set_bw_color_table (GimpImage *image)
   GimpPalette   *palette         = gimp_image_get_palette (image);
 
 #ifdef XWD_COL_DEBUG
-  g_printf ("Set GIMP b/w-colortable:\n");
+  g_printf ("Set Clay b/w-colortable:\n");
 #endif
 
   gimp_palette_set_colormap (palette, babl_format ("R'G'B' u8"), BWColorMap, 2 * 3);
@@ -1313,7 +1313,7 @@ set_color_table (GimpImage       *image,
     }
 
 #ifdef XWD_COL_DEBUG
-  g_printf ("Set GIMP colortable:\n");
+  g_printf ("Set Clay colortable:\n");
   for (j = 0; j < 256; j++)
     g_printf ("%3d: 0x%02x 0x%02x 0x%02x\n", j,
               ColorMap[j*3], ColorMap[j*3+1], ColorMap[j*3+2]);

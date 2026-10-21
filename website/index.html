@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clay — Image Beautification Program</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' fill='%231a1d2e'/%3E%3Cpath d='M190 70 A82 82 0 1 0 190 186' fill='none' stroke='%23f4f4f2' stroke-width='34' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #f4f4f2;
+      --navy: #1a1d2e;
+      --nebula: #c45b6a;
+      --muted: #b7b6c4;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background:
+        radial-gradient(900px 520px at 18% 40%, rgba(196, 91, 106, 0.28), transparent 60%),
+        radial-gradient(700px 480px at 78% 18%, rgba(92, 108, 184, 0.35), transparent 62%),
+        var(--navy);
+      color: var(--ink);
+      font-family: "Newsreader", "Iowan Old Style", Palatino, serif;
+      font-size: 1.2rem;
+      line-height: 1.45;
+    }
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4rem;
+      align-items: end;
+      padding: 8vh 8vw 10vh;
+    }
+    .mark { width: min(28vh, 180px); height: auto; display: block; }
+    h1 {
+      font-family: "Fraunces", "Iowan Old Style", serif;
+      font-weight: 560;
+      font-size: clamp(4.5rem, 12vw, 9rem);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      margin: 0;
+    }
+    .role {
+      margin: 0.8rem 0 0;
+      font-size: 1.35rem;
+      color: var(--muted);
+    }
+    p { max-width: 38rem; margin: 1.6rem 0 0; }
+    .where {
+      margin-top: 2.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.4rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    a { color: var(--ink); }
+    @media (max-width: 720px) {
+      main { grid-template-columns: 1fr; gap: 2rem; align-items: start; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <svg class="mark" viewBox="0 0 256 256" aria-hidden="true">
+      <path d="M190 70 A82 82 0 1 0 190 186" fill="none" stroke="#f4f4f2" stroke-width="34" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>Clay</h1>
+      <p class="role">Image Beautification Program · 3.36</p>
+      <p>A free image editor, forked from the GNU Image Manipulation Program and shared under the GNU General Public License. The 3.36 release is for Windows. Linux and macOS build from the same source.</p>
+      <div class="where">
+        <span>Windows</span>
+        <span>Linux</span>
+        <span>macOS</span>
+        <span>iOS, Android, Huawei, and Microsoft — later</span>
+        <a href="https://github.com/KurtStevenK/clay">Source</a>
+      </div>
+      <p class="role">© 2026 xyz.kainzmayer.ClayDesign and the contributors. GPL-3.0-or-later.</p>
+    </div>
+  </main>
+</body>
+</html>

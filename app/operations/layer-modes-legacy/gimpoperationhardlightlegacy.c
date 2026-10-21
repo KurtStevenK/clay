@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationhardlightmode.c
@@ -50,7 +50,7 @@ gimp_operation_hardlight_legacy_class_init (GimpOperationHardlightLegacyClass *k
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:hardlight-legacy",
-                                 "description", "GIMP hardlight mode operation",
+                                 "description", "Clay hardlight mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_hardlight_legacy_process;

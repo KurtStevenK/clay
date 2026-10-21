@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GIMP PSD Plug-in
@@ -911,7 +911,7 @@ load_resource_1028 (const PSDimageres  *res_a,
   IFDBG (3) iptc_data_dump (iptc_data, 0);
 
   /* Store resource data as a GIMP IPTC parasite */
-  IFDBG (2) g_debug ("Processing IPTC data as GIMP IPTC parasite");
+  IFDBG (2) g_debug ("Processing IPTC data as Clay IPTC parasite");
   /* Serialize IPTC data */
   iptc_data_save (iptc_data, &iptc_buf, &iptc_buf_len);
   if (iptc_buf_len > 0)

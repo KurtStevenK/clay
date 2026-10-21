@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,21 +57,21 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_gbr_load_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP brush"));
+  proc->menu_label = g_strdup (_("Clay brush"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-brush",
                                    strlen ("gimp-brush") + 1,
                                    NULL);
   gimp_plug_in_procedure_set_image_types (proc, NULL);
   gimp_plug_in_procedure_set_file_proc (proc, "gbr, gbp", NULL, "",
-                                        "20, string, GIMP");
+                                        "20, string, Clay");
   gimp_plug_in_procedure_set_mime_types (proc, "image/gimp-x-gbr");
   gimp_plug_in_procedure_set_handles_remote (proc);
 
   gimp_object_set_static_name (GIMP_OBJECT (procedure), "file-gbr-load");
   gimp_procedure_set_static_help (procedure,
-                                  "Loads GIMP brushes",
-                                  "Loads GIMP brushes (1 or 4 bpp "
+                                  "Loads Clay brushes",
+                                  "Loads Clay brushes (1 or 4 bpp "
                                   "and old .gpb format)",
                                   NULL);
   gimp_procedure_set_static_attribution (procedure,
@@ -113,7 +113,7 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_gbr_save_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP brush"));
+  proc->menu_label = g_strdup (_("Clay brush"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-brush",
                                    strlen ("gimp-brush") + 1,
@@ -175,7 +175,7 @@ file_data_init (Gimp *gimp)
                                                        "The name of the "
                                                        "brush",
                                                        FALSE, FALSE, TRUE,
-                                                       "GIMP Brush",
+                                                       "Clay Brush",
                                                        GIMP_PARAM_READWRITE));
 
   gimp_plug_in_manager_add_procedure (gimp->plug_in_manager, proc);
@@ -189,7 +189,7 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_gih_load_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP brush (animated)"));
+  proc->menu_label = g_strdup (_("Clay brush (animated)"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-brush",
                                    strlen ("gimp-brush") + 1,
@@ -201,8 +201,8 @@ file_data_init (Gimp *gimp)
 
   gimp_object_set_static_name (GIMP_OBJECT (procedure), "file-gih-load");
   gimp_procedure_set_static_help (procedure,
-                                  "Loads GIMP animated brushes",
-                                  "This procedure loads a GIMP brush "
+                                  "Loads Clay animated brushes",
+                                  "This procedure loads a Clay brush "
                                   "pipe as an image.",
                                   NULL);
   gimp_procedure_set_static_attribution (procedure,
@@ -242,7 +242,7 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_gih_save_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP brush (animated)"));
+  proc->menu_label = g_strdup (_("Clay brush (animated)"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-brush",
                                    strlen ("gimp-brush") + 1,
@@ -304,7 +304,7 @@ file_data_init (Gimp *gimp)
                                                        "The name of the "
                                                        "brush",
                                                        FALSE, FALSE, TRUE,
-                                                       "GIMP Brush",
+                                                       "Clay Brush",
                                                        GIMP_PARAM_READWRITE));
   gimp_procedure_add_argument (procedure,
                                gimp_param_spec_string ("params",
@@ -325,7 +325,7 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_pat_load_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP pattern"));
+  proc->menu_label = g_strdup (_("Clay pattern"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-pattern",
                                    strlen ("gimp-pattern") + 1,
@@ -338,8 +338,8 @@ file_data_init (Gimp *gimp)
 
   gimp_object_set_static_name (GIMP_OBJECT (procedure), "file-pat-load");
   gimp_procedure_set_static_help (procedure,
-                                  "Loads GIMP patterns",
-                                  "Loads GIMP patterns",
+                                  "Loads Clay patterns",
+                                  "Loads Clay patterns",
                                   NULL);
   gimp_procedure_set_static_attribution (procedure,
                                          "Tim Newsome, Michael Natterer",
@@ -377,7 +377,7 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_pat_save_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP pattern"));
+  proc->menu_label = g_strdup (_("Clay pattern"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-pattern",
                                    strlen ("gimp-pattern") + 1,
@@ -433,7 +433,7 @@ file_data_init (Gimp *gimp)
                                                        "The name of the "
                                                        "pattern",
                                                        FALSE, FALSE, TRUE,
-                                                       "GIMP Pattern",
+                                                       "Clay Pattern",
                                                        GIMP_PARAM_READWRITE));
 
   gimp_plug_in_manager_add_procedure (gimp->plug_in_manager, proc);
@@ -447,21 +447,21 @@ file_data_init (Gimp *gimp)
   procedure->marshal_func = file_gex_load_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP extension"));
+  proc->menu_label = g_strdup (_("Clay extension"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-plugin",
                                    strlen ("gimp-plugin") + 1,
                                    NULL);
   gimp_plug_in_procedure_set_file_proc (proc, "gex", NULL, "",
-                                        "20, string, GIMP");
+                                        "20, string, Clay");
   gimp_plug_in_procedure_set_generic_file_proc (proc, TRUE);
   gimp_plug_in_procedure_set_mime_types (proc, "image/gimp-x-gex");
   gimp_plug_in_procedure_set_handles_remote (proc);
 
   gimp_object_set_static_name (GIMP_OBJECT (procedure), "file-gex-load");
   gimp_procedure_set_static_help (procedure,
-                                  "Loads GIMP extension",
-                                  "Loads GIMP extension",
+                                  "Loads Clay extension",
+                                  "Loads Clay extension",
                                   NULL);
   gimp_procedure_set_static_attribution (procedure,
                                          "Jehan", "Jehan", "2019");

@@ -80,8 +80,8 @@
 #define TAG_THUMB_MIMETYPE        "tEXt::Thumb::Mimetype"
 #define TAG_THUMB_IMAGE_WIDTH     "tEXt::Thumb::Image::Width"
 #define TAG_THUMB_IMAGE_HEIGHT    "tEXt::Thumb::Image::Height"
-#define TAG_THUMB_GIMP_TYPE       "tEXt::Thumb::X-GIMP::Type"
-#define TAG_THUMB_GIMP_LAYERS     "tEXt::Thumb::X-GIMP::Layers"
+#define TAG_THUMB_GIMP_TYPE       "tEXt::Thumb::X-Clay::Type"
+#define TAG_THUMB_GIMP_LAYERS     "tEXt::Thumb::X-Clay::Layers"
 
 
 enum

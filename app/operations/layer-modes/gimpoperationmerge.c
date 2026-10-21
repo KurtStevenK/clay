@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationmerge.c
@@ -50,7 +50,7 @@ gimp_operation_merge_class_init (GimpOperationMergeClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:merge",
-                                 "description", "GIMP merge mode operation",
+                                 "description", "Clay merge mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_merge_process;

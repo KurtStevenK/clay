@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * module-dialog.c
@@ -132,7 +132,7 @@ module_dialog_new (Gimp *gimp)
                       vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  private->hint = gimp_hint_box_new (_("You will have to restart GIMP "
+  private->hint = gimp_hint_box_new (_("You will have to restart Clay "
                                        "for the changes to take effect."));
   gtk_box_pack_start (GTK_BOX (vbox), private->hint, FALSE, FALSE, 0);
 

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -260,7 +260,7 @@ get_item_from_ID_in_script (scheme   *sc,
     {
       *object_handle = (GObject *) gimp_item_get_by_id (id);
       if (! *object_handle)
-          return script_error (sc, "Invalid ID of GIMP item", a);
+          return script_error (sc, "Invalid ID of Clay item", a);
     }
 
   /* ensure *object_handle is NULL or a valid reference to a object */

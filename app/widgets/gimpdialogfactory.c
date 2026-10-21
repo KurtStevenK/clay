@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpdialogfactory.c
@@ -957,13 +957,12 @@ gimp_dialog_factory_add_dialog (GimpDialogFactory *factory,
                   gimp_session_info_is_session_managed (current_info) &&
                   ! gtk_widget_get_visible (dialog))
                 {
-                  GimpGuiConfig *gui_config;
-
-                  gui_config = GIMP_GUI_CONFIG (factory->p->context->gimp->config);
-
+                  /* Clay opens every window on the startup screen, not on
+                   * the monitor under the pointer or a previously stored one.
+                   */
                   gimp_session_info_apply_geometry (current_info,
                                                     monitor,
-                                                    gui_config->restore_monitor);
+                                                    FALSE);
                 }
 
               info = current_info;
@@ -1098,7 +1097,6 @@ gimp_dialog_factory_position_dialog (GimpDialogFactory *factory,
                                      GdkMonitor        *monitor)
 {
   GimpSessionInfo *info;
-  GimpGuiConfig   *gui_config;
 
   g_return_if_fail (GIMP_IS_DIALOG_FACTORY (factory));
   g_return_if_fail (identifier != NULL);
@@ -1122,11 +1120,9 @@ gimp_dialog_factory_position_dialog (GimpDialogFactory *factory,
       return;
     }
 
-  gui_config = GIMP_GUI_CONFIG (factory->p->context->gimp->config);
-
   gimp_session_info_apply_geometry (info,
                                     monitor,
-                                    gui_config->restore_monitor);
+                                    FALSE);
 }
 
 void

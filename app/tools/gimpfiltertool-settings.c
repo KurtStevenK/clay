@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpfiltertool-settings.c
@@ -128,7 +128,7 @@ gimp_filter_tool_real_settings_export (GimpFilterTool  *filter_tool,
   gchar    *footer;
   gboolean  success;
 
-  header = g_strdup_printf ("GIMP '%s' settings",
+  header = g_strdup_printf ("Clay '%s' settings",
                             gimp_tool_get_label (tool));
   footer = g_strdup_printf ("end of '%s' settings",
                             gimp_tool_get_label (tool));

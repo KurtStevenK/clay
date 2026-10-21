@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * gimpseamlessclonetool.h
  * Copyright (C) 2011 Barak Itkin <lightningismyname@gmail.com>

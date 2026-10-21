@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationantierase.c
@@ -52,7 +52,7 @@ gimp_operation_anti_erase_class_init (GimpOperationAntiEraseClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:anti-erase",
-                                 "description", "GIMP anti erase mode operation",
+                                 "description", "Clay anti erase mode operation",
                                  NULL);
 
   layer_mode_class->process             = gimp_operation_anti_erase_process;

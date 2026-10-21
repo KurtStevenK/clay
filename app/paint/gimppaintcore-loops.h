@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 2013 Daniel Sabo
  *
  * This program is free software: you can redistribute it and/or modify

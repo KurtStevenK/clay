@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GimpDBusService
@@ -24,13 +24,10 @@
 #include "gimpdbusservice-generated.h"
 
 
-/* service name and path should really be org.gimp.GIMP and
- * /org/gimp/GIMP and only the interface be called UI.
- */
-#define GIMP_DBUS_SERVICE_NAME   "org.gimp.GIMP.UI"
-#define GIMP_DBUS_SERVICE_PATH   "/org/gimp/GIMP/UI"
-#define GIMP_DBUS_INTERFACE_NAME "org.gimp.GIMP.UI"
-#define GIMP_DBUS_INTERFACE_PATH "/org/gimp/GIMP/UI"
+#define GIMP_DBUS_SERVICE_NAME   "xyz.kainzmayer.ClayDesign.UI"
+#define GIMP_DBUS_SERVICE_PATH   "/xyz/kainzmayer/ClayDesign/UI"
+#define GIMP_DBUS_INTERFACE_NAME "xyz.kainzmayer.ClayDesign.UI"
+#define GIMP_DBUS_INTERFACE_PATH "/xyz/kainzmayer/ClayDesign/UI"
 
 
 #define GIMP_TYPE_DBUS_SERVICE            (gimp_dbus_service_get_type ())

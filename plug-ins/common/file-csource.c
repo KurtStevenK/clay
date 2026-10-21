@@ -682,7 +682,7 @@ export_image (GFile         *file,
   basename = g_file_get_basename (file);
 
   if (! print (output, error,
-               "/* GIMP %s C-Source image dump %s(%s) */\n\n",
+               "/* Clay %s C-Source image dump %s(%s) */\n\n",
                config_save_alpha ? "RGBA" : "RGB",
                config_use_rle ? "1-byte-run-length-encoded " : "",
                basename))

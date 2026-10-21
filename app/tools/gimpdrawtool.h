@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-2001 Spencer Kimball, Peter Mattis, and others.
  *
  * This program is free software: you can redistribute it and/or modify

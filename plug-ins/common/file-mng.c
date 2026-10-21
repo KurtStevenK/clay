@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * Multiple-image Network Graphics (MNG) plug-in
@@ -1344,7 +1344,7 @@ mng_export_image (GFile         *file,
 
   if (mng_putchunk_text (handle,
                          strlen (MNG_TEXT_TITLE), MNG_TEXT_TITLE,
-                         18, "Created using GIMP") != MNG_NOERROR)
+                         18, "Created using Clay") != MNG_NOERROR)
     {
       g_warning ("Unable to mng_putchunk_text() in mng_export_image()");
       goto err3;

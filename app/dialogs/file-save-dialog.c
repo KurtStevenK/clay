@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995, 1996, 1997 Spencer Kimball and Peter Mattis
  * Copyright (C) 1997 Josh MacDonald
  *
@@ -661,14 +661,14 @@ file_save_dialog_switch_dialogs (GimpFileDialog *file_dialog,
         {
           primary = _("The given filename cannot be used for exporting");
           message = _("You can use this dialog to export to various file formats. "
-                      "If you want to save the image to the GIMP XCF format, use "
+                      "If you want to save the image to the Clay XCF format, use "
                       "File→Save instead.");
           link    = _("Take me to the Save dialog");
         }
       else
         {
           primary = _("The given filename cannot be used for saving");
-          message = _("You can use this dialog to save to the GIMP XCF "
+          message = _("You can use this dialog to save to the Clay XCF "
                       "format. Use File→Export to export to other file formats.");
           link    = _("Take me to the Export dialog");
         }

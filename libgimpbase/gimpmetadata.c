@@ -210,9 +210,9 @@ gimp_metadata_class_init (GimpMetadataClass *klass)
 
   /* Usage example Xmp.GIMP.tagname */
   if (! gexiv2_metadata_try_register_xmp_namespace ("http://www.gimp.org/xmp/",
-                                                    "GIMP", &error))
+                                                    "Clay", &error))
     {
-      g_printerr ("Failed to register XMP namespace 'GIMP': %s\n", error->message);
+      g_printerr ("Failed to register XMP namespace 'Clay': %s\n", error->message);
       g_clear_error (&error);
     }
 }

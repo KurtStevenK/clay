@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -50,7 +50,7 @@ gimp_pattern_save (GimpData       *data,
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Unsupported pattern dimensions %d x %d.\n"
-                     "GIMP Patterns have a maximum size of %d x %d."),
+                     "Clay Patterns have a maximum size of %d x %d."),
                    width, height,
                    GIMP_PATTERN_MAX_SIZE, GIMP_PATTERN_MAX_SIZE);
       return FALSE;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 1995-2017 Spencer Kimball, Peter Mattis, and others -->
 <component type="desktop">
-  <id>org.gimp.GIMP</id>
+  <id>xyz.kainzmayer.ClayDesign</id>
 
   <!--
       The tag 'metadata_license' means the licence of this file, not the whole
@@ -12,13 +12,14 @@
   -->
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+ AND LGPL-3.0+</project_license>
-  <developer_name>The GIMP team</developer_name>
-  <name>GNU Image Manipulation Program</name>
+  <developer_name>Clay</developer_name>
+  <name>Clay Image Beautification Program</name>
   <summary>High-end image creation and manipulation</summary>
   <description>
     <p>
-      GIMP is an acronym for GNU Image Manipulation Program. It is
-      Community-driven Free Software for high-end image creation and manipulation.
+      Clay is the Clay Image Beautification Program. It is
+      community-driven free software for high-end image creation, forked
+      from the GNU Image Manipulation Program.
     </p>
     <p>
       It has many capabilities. It can be used as a paint program,
@@ -27,11 +28,11 @@
       renderer, an image format converter, etc.
     </p>
     <p>
-      GIMP is expandable and extensible. It is designed to be
+      Clay is expandable and extensible. It is designed to be
       augmented with plug-ins and extensions to do just about
       anything. The advanced scripting interface allows everything
       from the simplest task to the most complex image manipulation
-      procedures to be easily scripted. GIMP is available for Linux,
+      procedures to be easily scripted. Clay is available for Linux,
       Microsoft Windows and macOS.
     </p>
   </description>

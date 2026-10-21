@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationbuffersourcevalidate.c
@@ -87,7 +87,7 @@ gimp_operation_buffer_source_validate_class_init (GimpOperationBufferSourceValid
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:buffer-source-validate",
                                  "categories",  "gimp",
-                                 "description", "GIMP Buffer-Source Validate operation",
+                                 "description", "Clay Buffer-Source Validate operation",
                                  NULL);
 
   g_object_class_install_property (object_class, PROP_BUFFER,

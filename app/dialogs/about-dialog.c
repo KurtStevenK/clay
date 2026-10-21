@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -255,7 +255,7 @@ about_dialog_create (Gimp           *gimp,
 
       pixbuf = about_dialog_load_logo ();
 
-      copyright = g_strdup_printf (GIMP_COPYRIGHT, GIMP_GIT_LAST_COMMIT_YEAR);
+      copyright = g_strdup (GIMP_COPYRIGHT);
       if (gimp_version_get_revision () > 0)
         /* Translators: the %s is GIMP version, the %d is the
          * installer/package revision.
@@ -274,7 +274,7 @@ about_dialog_create (Gimp           *gimp,
       widget = g_object_new (GTK_TYPE_ABOUT_DIALOG,
                              "role",               "gimp-about",
                              "window-position",    GTK_WIN_POS_CENTER,
-                             "title",              _("About GIMP"),
+                             "title",              _("About Clay"),
                              "program-name",       GIMP_ACRONYM,
                              "version",            version,
                              "copyright",          copyright,
@@ -282,8 +282,8 @@ about_dialog_create (Gimp           *gimp,
                              "license",            GIMP_LICENSE,
                              "wrap-license",       TRUE,
                              "logo",               pixbuf,
-                             "website",            "https://www.gimp.org/",
-                             "website-label",      _("Visit the GIMP website"),
+                             "website",            "https://claydesign.web.app",
+                             "website-label",      _("Visit the Clay website"),
                              "authors",            authors,
                              "artists",            artists,
                              "documenters",        documenters,
@@ -580,7 +580,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
       if (config->last_revision > 0)
         {
           /* This is actually a new revision of current version. */
-          text = g_strdup_printf (_("Download GIMP %s revision %d (released on %s)\n"),
+          text = g_strdup_printf (_("Download Clay %s revision %d (released on %s)\n"),
                                   config->last_known_release,
                                   config->last_revision,
                                   date);
@@ -595,7 +595,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
         }
       else
         {
-          text = g_strdup_printf (_("Download GIMP %s (released on %s)\n"),
+          text = g_strdup_printf (_("Download Clay %s (released on %s)\n"),
                                   config->last_known_release, date);
         }
       gtk_label_set_text (GTK_LABEL (button_label), text);
@@ -898,7 +898,7 @@ about_dialog_timer (gpointer data)
           return G_SOURCE_REMOVE;
 
         case 1:
-          text = insert_spacers (_("GIMP is brought to you by"));
+          text = insert_spacers (_("Clay is brought to you by"));
           dialog->state += 1;
           break;
 

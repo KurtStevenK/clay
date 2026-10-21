@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -99,7 +99,7 @@ script_fu_server_create_procedure (GimpPlugIn  *plug_in,
                                     "script-fu operation. NOTE that for "
                                     "security reasons this procedure's "
                                     "API was changed in an incompatible "
-                                    "way since GIMP 2.8.12. You now have "
+                                    "way since Clay 2.8.12. You now have "
                                     "to pass the IP to listen on as "
                                     "first parameter. Calling this "
                                     "procedure with the old API will "
@@ -179,7 +179,7 @@ script_fu_server_create_procedure (GimpPlugIn  *plug_in,
  * A server that dies leaves the client with a broken connection,
  * but does not affect extension-script-fu.
  *
- * A server is a child process of a GIMP process.
+ * A server is a child process of a Clay process.
  * Quitting or killing the parent process also kills the server.
  */
 static GimpValueArray *

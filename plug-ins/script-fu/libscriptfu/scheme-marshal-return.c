@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -400,7 +400,7 @@ marshal_returned_PDB_value (scheme  *sc,
         * It is not necessarily an error in the script.
         */
       if (id == -1)
-        g_warning ("PDB procedure returned NULL GIMP object.");
+        g_warning ("PDB procedure returned NULL Clay object.");
 
       g_debug ("PDB procedure returned object ID: %i", id);
 

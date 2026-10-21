@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -643,7 +643,7 @@ menus_quartz_app_menu (Gimp *gimp)
    * implementations. In addition, we extend the menu with extra entries specific to
    * our application’s functionality. */
 
-  [app_menu setTitle:@"GIMP"];
+  [app_menu setTitle:@"Clay"];
 
   /* customize the GIMP Mac menu only once: otherwise every new image window
      (on multi-window mode) duplicates the entries we insert here. */

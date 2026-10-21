@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1999 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -292,7 +292,7 @@ gimp_tool_options_serialize (GimpToolOptions  *tool_options,
   if (tool_options->tool_info->gimp->be_verbose)
     g_print ("Writing '%s'\n", gimp_file_get_utf8_name (file));
 
-  header = g_strdup_printf ("GIMP %s options",
+  header = g_strdup_printf ("Clay %s options",
                             gimp_object_get_name (tool_options->tool_info));
   footer = g_strdup_printf ("end of %s options",
                             gimp_object_get_name (tool_options->tool_info));

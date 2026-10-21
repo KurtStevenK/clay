@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ gimp_palette_save (GimpData       *data,
   GString     *string;
   GList       *list;
 
-  string = g_string_new ("GIMP Palette\n");
+  string = g_string_new ("Clay Palette\n");
 
   g_string_append_printf (string,
                           "Name: %s\n"

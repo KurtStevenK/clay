@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GIMP PSD Plug-in
@@ -1032,7 +1032,7 @@ load_resource_lpla (const PSDlayerres  *res_a,
     {
       g_message ("Warning:\n"
                  "The image file contains placed or smart object layers. "
-                 "These are not supported by the GIMP and will "
+                 "These are not supported by the Clay and will "
                  "be dropped.");
       msg_flag = TRUE;
     }

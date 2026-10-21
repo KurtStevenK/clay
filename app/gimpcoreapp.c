@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Peter Mattis and Spencer Kimball
  *
  * gimpapp.c
@@ -57,8 +57,8 @@ gimp_core_app_default_init (GimpCoreAppInterface *iface)
   /* add properties and signals to the interface here */
   g_object_interface_install_property (iface,
                                        g_param_spec_object ("gimp",
-                                                            "GIMP",
-                                                            "GIMP root object",
+                                                            "Clay",
+                                                            "Clay root object",
                                                             GIMP_TYPE_GIMP,
                                                             GIMP_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
   g_object_interface_install_property (iface,
@@ -77,7 +77,7 @@ gimp_core_app_default_init (GimpCoreAppInterface *iface)
   g_object_interface_install_property (iface,
                                        g_param_spec_boolean ("quit",
                                                              "Quit",
-                                                             "Quit GIMP immediately after running batch commands",
+                                                             "Quit Clay immediately after running batch commands",
                                                              FALSE,
                                                              GIMP_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
   g_object_interface_install_property (iface,

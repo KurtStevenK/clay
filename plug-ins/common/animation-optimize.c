@@ -5,7 +5,7 @@
  *     adam@gimp.org
  *     adam@foxbox.org
  *
- * GIMP - The GNU Image Manipulation Program
+ * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -180,7 +180,7 @@ optimize_create_procedure (GimpPlugIn  *plug_in,
                                         _("Modify image to reduce size when "
                                           "saved as GIF animation"),
                                         "This procedure applies various "
-                                        "optimizations to a GIMP layer-based "
+                                        "optimizations to a Clay layer-based "
                                         "animation in an attempt to reduce the "
                                         "final file size.  If a frame of the"
                                         "animation can use the 'combine' "
@@ -208,7 +208,7 @@ optimize_create_procedure (GimpPlugIn  *plug_in,
                                         _("Reduce file size where "
                                           "combining layers is possible"),
                                         "This procedure applies various "
-                                        "optimizations to a GIMP layer-based "
+                                        "optimizations to a Clay layer-based "
                                         "animation in an attempt to reduce "
                                         "the final file size.  If a frame of "
                                         "the animation can use the 'combine' "
@@ -232,7 +232,7 @@ optimize_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_set_documentation (procedure,
                                         _("Remove optimization to make "
                                           "editing easier"),
-                                        "This procedure 'simplifies' a GIMP "
+                                        "This procedure 'simplifies' a Clay "
                                         "layer-based animation that has been "
                                         "optimized for animation. This makes "
                                         "editing the animation much easier.",
@@ -253,7 +253,7 @@ optimize_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_documentation (procedure,
                                         "This procedure attempts to remove "
-                                        "the backdrop from a GIMP layer-based "
+                                        "the backdrop from a Clay layer-based "
                                         "animation, leaving the foreground "
                                         "animation over transparency.",
                                         NULL,
@@ -274,7 +274,7 @@ optimize_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_documentation (procedure,
                                         "This procedure attempts to remove "
-                                        "the foreground from a GIMP "
+                                        "the foreground from a Clay "
                                         "layer-based animation, leaving"
                                         " a one-layered image containing only "
                                         "the constant backdrop image.",

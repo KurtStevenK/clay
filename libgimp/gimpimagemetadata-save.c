@@ -853,18 +853,18 @@ gimp_image_metadata_save_filter (GimpImage            *image,
           gimp_metadata_add_xmp_history (metadata, "");
 
           gexiv2_metadata_try_set_tag_string (GEXIV2_METADATA (metadata),
-                                              "Xmp.GIMP.TimeStamp",
+                                              "Xmp.Clay.TimeStamp",
                                               ts, &code_error);
           if (code_error)
             {
               g_warning ("%s: failed to set metadata '%s': %s\n",
-                         G_STRFUNC, "Xmp.GIMP.TimeStamp", code_error->message);
+                         G_STRFUNC, "Xmp.Clay.TimeStamp", code_error->message);
               g_clear_error (&code_error);
             }
 
           gexiv2_metadata_try_set_tag_string (GEXIV2_METADATA (metadata),
                                               "Xmp.xmp.CreatorTool",
-                                              N_("GIMP"), &code_error);
+                                              N_("Clay"), &code_error);
           if (code_error)
             {
               g_warning ("%s: failed to set metadata '%s': %s\n",
@@ -873,27 +873,27 @@ gimp_image_metadata_save_filter (GimpImage            *image,
             }
 
           gexiv2_metadata_try_set_tag_string (GEXIV2_METADATA (metadata),
-                                              "Xmp.GIMP.Version",
+                                              "Xmp.Clay.Version",
                                               GIMP_VERSION, &code_error);
           if (code_error)
             {
               g_warning ("%s: failed to set metadata '%s': %s\n",
-                         G_STRFUNC, "Xmp.GIMP.Version", code_error->message);
+                         G_STRFUNC, "Xmp.Clay.Version", code_error->message);
               g_clear_error (&code_error);
             }
 
           gexiv2_metadata_try_set_tag_string (GEXIV2_METADATA (metadata),
-                                              "Xmp.GIMP.API",
+                                              "Xmp.Clay.API",
                                               GIMP_API_VERSION, &code_error);
           if (code_error)
             {
               g_warning ("%s: failed to set metadata '%s': %s\n",
-                         G_STRFUNC, "Xmp.GIMP.API", code_error->message);
+                         G_STRFUNC, "Xmp.Clay.API", code_error->message);
               g_clear_error (&code_error);
             }
 
           gexiv2_metadata_try_set_tag_string (GEXIV2_METADATA (metadata),
-                                              "Xmp.GIMP.Platform",
+                                              "Xmp.Clay.Platform",
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
                                               "Windows",
 #elif defined(__linux__)
@@ -909,7 +909,7 @@ gimp_image_metadata_save_filter (GimpImage            *image,
           if (code_error)
             {
               g_warning ("%s: failed to set metadata '%s': %s\n",
-                         G_STRFUNC, "Xmp.GIMP.Platform", code_error->message);
+                         G_STRFUNC, "Xmp.Clay.Platform", code_error->message);
               g_clear_error (&code_error);
             }
         }

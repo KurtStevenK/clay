@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -223,7 +223,7 @@ export_image (GFile         *file,
   drawable_type = gimp_drawable_type (drawable);
 
   if (! print (output, error,
-               "/*  GIMP header image file format (%s): %s  */\n\n",
+               "/*  Clay header image file format (%s): %s  */\n\n",
                GIMP_RGB_IMAGE == drawable_type ? "RGB" : "INDEXED",
                gimp_file_get_utf8_name (file)) ||
       ! print (output, error,

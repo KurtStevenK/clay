@@ -156,7 +156,7 @@ gui_libapps = [
 # Executables
 
 if platform_windows
-  console_rc_name = 'gimp-console-'+ gimp_app_version
+  console_rc_name = 'clay-console-'+ gimp_app_version
   console_rc_file = windows.compile_resources(
     gimp_plugins_rc,
     args: [
@@ -168,7 +168,7 @@ if platform_windows
     ],
   )
 
-  gui_rc_name = 'gimp-'+ gimp_app_version
+  gui_rc_name = 'clay-'+ gimp_app_version
   gui_rc_file = windows.compile_resources(
     gimp_app_rc,
     args: [

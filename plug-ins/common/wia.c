@@ -1,4 +1,4 @@
-/*   GIMP - The GNU Image Manipulation Program
+/*   xyz.kainzmayer.ClayDesign
  *   Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  *   WIA Scanner plug-in
@@ -211,7 +211,7 @@ wia_main (GimpProcedure       *procedure,
           TCHAR            temp_path[MAX_FOLDER_PATH];
           gchar           *scan_directory = NULL;
 
-          szFileName = SysAllocString (L"GIMP-SCANNED-IMAGE");
+          szFileName = SysAllocString (L"Clay-SCANNED-IMAGE");
 
           /* Check if we have a saved directory, and if so, if it's still
            * valid. */

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimplevelsconfig.c
@@ -878,10 +878,10 @@ gimp_levels_config_load_cruft (GimpLevelsConfig  *config,
   if (! line)
     return FALSE;
 
-  if (strcmp (line, "# GIMP Levels File") != 0)
+  if (strcmp (line, "# Clay Levels File") != 0)
     {
       g_set_error_literal (error, GIMP_CONFIG_ERROR, GIMP_CONFIG_ERROR_PARSE,
-                           _("not a GIMP Levels file"));
+                           _("not a Clay Levels file"));
       g_object_unref (data_input);
       g_free (line);
       return FALSE;
@@ -981,7 +981,7 @@ gimp_levels_config_save_cruft (GimpLevelsConfig  *config,
   g_return_val_if_fail (G_IS_OUTPUT_STREAM (output), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  string = g_string_new ("# GIMP Levels File\n");
+  string = g_string_new ("# Clay Levels File\n");
 
   for (i = 0; i < 5; i++)
     {

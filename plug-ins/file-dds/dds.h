@@ -226,7 +226,7 @@ typedef struct
   {
     struct
     {
-      guint magic1;  /* FOURCC "GIMP" */
+      guint magic1;  /* FOURCC "Clay" */
       guint magic2;  /* FOURCC "-DDS" */
       guint version;
       guint extra_fourcc;

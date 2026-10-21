@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * modifiers.c
@@ -150,12 +150,12 @@ modifiers_save (Gimp     *gimp,
     g_print ("Writing '%s'\n", gimp_file_get_utf8_name (file));
 
   gimp_config_serialize_to_file (GIMP_CONFIG (manager), file,
-                                 "GIMP modifiersrc\n\n"
+                                 "Clay modifiersrc\n\n"
                                  "This file stores modifiers configuration. "
                                  "You are not supposed to edit it manually, "
                                  "but of course you can do. The modifiersrc "
                                  "will be entirely rewritten every time you "
-                                 "quit GIMP. If this file isn't found, "
+                                 "quit Clay. If this file isn't found, "
                                  "defaults are used.",
                                  NULL, NULL, &error);
   if (error != NULL)

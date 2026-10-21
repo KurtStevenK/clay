@@ -934,9 +934,9 @@ save_as_cern(gpointer param, OutputFunc_t output)
 #endif
 
    write_cern_comment(param, output);
-   output(param, "-:Image map file created by GIMP Image Map plug-in\n");
+   output(param, "-:Image map file created by Clay Image Map plug-in\n");
    write_cern_comment(param, output);
-   output(param, "-:GIMP Image Map plug-in by Maurits Rijk\n");
+   output(param, "-:Clay Image Map plug-in by Maurits Rijk\n");
    write_cern_comment(param, output);
    output(param, "-:Please do not edit lines starting with \"#$\"\n");
    write_cern_comment(param, output);
@@ -980,8 +980,8 @@ save_as_csim(gpointer param, OutputFunc_t output)
           _image_width, _image_height, _map_info.title);
    output(param, "<map name=\"%s\">\n", _map_info.title);
    output(param,
-          "<!-- #$-:Image map file created by GIMP Image Map plug-in -->\n");
-   output(param, "<!-- #$-:GIMP Image Map plug-in by Maurits Rijk -->\n");
+          "<!-- #$-:Image map file created by Clay Image Map plug-in -->\n");
+   output(param, "<!-- #$-:Clay Image Map plug-in by Maurits Rijk -->\n");
    output(param,
           "<!-- #$-:Please do not edit lines starting with \"#$\" -->\n");
    output(param, "<!-- #$VERSION:2.3 -->\n");
@@ -1012,8 +1012,8 @@ save_as_ncsa(gpointer param, OutputFunc_t output)
    gchar *context = NULL;
 #endif
 
-   output(param, "#$-:Image map file created by GIMP Image Map plug-in\n");
-   output(param, "#$-:GIMP Image Map plug-in by Maurits Rijk\n");
+   output(param, "#$-:Image map file created by Clay Image Map plug-in\n");
+   output(param, "#$-:Clay Image Map plug-in by Maurits Rijk\n");
    output(param, "#$-:Please do not edit lines starting with \"#$\"\n");
    output(param, "#$VERSION:2.3\n");
    output(param, "#$TITLE:%s\n", _map_info.title);

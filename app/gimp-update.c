@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimp-update.c
@@ -463,7 +463,7 @@ gimp_update_about_dialog (GimpCoreConfig   *config,
 #ifndef GIMP_CONSOLE_COMPILATION
       gtk_widget_set_visible (about_dialog_create (gimp, config), TRUE);
 #else
-      g_printerr (_("A new version of GIMP (%s) was released.\n"
+      g_printerr (_("A new version of Clay (%s) was released.\n"
                     "It is recommended to update."),
                   config->last_known_release);
 #endif
@@ -553,7 +553,7 @@ gimp_update_auto_check (GimpCoreConfig *config,
         return FALSE;
 #else
       g_log (G_LOG_DOMAIN, G_LOG_LEVEL_MESSAGE,
-             "Welcome to GIMP %s!", GIMP_VERSION);
+             "Welcome to Clay %s!", GIMP_VERSION);
 #endif
     }
 

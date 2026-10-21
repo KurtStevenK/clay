@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * gimpoperationcage.c
  * Copyright (C) 2010 Michael Muré <batolettre@gmail.com>
@@ -101,7 +101,7 @@ gimp_operation_cage_transform_class_init (GimpOperationCageTransformClass *klass
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:cage-transform",
                                  "categories",  "transform",
-                                 "description", _("Convert a set of coefficient buffer to a coordinate buffer for the GIMP cage tool"),
+                                 "description", _("Convert a set of coefficient buffer to a coordinate buffer for the Clay cage tool"),
                                  NULL);
 
   operation_class->prepare                 = gimp_operation_cage_transform_prepare;

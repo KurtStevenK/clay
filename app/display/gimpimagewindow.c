@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1012,8 +1012,8 @@ gimp_image_window_window_state_event (GtkWidget           *widget,
       /* macOS has no cross-process transiency: so tell the plug-ins (see
          gimp_osx_display_callback() on gimpui.c). See: #16778 */
       [[NSDistributedNotificationCenter defaultCenter]
-        postNotificationName: (iconified ? @"GIMP-" GIMP_MUTEX_VERSION ".window-miniaturized"
-                                         : @"GIMP-" GIMP_MUTEX_VERSION ".window-deminiaturized")
+        postNotificationName: (iconified ? @"Clay-" GIMP_MUTEX_VERSION ".window-miniaturized"
+                                         : @"Clay-" GIMP_MUTEX_VERSION ".window-deminiaturized")
         object: [NSString stringWithFormat: @"%d", getpid ()]
         userInfo: nil
         deliverImmediately: YES];

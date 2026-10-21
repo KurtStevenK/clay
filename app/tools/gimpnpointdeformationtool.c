@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * gimpnpointdeformationtool.c
  * Copyright (C) 2013 Marek Dvoroznak <dvoromar@gmail.com>

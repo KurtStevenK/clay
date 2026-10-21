@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -94,7 +94,7 @@ void
 gimp_templates_save (Gimp *gimp)
 {
   const gchar *header =
-    "GIMP templaterc\n"
+    "Clay templaterc\n"
     "\n"
     "This file will be entirely rewritten each time you exit.";
   const gchar *footer =

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationcolormode.c
@@ -55,7 +55,7 @@ gimp_operation_hsl_color_legacy_class_init (GimpOperationHslColorLegacyClass *kl
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:hsl-color-legacy",
-                                 "description", "GIMP color mode operation",
+                                 "description", "Clay color mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_hsl_color_legacy_process;

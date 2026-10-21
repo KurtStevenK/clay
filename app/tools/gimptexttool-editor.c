@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GimpTextTool
@@ -1529,7 +1529,7 @@ gimp_text_tool_editor_dialog (GimpTextTool *text_tool)
     (&text_tool->editor_dialog,
      gimp_text_options_editor_new (parent, tool->tool_info->gimp, options,
                                    menus_get_global_menu_factory (tool->tool_info->gimp),
-                                   _("GIMP Text Editor"),
+                                   _("Clay Text Editor"),
                                    text_tool->proxy, text_tool->buffer,
                                    xres, yres));
 

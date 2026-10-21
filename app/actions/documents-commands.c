@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -296,7 +296,7 @@ documents_clear_cmd_callback (GimpAction *action,
           GtkRecentInfo *info = list->data;
 
           if (gtk_recent_info_has_application (info,
-                                               "GNU Image Manipulation Program"))
+                                               "Clay Image Beautification Program"))
             {
               gtk_recent_manager_remove_item (manager,
                                               gtk_recent_info_get_uri (info),

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * PNM reading and writing code Copyright (C) 1996 Erik Nygren
@@ -762,7 +762,7 @@ load_image (GFile   *file,
       CHECK_FOR_ERROR (pnminfo->xres <= 0, pnminfo->jmpbuf,
                        _("Invalid X resolution."));
       CHECK_FOR_ERROR (pnminfo->xres > GIMP_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
-                       _("Image width is larger than GIMP can handle."));
+                       _("Image width is larger than Clay can handle."));
 
       pnmscanner_gettoken (scan, buf, BUFLEN);
       CHECK_FOR_ERROR (pnmscanner_eof (scan), pnminfo->jmpbuf,
@@ -771,7 +771,7 @@ load_image (GFile   *file,
       CHECK_FOR_ERROR (pnminfo->yres <= 0, pnminfo->jmpbuf,
                        _("Invalid Y resolution."));
       CHECK_FOR_ERROR (pnminfo->yres > GIMP_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
-                       _("Image height is larger than GIMP can handle."));
+                       _("Image height is larger than Clay can handle."));
 
     }
 
@@ -936,7 +936,7 @@ process_pam_header (PNMScanner *scan,
     CHECK_FOR_ERROR (pnmscanner_eof (scan), pnminfo->jmpbuf,
                      _("PAM: Premature end of file."));
     CHECK_FOR_ERROR (pnminfo->xres > GIMP_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
-                     _("Image width is larger than GIMP can handle."));
+                     _("Image width is larger than Clay can handle."));
     CHECK_FOR_ERROR (pnminfo->xres <= 0, pnminfo->jmpbuf,
                      _("PAM: Invalid X resolution."));
     CHECK_FOR_ERROR (pnminfo->yres <= 0, pnminfo->jmpbuf,
@@ -1322,7 +1322,7 @@ create_pam_header (const gchar      **header_string,
   gint   yres     = gegl_buffer_get_height (buffer);
   gchar *tupltype = NULL;
 
-  comment = g_strdup_printf ("# Created by GIMP version %s PNM plug-in",
+  comment = g_strdup_printf ("# Created by Clay version %s PNM plug-in",
                              GIMP_VERSION);
   *saverow = pnmsaverow_raw;
 
@@ -1875,7 +1875,7 @@ export_image (GFile         *file,
   if (file_type != FILE_TYPE_PFM && file_type != FILE_TYPE_PAM)
     {
       /* write out comment string */
-      comment = g_strdup_printf("# Created by GIMP version %s PNM plug-in\n",
+      comment = g_strdup_printf("# Created by Clay version %s PNM plug-in\n",
                                 GIMP_VERSION);
 
       if (! output_write (output, comment, strlen (comment), error))

@@ -5,8 +5,24 @@ else
 endif
 
 
+if platform_windows
+  gimp_debug_tool_rc = windows.compile_resources(
+    gimp_plugins_rc,
+    args: [
+      rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', 'gimp-debug-tool' + exec_ver + '.exe'),
+      rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', 'gimp-debug-tool' + exec_ver),
+    ],
+    include_directories: [
+      rootInclude, appInclude,
+    ],
+  )
+else
+  gimp_debug_tool_rc = []
+endif
+
 gimp_debug_tool = executable('gimp-debug-tool' + exec_ver,
   'gimp-debug-tool.c',
+  gimp_debug_tool_rc,
   include_directories: rootInclude,
   dependencies: [
     fontconfig,

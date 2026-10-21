@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationadditionmode.c
@@ -50,7 +50,7 @@ gimp_operation_addition_legacy_class_init (GimpOperationAdditionLegacyClass *kla
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:addition-legacy",
-                                 "description", "GIMP addition mode operation",
+                                 "description", "Clay addition mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_addition_legacy_process;

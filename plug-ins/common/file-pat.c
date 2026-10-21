@@ -2,7 +2,7 @@
  * pat plug-in version 1.01
  * Loads/exports version 1 GIMP .pat files, by Tim Newsome <drz@frody.bloke.com>
  *
- * GIMP - The GNU Image Manipulation Program
+ * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -109,12 +109,12 @@ pat_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("GIMP pattern"));
+      gimp_procedure_set_menu_label (procedure, _("Clay pattern"));
       gimp_procedure_set_icon_name (procedure, GIMP_ICON_PATTERN);
 
       gimp_procedure_set_documentation (procedure,
-                                        _("Exports GIMP pattern file (.PAT)"),
-                                        _("New GIMP patterns can be created "
+                                        _("Exports Clay pattern file (.PAT)"),
+                                        _("New Clay patterns can be created "
                                           "by exporting them in the "
                                           "appropriate place with this plug-in."),
                                         EXPORT_PROC);
@@ -142,7 +142,7 @@ pat_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_add_string_argument (procedure, "description",
                                           _("_Description"),
                                           _("Short description of the pattern"),
-                                          _("GIMP Pattern"),
+                                          _("Clay Pattern"),
                                           GIMP_PARAM_READWRITE);
     }
 

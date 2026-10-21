@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GIMP PSD Plug-in
@@ -331,7 +331,7 @@ load_image (GFile        *file,
   gimp_progress_update (0.5);
 
   /* ----- Create GIMP image ----- */
-  IFDBG(2) g_debug ("Create GIMP image");
+  IFDBG(2) g_debug ("Create Clay image");
   image = create_gimp_image (&img_a, file);
   if (! image)
     goto load_error;
@@ -5688,7 +5688,7 @@ add_clipping_group (GimpImage  *image,
    * composition mode in a different manner than PS. */
   IFDBG(2) g_debug ("Creating a layer group to handle PS transparency clipping correctly.");
 
-  clipping_group = GIMP_LAYER (gimp_group_layer_new (image, "Group added by GIMP"));
+  clipping_group = GIMP_LAYER (gimp_group_layer_new (image, "Group added by Clay"));
 
   gimp_layer_set_blend_space (clipping_group, GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
   gimp_layer_set_composite_space (clipping_group, GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
@@ -6331,7 +6331,7 @@ load_dialog (const gchar *title,
                                             _("Compatibility Notice"),
                                             _("This PSD file contains features "
                                               "that\nare not yet fully supported "
-                                              "in GIMP:"));
+                                              "in Clay:"));
 
       title_label = gtk_label_new (NULL);
       gtk_label_set_markup (GTK_LABEL (title_label), title);

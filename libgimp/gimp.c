@@ -367,7 +367,7 @@ gimp_main (GType  plug_in_type,
     p_SetCurrentProcessExplicitAppUserModelID = (t_SetCurrentProcessExplicitAppUserModelID) GetProcAddress (GetModuleHandleW (L"shell32.dll"),
                                                                                                             "SetCurrentProcessExplicitAppUserModelID");
     if (p_SetCurrentProcessExplicitAppUserModelID)
-      (*p_SetCurrentProcessExplicitAppUserModelID) (L"gimp.GimpApplication");
+      (*p_SetCurrentProcessExplicitAppUserModelID) (L"clay.ClayApplication");
   }
 
   /* Check for exe file name with spaces in the path having been split up
@@ -425,7 +425,7 @@ gimp_main (GType  plug_in_type,
 
   if ((argc != N_ARGS) || (strcmp (argv[ARG_GIMP], "-gimp") != 0))
     {
-      g_printerr ("%s is a GIMP plug-in and must be run by GIMP to be used\n",
+      g_printerr ("%s is a Clay plug-in and must be run by Clay to be used\n",
                   argv[ARG_PROGNAME]);
       return EXIT_FAILURE;
     }
@@ -443,7 +443,7 @@ gimp_main (GType  plug_in_type,
   if (protocol_version < GIMP_PROTOCOL_VERSION)
     {
       g_printerr ("Could not execute plug-in \"%s\"\n(%s)\n"
-                  "because GIMP is using an older version of the "
+                  "because Clay is using an older version of the "
                   "plug-in protocol.\n",
                   gimp_filename_to_utf8 (g_get_prgname ()),
                   gimp_filename_to_utf8 (progname));

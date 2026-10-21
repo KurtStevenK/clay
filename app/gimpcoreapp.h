@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Peter Mattis and Spencer Kimball
  *
  * gimpcoreapp.h
@@ -17,7 +17,7 @@
 #pragma once
 
 
-#define GIMP_APPLICATION_ID "org.gimp.GIMP"
+#define GIMP_APPLICATION_ID "xyz.kainzmayer.ClayDesign"
 
 enum
 {

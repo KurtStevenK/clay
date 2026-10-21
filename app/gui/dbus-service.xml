@@ -2,7 +2,7 @@
 
 <node>
 
-  <interface name="org.gimp.GIMP.UI">
+  <interface name="xyz.kainzmayer.ClayDesign.UI">
 
     <method name="Open">
       <arg type="s" name="uri" direction="in" />

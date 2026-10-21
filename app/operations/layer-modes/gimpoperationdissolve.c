@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationdissolve.c
@@ -60,7 +60,7 @@ gimp_operation_dissolve_class_init (GimpOperationDissolveClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:dissolve",
-                                 "description", "GIMP dissolve mode operation",
+                                 "description", "Clay dissolve mode operation",
                                  "categories",  "compositors",
                                  NULL);
 

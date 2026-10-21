@@ -1,6 +1,6 @@
 #!/usr/bin/env gjs
 
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * hello-world.js

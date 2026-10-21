@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  * SUN raster reading and writing code Copyright (C) 1996 Peter Kirchgessner
  * (email: peter@kirchgessner.net, WWW: http://www.kirchgessner.net)
@@ -460,7 +460,7 @@ load_image (GFile   *file,
   if (sunhdr.l_ras_maplength > (256 * 3))
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   "Map lengths greater than 256 entries are unsupported by GIMP.");
+                   "Map lengths greater than 256 entries are unsupported by Clay.");
       fclose (ifp);
       return NULL;
     }
@@ -507,7 +507,7 @@ load_image (GFile   *file,
 
   if (sunhdr.l_ras_width > GIMP_MAX_IMAGE_SIZE)
     {
-      g_message (_("'%s':\nImage width is larger than GIMP can handle"),
+      g_message (_("'%s':\nImage width is larger than Clay can handle"),
                  gimp_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
@@ -523,7 +523,7 @@ load_image (GFile   *file,
 
   if (sunhdr.l_ras_height > GIMP_MAX_IMAGE_SIZE)
     {
-      g_message (_("'%s':\nImage height is larger than GIMP can handle"),
+      g_message (_("'%s':\nImage height is larger than Clay can handle"),
                  gimp_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
@@ -1017,7 +1017,7 @@ set_color_table (GimpImage       *image,
     }
 
 #ifdef DEBUG
-  printf ("Set GIMP colortable:\n");
+  printf ("Set Clay colortable:\n");
   for (j = 0; j < ncols; j++)
     printf ("%3d: 0x%02x 0x%02x 0x%02x\n", j,
             ColorMap[j*3], ColorMap[j*3+1], ColorMap[j*3+2]);

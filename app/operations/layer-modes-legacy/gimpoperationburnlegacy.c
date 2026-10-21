@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationburnmode.c
@@ -50,7 +50,7 @@ gimp_operation_burn_legacy_class_init (GimpOperationBurnLegacyClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:burn-legacy",
-                                 "description", "GIMP burn mode operation",
+                                 "description", "Clay burn mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_burn_legacy_process;

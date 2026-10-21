@@ -1,6 +1,6 @@
 project('gimp',
   'c', 'cpp',
-  version: '3.3.1',
+  version: '3.36.0',
   meson_version: '>=0.61.0',
   default_options: [
     #'c_std=none', # c11 breaks Linux/GNU, gnu11 breaks Windows/MSVC, so set to none
@@ -19,8 +19,8 @@ warnings = []
 ################################################################################
 # Project info
 
-prettyname = 'GIMP'
-full_name  = 'GNU Image Manipulation Program'
+prettyname = 'Clay'
+full_name  = 'Clay Image Beautification Program'
 
 # General version
 gimp_version = meson.project_version()
@@ -80,15 +80,15 @@ so_version = '@0@.@1@.@2@'.format(lt_current - lt_age, lt_age, lt_revision)
 darwin_versions = [lt_current + 1, '@0@.@1@'.format(lt_current + 1, lt_revision)]
 
 
-gimp_command  = 'gimp-' + gimp_app_version
+gimp_command  = 'clay-' + gimp_app_version
 
 exec_ver  = '-' + gimp_app_version
 
-gimpconsole_exe_name = 'gimp-console' + exec_ver
-gimpmain_exe_name    = 'gimp' + exec_ver
+gimpconsole_exe_name = 'clay-console' + exec_ver
+gimpmain_exe_name    = 'clay' + exec_ver
 
 # A specific desktop name to fix window icon under Wayland
-gimp_desktop_name = 'gimp'
+gimp_desktop_name = 'xyz.kainzmayer.ClayDesign'
 
 gettext_package= 'gimp@0@@1@'.format(api_version_major, api_version_minor)
 conf.set_quoted('GETTEXT_PACKAGE', gettext_package)
@@ -108,19 +108,9 @@ conf.set('GIMP_RC_VERSION', release and gimp_app_version_rc > 0 ? gimp_app_versi
 # GIMP_IS_GIT can only be set during development of a RC.
 conf.set('GIMP_IS_RC_GIT', gimp_rc_git ? 1 : false)
 
-# Mutex version
-if not stable and gimp_app_version_rc <= 0
-  gimp_mutex_version = gimp_app_version
-elif gimp_app_version_rc > 0
-  # same as unstable gimp_app_version. See: https://gitlab.gnome.org/GNOME/gimp/-/issues/15341
-  if gimp_app_version_minor == 0
-    gimp_mutex_version = (gimp_app_version_major - 1).to_string() + '.' + '99'
-  else
-    gimp_mutex_version = gimp_app_version_major.to_string() + '.' + (gimp_app_version_minor - 1).to_string()
-  endif
-else
-  gimp_mutex_version = gimp_app_version_major.to_string()
-endif
+# Clay keeps its own single-instance lock on every release. Upstream uses
+# only the major version for stable releases, which is the same lock as GIMP 3.
+gimp_mutex_version = gimp_app_version
 conf.set_quoted('GIMP_MUTEX_VERSION', gimp_mutex_version)
 
 versionconfig = configuration_data()
@@ -1691,8 +1681,8 @@ conf.set_quoted('GIMP_PKGCONFIG_VERSION', gimp_api_version)
 # Possibly change default gimpdir from $XDG_CONFIG_HOME/GIMP/gimp_user_version
 gimpdir = get_option('gimpdir')
 if gimpdir == ''
-  # Default value
-  gimpdir = meson.project_name().to_upper()
+  # Clay settings stay out of the official GIMP profile directory.
+  gimpdir = 'Clay'
 endif
 
 project_subdir = meson.project_name() / gimp_api_version

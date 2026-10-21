@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GimpGuiConfig class
@@ -50,6 +50,7 @@ struct _GimpGuiConfig
   gboolean             save_session_info;
   gboolean             restore_session;
   gboolean             restore_monitor;
+  gint                 startup_monitor;
   gboolean             save_tool_options;
   gboolean             save_accels;
   gboolean             restore_accels;

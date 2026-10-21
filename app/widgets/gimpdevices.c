@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -131,7 +131,7 @@ gimp_devices_save (Gimp     *gimp,
 
   if (! gimp_config_serialize_to_file (GIMP_CONFIG (manager),
                                        file,
-                                       "GIMP devicerc",
+                                       "Clay devicerc",
                                        "end of devicerc",
                                        NULL,
                                        &error))

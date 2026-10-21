@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationsplit.c
@@ -50,7 +50,7 @@ gimp_operation_split_class_init (GimpOperationSplitClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:split",
-                                 "description", "GIMP split mode operation",
+                                 "description", "Clay split mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_split_process;

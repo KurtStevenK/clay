@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationscreenlegacy.c
@@ -50,7 +50,7 @@ gimp_operation_screen_legacy_class_init (GimpOperationScreenLegacyClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:screen-legacy",
-                                 "description", "GIMP screen mode operation",
+                                 "description", "Clay screen mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_screen_legacy_process;

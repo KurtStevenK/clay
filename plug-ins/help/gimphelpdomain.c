@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * The GIMP Help plug-in
@@ -183,7 +183,7 @@ gimp_help_domain_map (GimpHelpDomain    *domain,
               else
                 {
                   g_message ("%s\n\n%s",
-                             _("The GIMP user manual is not available."),
+                             _("The Clay user manual is not available."),
                              /* TRANSLATORS: do not end the URL with a dot,
                               * it would be in the link. Because of
                               * technical limitations, make sure the URL

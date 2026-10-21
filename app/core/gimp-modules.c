@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpmodules.c
@@ -196,7 +196,7 @@ gimp_modules_unload (Gimp *gimp)
 
       writer = gimp_config_writer_new_from_file (file,
                                                  TRUE,
-                                                 "GIMP modulerc",
+                                                 "Clay modulerc",
                                                  &error);
       g_object_unref (file);
 

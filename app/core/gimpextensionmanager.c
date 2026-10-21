@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-2002 Spencer Kimball, Peter Mattis, and others
  *
  * gimpextensionmanager.c
@@ -689,7 +689,7 @@ gimp_extension_manager_exit (GimpExtensionManager *manager)
 
   if (! gimp_config_serialize_to_file (GIMP_CONFIG (manager),
                                        file,
-                                       "GIMP extensionrc",
+                                       "Clay extensionrc",
                                        "end of extensionrc",
                                        NULL,
                                        &error))

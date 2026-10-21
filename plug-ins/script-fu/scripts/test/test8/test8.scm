@@ -16,7 +16,7 @@
 ; A PDB procedure is created.
 ; When invoked from Test>Test SF interpreter 8"
 ; the interpreter enters an infinite loop.
-; There is no harm to the GIMP app, but the interpreter process can only be killed.
+; There is no harm to the Clay app, but the interpreter process can only be killed.
 ; During the run phase, the "(define foo)"
 ; should re-define an existing definition in the interpreter state.
 ; Instead, since the name is mismatched,

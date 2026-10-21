@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -110,7 +110,7 @@ gimp_pattern_load (GimpContext   *context,
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Unsupported pattern depth %d.\n"
-                     "GIMP Patterns must be GRAY or RGB."),
+                     "Clay Patterns must be GRAY or RGB."),
                    header.bytes);
       goto error;
     }

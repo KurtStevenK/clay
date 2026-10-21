@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationfillsource.c
@@ -87,7 +87,7 @@ gimp_operation_fill_source_class_init (GimpOperationFillSourceClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:fill-source",
                                  "categories",  "gimp",
-                                 "description", "GIMP Fill Source operation",
+                                 "description", "Clay Fill Source operation",
                                  NULL);
 
   g_object_class_install_property (object_class, PROP_OPTIONS,

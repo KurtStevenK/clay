@@ -9,7 +9,7 @@ desktop_conf.set('MIME_TYPES',        'image/x-xcf;' + MIMEtypes_dep.get_variabl
 desktop_conf.set('BUG_REPORT_URL',    bug_report_url)
 
 desktopfilein = configure_file(
-  input : desktopfilename+'.in.in',
+  input : 'gimp.desktop.in.in',
   output: desktopfilename+'.in',
   configuration: desktop_conf,
 )
@@ -23,9 +23,9 @@ desktopfile = i18n.merge_file(
   install_dir: get_option('datadir') / 'applications',
 )
 
-appdatafilename = 'org.gimp.GIMP.appdata.xml'
+appdatafilename = 'xyz.kainzmayer.ClayDesign.appdata.xml'
 appdatafilein = configure_file(
-  input : appdatafilename+'.in.in',
+  input : 'org.gimp.GIMP.appdata.xml.in.in',
   output: appdatafilename+'.in',
   configuration: desktop_conf,
 )

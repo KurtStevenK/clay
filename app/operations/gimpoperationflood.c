@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationflood.c
@@ -237,7 +237,7 @@ gimp_operation_flood_class_init (GimpOperationFloodClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:flood",
                                  "categories",  "gimp",
-                                 "description", "GIMP Flood operation",
+                                 "description", "Clay Flood operation",
                                  "reference", "https://wiki.gimp.org/wiki/Algorithms:Flood",
                                  "reference-image", "flood-output.png",
                                  "reference-composition", reference_xml,

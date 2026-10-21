@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpmenu_model.c
@@ -828,13 +828,13 @@ gimp_menu_model_initialize (GimpMenuModel *model,
 
 #ifdef PLATFORM_OSX
               /* on macOS, entries flagged with "hidden-when" == "macos-menubar"
-                 are relocated to the "GIMP" Mac menu. See: #9877 */
+                 are relocated to the "Clay" Mac menu. See: #9877 */
               gchar *hidden_when = NULL;
 
               if (g_menu_item_get_attribute (item, "hidden-when", "s", &hidden_when) &&
                   g_strcmp0 (hidden_when, "macos-menubar") == 0)
                 {
-                  menu_path = g_strdup_printf ("/GIMP/%s",
+                  menu_path = g_strdup_printf ("/Clay/%s",
                                                gimp_action_get_short_label (action));
                 }
               g_free (hidden_when);

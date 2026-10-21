@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationgrow.c
@@ -84,7 +84,7 @@ gimp_operation_grow_class_init (GimpOperationGrowClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:grow",
                                  "categories",  "gimp",
-                                 "description", "GIMP Grow operation",
+                                 "description", "Clay Grow operation",
                                  NULL);
 
   operation_class->prepare                 = gimp_operation_grow_prepare;

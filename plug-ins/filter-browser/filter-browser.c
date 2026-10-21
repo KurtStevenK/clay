@@ -859,7 +859,7 @@ filter_browser_create_procedure (GimpPlugIn  *plug_in,
                                       " their details and what parameters they"
                                       " are configured with. The list contains"
                                       " operations provided by GEGL itself,"
-                                      " GIMP and plug-ins loaded by GEGL."),
+                                      " Clay and plug-ins loaded by GEGL."),
                                     PLUG_IN_GEGL_FILTER_BROWSER);
   gimp_procedure_set_attribution (procedure, "Ondřej Míchal", "Ondřej Míchal", "2025");
 

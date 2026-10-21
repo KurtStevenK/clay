@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GTM plug-in --- GIMP Table Magic
@@ -155,9 +155,9 @@ html_create_procedure (GimpPlugIn  *plug_in,
                                            _("HTML Table"));
 
       gimp_procedure_set_documentation (procedure,
-                                        _("GIMP Table Magic"),
+                                        _("Clay Table Magic"),
                                         _("Allows you to draw an HTML table "
-                                          "in GIMP. See help for more info."),
+                                          "in Clay. See help for more info."),
                                         name);
       gimp_procedure_set_attribution (procedure,
                                       "Daniel Dunbar",
@@ -186,7 +186,7 @@ html_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_add_string_aux_argument (procedure, "caption-text",
                                               _("Capt_ion"),
                                               _("The text for the table caption."),
-                                              "Made with GIMP Table Magic",
+                                              "Made with Clay Table Magic",
                                               GIMP_PARAM_READWRITE);
 
       gimp_procedure_add_string_aux_argument (procedure, "cell-content",
@@ -211,7 +211,7 @@ html_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_add_boolean_aux_argument (procedure, "full-document",
                                                _("_Generate full HTML document"),
-                                               _("If enabled GIMP Table Magic will output a full HTML "
+                                               _("If enabled Clay Table Magic will output a full HTML "
                                                  "document with <HTML>, <BODY>, etc. tags "
                                                  "instead of just the table html."),
                                                TRUE,
@@ -225,7 +225,7 @@ html_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_add_boolean_aux_argument (procedure, "span-tags",
                                                _("_Use cellspan"),
-                                               _("If enabled GIMP Table Magic will replace any "
+                                               _("If enabled Clay Table Magic will replace any "
                                                  "rectangular sections of identically "
                                                  "colored blocks with one large cell with "
                                                  "ROWSPAN and COLSPAN values."),
@@ -234,7 +234,7 @@ html_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_add_boolean_aux_argument (procedure, "compress-td-tags",
                                                _("Co_mpress TD tags"),
-                                               _("Enabling this will cause GIMP Table Magic to "
+                                               _("Enabling this will cause Clay Table Magic to "
                                                  "leave no whitespace between the TD "
                                                  "tags and the cell content. This is only "
                                                  "necessary for pixel level positioning "

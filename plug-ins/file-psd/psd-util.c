@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GIMP PSD Plug-in
@@ -2374,7 +2374,7 @@ convert_psd_mode (const gchar   *psd_mode,
         {
           if (! layer_mode_map[i].exact && CONVERSION_WARNINGS)
             {
-              g_message ("GIMP uses a different equation than Photoshop for "
+              g_message ("Clay uses a different equation than Photoshop for "
                          "blend mode: %s. Results will differ.",
                          layer_mode_map[i].name);
             }
@@ -2399,7 +2399,7 @@ convert_psd_effect_mode (const gchar   *psd_mode,
         {
           if (! descriptor_mode_map[i].exact && CONVERSION_WARNINGS)
             {
-              g_message ("GIMP uses a different equation than Photoshop for "
+              g_message ("Clay uses a different equation than Photoshop for "
                          "blend mode: %s. Results will differ.",
                          descriptor_mode_map[i].name);
             }
@@ -2457,7 +2457,7 @@ gimp_to_psd_blend_mode (const LayerModeInfo *mode_info)
         {
           if (! layer_mode_map[i].exact && CONVERSION_WARNINGS)
             {
-              g_message ("GIMP uses a different equation than Photoshop for "
+              g_message ("Clay uses a different equation than Photoshop for "
                          "blend mode: %s. Results may differ.",
                          get_enum_value_nick (GIMP_TYPE_LAYER_MODE,
                                               mode_info->mode));
@@ -2511,7 +2511,7 @@ psd_to_gimp_layer_color_tag (guint16 layer_color_tag)
 
     default:
       if (CONVERSION_WARNINGS)
-        g_message ("Unsupported Photoshop layer color tag: %i. GIMP layer color tag set to none.",
+        g_message ("Unsupported Photoshop layer color tag: %i. Clay layer color tag set to none.",
                        layer_color_tag);
       colorTag = GIMP_COLOR_TAG_NONE;
     }
@@ -2556,7 +2556,7 @@ gimp_to_psd_layer_color_tag (GimpColorTag layer_color_tag)
 
     default:
       if (CONVERSION_WARNINGS)
-        g_message ("Photoshop doesn't support GIMP layer color tag: %i. Photoshop layer color tag set to none.",
+        g_message ("Photoshop doesn't support Clay layer color tag: %i. Photoshop layer color tag set to none.",
                    layer_color_tag);
 
       color_tag = 0;

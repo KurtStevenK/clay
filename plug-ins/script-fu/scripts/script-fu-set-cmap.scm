@@ -6,7 +6,7 @@
 ; returns a GBytes containing the colors from a specified palette.
 ; This array can be used as the cmap argument for gimp-image-set-colormap.
 
-; GIMP - The GNU Image Manipulation Program
+; xyz.kainzmayer.ClayDesign
 ; Copyright (C) 1995 Spencer Kimball and Peter Mattis
 ;
 ; This program is free software: you can redistribute it and/or modify

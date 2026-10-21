@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  * PostScript file plugin
  * PostScript writing and GhostScript interfacing code
@@ -2483,7 +2483,7 @@ save_ps_header (GOutputStream  *output,
     goto fail;
 
   if (! print (output, error,
-               "%%%%Creator: GIMP PostScript file plug-in V %4.2f "
+               "%%%%Creator: Clay PostScript file plug-in V %4.2f "
                "by Peter Kirchgessner\n", VERSION))
     goto fail;
 

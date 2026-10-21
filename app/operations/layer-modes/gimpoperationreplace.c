@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationreplace.c
@@ -62,7 +62,7 @@ gimp_operation_replace_class_init (GimpOperationReplaceClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:replace",
-                                 "description", "GIMP replace mode operation",
+                                 "description", "Clay replace mode operation",
                                  NULL);
 
   operation_class->get_bounding_box     = gimp_operation_replace_get_bounding_box;

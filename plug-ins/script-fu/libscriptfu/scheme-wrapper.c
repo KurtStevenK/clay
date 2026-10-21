@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -706,7 +706,7 @@ ts_load_init_and_compatibility_scripts (GList *paths)
            */
           (void) ts_load_file (dir, "script-fu-compat.scm");
 
-          /* Improve compatibility with older GIMP version,
+          /* Improve compatibility with older Clay version,
            * load definitions that alias/adapt older PDB procedures or plugins.
            */
           (void) ts_load_file (dir, "plug-in-compat.scm");

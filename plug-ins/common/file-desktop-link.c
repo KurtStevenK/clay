@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -117,7 +117,7 @@ desktop_create_procedure (GimpPlugIn  *plug_in,
                                         "Follows a link to an image in a "
                                         ".desktop file",
                                         "Opens a .desktop file and if it is "
-                                        "a link, it asks GIMP to open the "
+                                        "a link, it asks Clay to open the "
                                         "file the link points to.",
                                         LOAD_PROC);
 

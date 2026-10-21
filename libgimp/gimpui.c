@@ -82,7 +82,7 @@ static void        gimp_osx_display_callback       (CFNotificationCenterRef  cen
                                                     CFDictionaryRef          user_info)
 {
   /* sent by the GIMP main process, see gimp_image_window_window_state_event() */
-  if (CFStringCompare (name, CFSTR ("GIMP-" GIMP_MUTEX_VERSION ".window-miniaturized"), 0) == kCFCompareEqualTo)
+  if (CFStringCompare (name, CFSTR ("Clay-" GIMP_MUTEX_VERSION ".window-miniaturized"), 0) == kCFCompareEqualTo)
     {
       for (NSWindow *win in [NSApp windows])
         [win orderOut:nil];
@@ -766,13 +766,13 @@ gimp_window_transient_on_mapped (GtkWidget   *window,
           CFNotificationCenterAddObserver (CFNotificationCenterGetDistributedCenter (),
                                            &gimp_app_observer,
                                            gimp_osx_display_callback,
-                                           CFSTR ("GIMP-" GIMP_MUTEX_VERSION ".window-miniaturized"),
+                                           CFSTR ("Clay-" GIMP_MUTEX_VERSION ".window-miniaturized"),
                                            gimp_pid_str,
                                            CFNotificationSuspensionBehaviorDeliverImmediately);
           CFNotificationCenterAddObserver (CFNotificationCenterGetDistributedCenter (),
                                            &gimp_app_observer,
                                            gimp_osx_display_callback,
-                                           CFSTR ("GIMP-" GIMP_MUTEX_VERSION ".window-deminiaturized"),
+                                           CFSTR ("Clay-" GIMP_MUTEX_VERSION ".window-deminiaturized"),
                                            gimp_pid_str,
                                            CFNotificationSuspensionBehaviorDeliverImmediately);
           CFRelease (gimp_pid_str);

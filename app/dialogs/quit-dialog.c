@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * Copyright (C) 2004  Sven Neumann <sven@gimp.org>
@@ -139,7 +139,7 @@ quit_close_all_dialog_new (Gimp     *gimp,
   g_return_val_if_fail (private->images != NULL, NULL);
 
   private->dialog =
-    gimp_message_dialog_new (do_quit ? _("Quit GIMP") : _("Close All Images"),
+    gimp_message_dialog_new (do_quit ? _("Quit Clay") : _("Close All Images"),
                              GIMP_ICON_DIALOG_WARNING,
                              NULL, 0,
                              gimp_standard_help_func,
@@ -217,7 +217,7 @@ quit_close_all_dialog_new (Gimp     *gimp,
                     private);
 
   if (do_quit)
-    private->lost_label = gtk_label_new (_("If you quit GIMP now, "
+    private->lost_label = gtk_label_new (_("If you quit Clay now, "
                                            "these changes will be lost."));
   else
     private->lost_label = gtk_label_new (_("If you close these images now, "

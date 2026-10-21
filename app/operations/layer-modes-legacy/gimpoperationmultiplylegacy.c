@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationmultiplylegacy.c
@@ -50,7 +50,7 @@ gimp_operation_multiply_legacy_class_init (GimpOperationMultiplyLegacyClass *kla
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:multiply-legacy",
-                                 "description", "GIMP multiply legacy operation",
+                                 "description", "Clay multiply legacy operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_multiply_legacy_process;

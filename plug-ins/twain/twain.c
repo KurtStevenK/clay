@@ -325,13 +325,13 @@ getAppIdentity (void)
   appIdentity->Version.MinorNum = 1;
   appIdentity->Version.Language = TWLG_USA;
   appIdentity->Version.Country = TWCY_USA;
-  strcpy(appIdentity->Version.Info, "GIMP TWAIN 0.6");
+  strcpy(appIdentity->Version.Info, "Clay TWAIN 0.6");
   appIdentity->ProtocolMajor = TWON_PROTOCOLMAJOR;
   appIdentity->ProtocolMinor = TWON_PROTOCOLMINOR;
   appIdentity->SupportedGroups = DG_IMAGE;
   strcpy(appIdentity->Manufacturer, "Craig Setera");
-  strcpy(appIdentity->ProductFamily, "GIMP");
-  strcpy(appIdentity->ProductName, "GIMP");
+  strcpy(appIdentity->ProductFamily, "Clay");
+  strcpy(appIdentity->ProductName, "Clay");
 
   return appIdentity;
 }

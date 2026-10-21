@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * file-raw-placeholder.c -- raw file format plug-in that does nothing
@@ -175,7 +175,7 @@ placeholder_load (GimpProcedure         *procedure,
   g_set_error (&error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                _("There is no RAW loader installed to open '%s' files.\n"
                  "\n"
-                 "GIMP currently supports these RAW loaders:\n"
+                 "Clay currently supports these RAW loaders:\n"
                  "- darktable (https://www.darktable.org/), at least 5.6\n"
                  "- RawTherapee (https://rawtherapee.com/), at least 5.2\n"
                  "- ART (https://artraweditor.github.io/)\n"

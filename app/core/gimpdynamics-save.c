@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ gimp_dynamics_save (GimpData       *data,
 
   return gimp_config_serialize_to_stream (GIMP_CONFIG (data),
                                           output,
-                                          "GIMP dynamics file",
-                                          "end of GIMP dynamics file",
+                                          "Clay dynamics file",
+                                          "end of Clay dynamics file",
                                           NULL, error);
 }

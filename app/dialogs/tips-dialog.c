@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -85,11 +85,11 @@ tips_dialog_create (Gimp *gimp)
 
           if (! error)
             {
-              tip = gimp_tip_new (_("The GIMP tips file is empty!"), NULL);
+              tip = gimp_tip_new (_("The Clay tips file is empty!"), NULL);
             }
           else if (error->code == G_FILE_ERROR_NOENT)
             {
-              tip = gimp_tip_new (_("The GIMP tips file appears to be "
+              tip = gimp_tip_new (_("The Clay tips file appears to be "
                                     "missing!"),
                                   _("There should be a file called '%s'. "
                                     "Please check your installation."),
@@ -97,7 +97,7 @@ tips_dialog_create (Gimp *gimp)
             }
           else
             {
-              tip = gimp_tip_new (_("The GIMP tips file could not be parsed!"),
+              tip = gimp_tip_new (_("The Clay tips file could not be parsed!"),
                                   "%s", error->message);
             }
 
@@ -125,7 +125,7 @@ tips_dialog_create (Gimp *gimp)
   if (tips_dialog)
     return tips_dialog;
 
-  tips_dialog = gimp_dialog_new (_("GIMP Tip of the Day"),
+  tips_dialog = gimp_dialog_new (_("Clay Tip of the Day"),
                                  "gimp-tip-of-the-day",
                                  NULL, 0, gimp_standard_help_func,
                                  GIMP_HELP_TIPS_DIALOG,

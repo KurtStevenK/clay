@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpbrush-load.c
@@ -427,7 +427,7 @@ gimp_brush_load_brush (GimpContext   *context,
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
                    _("Fatal parse error in brush file:\n"
                      "Unsupported brush depth %d\n"
-                     "GIMP brushes must be GRAY or RGBA."),
+                     "Clay brushes must be GRAY or RGBA."),
                    header.bytes);
       return NULL;
     }

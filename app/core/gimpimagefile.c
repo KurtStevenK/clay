@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpimagefile.c
@@ -579,7 +579,7 @@ gimp_imagefile_create_thumbnail (GimpImagefile  *imagefile,
            * thumbnail saving.
            */
           gimp_thumbnail_save_failure (thumbnail,
-                                       "GIMP " GIMP_VERSION,
+                                       "Clay " GIMP_VERSION,
                                        error && *error ? NULL : error);
           gimp_imagefile_update (imagefile);
           success = FALSE;
@@ -1126,7 +1126,7 @@ gimp_imagefile_save_thumb (GimpImagefile  *imagefile,
 
   success = gimp_thumbnail_save_thumb (thumbnail,
                                        pixbuf,
-                                       "GIMP " GIMP_VERSION,
+                                       "Clay " GIMP_VERSION,
                                        error);
 
   g_object_unref (pixbuf);

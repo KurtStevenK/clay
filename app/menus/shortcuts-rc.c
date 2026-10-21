@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * shortcuts-rc.c
@@ -170,7 +170,7 @@ shortcuts_rc_write (GtkApplication  *application,
 
   writer = gimp_config_writer_new_from_file (file,
                                              FALSE,
-                                             "GIMP shortcutsrc\n\n"
+                                             "Clay shortcutsrc\n\n"
                                              "If you delete this file, all shortcuts "
                                              "will be reset to defaults.",
                                              error);

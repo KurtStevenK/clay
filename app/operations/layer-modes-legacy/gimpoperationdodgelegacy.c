@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationdodgelegacy.c
@@ -52,7 +52,7 @@ gimp_operation_dodge_legacy_class_init (GimpOperationDodgeLegacyClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:dodge-legacy",
-                                 "description", "GIMP dodge mode operation",
+                                 "description", "Clay dodge mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_dodge_legacy_process;

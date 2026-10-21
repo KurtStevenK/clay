@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -122,13 +122,13 @@ gbr_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("GIMP brush"));
+      gimp_procedure_set_menu_label (procedure, _("Clay brush"));
       gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
                                            _("Brush"));
       gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
 
       gimp_procedure_set_documentation (procedure,
-                                        _("Exports files in the GIMP brush "
+                                        _("Exports files in the Clay brush "
                                           "file format"),
                                         NULL, EXPORT_PROC);
       gimp_procedure_set_attribution (procedure,
@@ -161,7 +161,7 @@ gbr_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_add_string_argument (procedure, "description",
                                           _("_Description"),
                                           _("Short description of the brush"),
-                                          _("GIMP Brush"),
+                                          _("Clay Brush"),
                                           GIMP_PARAM_READWRITE);
     }
 

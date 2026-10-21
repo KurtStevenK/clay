@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1999 Spencer Kimball and Peter Mattis
  *
  * gimp-contexts.c
@@ -123,7 +123,7 @@ gimp_contexts_save (Gimp    *gimp,
 
   success = gimp_config_serialize_to_file (GIMP_CONFIG (gimp_get_user_context (gimp)),
                                            file,
-                                           "GIMP user context",
+                                           "Clay user context",
                                            "end of user context",
                                            NULL, error);
 

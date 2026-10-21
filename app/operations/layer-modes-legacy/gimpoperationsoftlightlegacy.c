@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationsoftlightmode.c
@@ -67,7 +67,7 @@ gimp_operation_softlight_legacy_class_init (GimpOperationSoftlightLegacyClass *k
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:softlight-legacy",
-                                 "description", "GIMP softlight mode operation",
+                                 "description", "Clay softlight mode operation",
                                  "reference-image", "soft-light-mode.png",
                                  "reference-composition", reference_xml,
                                  NULL);

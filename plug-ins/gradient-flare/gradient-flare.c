@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GFlare plug-in -- lense flare effect by using custom gradients
@@ -23,7 +23,7 @@
  * Editor copyrighted by Federico Mena Quintero. (See copyright notice
  * below) Thanks for senior GIMP hackers!!
  *
- * GIMP - The GNU Image Manipulation Program
+ * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * Gradient editor module copyight (C) 1996-1997 Federico Mena Quintero
@@ -71,7 +71,7 @@
 #define GRADIENT_RESOLUTION 360
 
 #define GFLARE_NAME_MAX     256
-#define GFLARE_FILE_HEADER  "GIMP GFlare 0.25"
+#define GFLARE_FILE_HEADER  "Clay GFlare 0.25"
 #define SFLARE_NUM           30
 
 #define DLG_PREVIEW_WIDTH   256
@@ -829,7 +829,7 @@ gflare_create_procedure (GimpPlugIn  *plug_in,
                                         name);
       gimp_procedure_set_attribution (procedure,
                                       "Eiichi Takamori",
-                                      "Eiichi Takamori, and a lot of GIMP people",
+                                      "Eiichi Takamori, and a lot of Clay people",
                                       "1997");
 
       gimp_procedure_add_string_argument (procedure, "gflare-name",

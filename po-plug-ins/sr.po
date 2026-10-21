@@ -157,7 +157,7 @@ msgstr "Пример прикључка у Јаваскрипту (GJS)"
 msgid "_OK"
 msgstr "_У реду"
 
-#. GIMP - The GNU Image Manipulation Program
+#. xyz.kainzmayer.ClayDesign
 #. Copyright (C) 1995 Spencer Kimball and Peter Mattis
 #.
 #. goat-exercise-lua.lua

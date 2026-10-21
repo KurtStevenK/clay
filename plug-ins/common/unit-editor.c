@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This is a plug-in for GIMP.
@@ -111,7 +111,7 @@ DEFINE_STD_SET_I18N
 static const UnitColumn columns[] =
 {
   { N_("Saved"),        N_("A unit definition will only be saved before "
-                           "GIMP exits if this column is checked.")         },
+                           "Clay exits if this column is checked.")         },
   { N_("Name"),         N_("The name to be used to identify this unit in "
                            "the graphical interface")                       },
   { N_("Factor"),       N_("How many units make up an inch.")               },
@@ -176,8 +176,8 @@ editor_create_procedure (GimpPlugIn  *plug_in,
 #endif
 
       gimp_procedure_set_documentation (procedure,
-                                        _("Create or alter units used in GIMP"),
-                                        "The GIMP unit editor",
+                                        _("Create or alter units used in Clay"),
+                                        "The Clay unit editor",
                                         name);
       gimp_procedure_set_attribution (procedure,
                                       "Michael Natterer <mitch@gimp.org>",

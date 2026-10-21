@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -67,10 +67,10 @@ gimp_gradient_load (GimpContext   *context,
   if (! line)
     goto failed;
 
-  if (! g_str_has_prefix (line, "GIMP Gradient"))
+  if (! g_str_has_prefix (line, "Clay Gradient"))
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
-                   _("Not a GIMP gradient file."));
+                   _("Not a Clay gradient file."));
       g_free (line);
       goto failed;
     }

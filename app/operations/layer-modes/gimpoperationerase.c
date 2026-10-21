@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationerase.c
@@ -50,7 +50,7 @@ gimp_operation_erase_class_init (GimpOperationEraseClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:erase",
-                                 "description", "GIMP erase mode operation",
+                                 "description", "Clay erase mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_erase_process;

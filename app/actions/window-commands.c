@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -86,7 +86,7 @@ window_open_display_cmd_callback (GimpAction *action,
 
   gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
                                      _("Experimental multi-display stuff!\n"
-                                     "Click OK and have fun crashing GIMP..."));
+                                     "Click OK and have fun crashing Clay..."));
 
   gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
                              _("Please enter the name of the new display:"));

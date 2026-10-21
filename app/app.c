@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -568,10 +568,10 @@ app_activate_callback (GimpCoreApp *app,
                 /* TRANSLATORS: title for info message in terminal window */
                 _("INFO"),
                 /* TRANSLATORS: info message displayed in terminal window. */
-                _("GIMP is now running as a background process. "
+                _("Clay is now running as a background process. "
                   "You can quit anytime with Ctrl-C (SIGINT)."),
                 /* TRANSLATORS: info message displayed in terminal window. */
-                _("If you wanted to quit immediately instead, call GIMP with --quit."));
+                _("If you wanted to quit immediately instead, call Clay with --quit."));
       g_application_hold (G_APPLICATION (app));
     }
 }

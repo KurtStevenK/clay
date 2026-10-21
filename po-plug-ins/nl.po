@@ -156,7 +156,7 @@ msgstr "Plug-in voorbeeld in Javascript (GJS)"
 msgid "_OK"
 msgstr "_Oké"
 
-#. GIMP - The GNU Image Manipulation Program
+#. xyz.kainzmayer.ClayDesign
 #. Copyright (C) 1995 Spencer Kimball and Peter Mattis
 #.
 #. goat-exercise-lua.lua

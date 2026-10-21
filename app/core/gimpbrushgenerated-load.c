@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimp_brush_generated module Copyright 1998 Jay Cox <jaycox@earthlink.net>
@@ -70,10 +70,10 @@ gimp_brush_generated_load (GimpContext   *context,
   if (! string)
     goto failed;
 
-  if (! g_str_has_prefix (string, "GIMP-VBR"))
+  if (! g_str_has_prefix (string, "Clay-VBR"))
     {
       g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
-                   _("Not a GIMP brush file."));
+                   _("Not a Clay brush file."));
       g_free (string);
       goto failed;
     }
@@ -93,7 +93,7 @@ gimp_brush_generated_load (GimpContext   *context,
       if (! g_str_has_prefix (string, "1.5"))
         {
           g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
-                       _("Unknown GIMP brush version."));
+                       _("Unknown Clay brush version."));
           g_free (string);
           goto failed;
         }
@@ -150,7 +150,7 @@ gimp_brush_generated_load (GimpContext   *context,
       if (! shape_val)
         {
           g_set_error (error, GIMP_DATA_ERROR, GIMP_DATA_ERROR_READ,
-                       _("Unknown GIMP brush shape."));
+                       _("Unknown Clay brush shape."));
           g_free (string);
           goto failed;
         }

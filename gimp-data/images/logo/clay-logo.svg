@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Full-bleed mark: Windows applies its own rounded mask. -->
+  <rect width="256" height="256" fill="#1a1d2e"/>
+  <path
+     d="M190 70 A82 82 0 1 0 190 186"
+     fill="none"
+     stroke="#f4f4f2"
+     stroke-width="34"
+     stroke-linecap="round"/>
+</svg>

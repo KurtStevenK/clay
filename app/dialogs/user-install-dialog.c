@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * user-install-dialog.c
@@ -83,7 +83,7 @@ user_install_dialog_new (GimpUserInstall *install)
 
   gimp_icons_init ();
 
-  dialog = gimp_message_dialog_new (_("GIMP User Installation"),
+  dialog = gimp_message_dialog_new (_("Clay User Installation"),
                                     GIMP_ICON_WILBER_EEK,
                                     NULL, 0, NULL, NULL,
 
@@ -94,7 +94,7 @@ user_install_dialog_new (GimpUserInstall *install)
   gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
                                      _("User installation failed!"));
   gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
-                             _("The GIMP user installation failed; "
+                             _("The Clay user installation failed; "
                                "see the log for details."));
 
   frame = gimp_frame_new (_("Installation Log"));

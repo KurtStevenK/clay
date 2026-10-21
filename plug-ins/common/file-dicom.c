@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  * PNM reading and writing code Copyright (C) 1996 Erik Nygren
  *
@@ -565,9 +565,9 @@ load_image (GFile   *file,
                 }
               else
                 {
-                  g_debug ("Transfer syntax %s is not supported by GIMP.", (gchar *) value);
+                  g_debug ("Transfer syntax %s is not supported by Clay.", (gchar *) value);
                   g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
-                              _("Transfer syntax %s is not supported by GIMP."),
+                              _("Transfer syntax %s is not supported by Clay."),
                               (gchar *) value);
                   g_free (dicominfo);
                   fclose (dicom);
@@ -622,7 +622,7 @@ load_image (GFile   *file,
               if (! supported)
                 {
                   g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
-                               _("%s is not supported by GIMP in combination "
+                               _("%s is not supported by Clay in combination "
                                  "with samples per pixel: %d"),
                                (gchar *) value, samples_per_pixel);
                   g_free (dicominfo);
@@ -705,7 +705,7 @@ load_image (GFile   *file,
   if ((bpp != 8) && (bpp != 16))
     {
       g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
-                   _("'%s' has a bpp of %d which GIMP cannot handle."),
+                   _("'%s' has a bpp of %d which Clay cannot handle."),
                    gimp_file_get_utf8_name (file), bpp);
       g_free (pix_buf);
       g_free (dicominfo);
@@ -716,7 +716,7 @@ load_image (GFile   *file,
   if ((width > GIMP_MAX_IMAGE_SIZE) || (height > GIMP_MAX_IMAGE_SIZE))
     {
       g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
-                   _("'%s' has a larger image size (%d x %d) than GIMP can handle."),
+                   _("'%s' has a larger image size (%d x %d) than Clay can handle."),
                    gimp_file_get_utf8_name (file), width, height);
       g_free (pix_buf);
       g_free (dicominfo);
@@ -727,7 +727,7 @@ load_image (GFile   *file,
   if (samples_per_pixel > 3)
     {
       g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
-                   _("'%s' has samples per pixel of %d which GIMP cannot handle."),
+                   _("'%s' has samples per pixel of %d which Clay cannot handle."),
                    gimp_file_get_utf8_name (file), samples_per_pixel);
       g_free (pix_buf);
       g_free (dicominfo);
@@ -1429,7 +1429,7 @@ dicom_ensure_required_elements_present (GSList *elements,
       strlen ("1.2.840.10008.1.2.1"), (guint8 *) "1.2.840.10008.1.2.1"},
     /* 0002, 0013 - Implementation version name */
     { 0x0002, 0x0013, "SH",
-      strlen ("GIMP Dicom Plugin 1.0"), (guint8 *) "GIMP Dicom Plugin 1.0" },
+      strlen ("Clay Dicom Plugin 1.0"), (guint8 *) "Clay Dicom Plugin 1.0" },
     /* Identifying group */
     /* ImageType */
     { 0x0008, 0x0008, "CS",

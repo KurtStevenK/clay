@@ -583,7 +583,7 @@ gimpBaseTypeToPsdMode (GimpImageBaseType gimpBaseType)
     case GIMP_INDEXED:
       return 2;                                         /* Indexed */
     default:
-      g_message (_("Error: Can't convert GIMP base imagetype to PSD mode"));
+      g_message (_("Error: Can't convert Clay base imagetype to PSD mode"));
       IFDBG(1) g_debug ("PSD Export: gimpBaseType value is %d, "
                         "can't convert to PSD mode", gimpBaseType);
       g_return_val_if_reached (3);

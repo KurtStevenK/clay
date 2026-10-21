@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * busy-dialog.c
@@ -123,7 +123,7 @@ busy_dialog_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_set_documentation (procedure,
                                         "Show a dialog while waiting for an "
                                         "operation to finish",
-                                        "Used by GIMP to display a dialog, "
+                                        "Used by Clay to display a dialog, "
                                         "containing a spinner and a custom "
                                         "message, while waiting for an "
                                         "ongoing operation to finish. "

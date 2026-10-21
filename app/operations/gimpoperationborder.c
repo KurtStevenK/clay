@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationborder.c
@@ -85,7 +85,7 @@ gimp_operation_border_class_init (GimpOperationBorderClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:border",
                                  "categories",  "gimp",
-                                 "description", "GIMP Border operation",
+                                 "description", "Clay Border operation",
                                  NULL);
 
   operation_class->prepare                 = gimp_operation_border_prepare;

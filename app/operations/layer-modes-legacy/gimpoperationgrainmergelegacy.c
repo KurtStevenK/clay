@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationgrainmergemode.c
@@ -50,7 +50,7 @@ gimp_operation_grain_merge_legacy_class_init (GimpOperationGrainMergeLegacyClass
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:grain-merge-legacy",
-                                 "description", "GIMP grain merge mode operation",
+                                 "description", "Clay grain merge mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_grain_merge_legacy_process;

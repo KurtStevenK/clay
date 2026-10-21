@@ -1290,7 +1290,7 @@ load_layer (FILE             *fp,
           (load_info->d3d9_format == D3DFMT_A2R10G10B10))
         {
           g_printerr ("Switching incorrect red and green channels in RGB10A2 DDS "
-                      "written by an older version of GIMP's DDS plug-in.\n");
+                      "written by an older version of Clay's DDS plug-in.\n");
           idx_r = 2;
           idx_b = 0;
         }
@@ -1546,7 +1546,7 @@ load_layer (FILE             *fp,
           (load_info->comp_format == DDS_COMPRESS_BC5))
         {
           g_printerr ("Switching incorrect red and green channels in BC5 DDS "
-                      "written by an older version of GIMP's DDS plug-in.\n");
+                      "written by an older version of Clay's DDS plug-in.\n");
 
           for (y = 0; y < height; ++y)
             {

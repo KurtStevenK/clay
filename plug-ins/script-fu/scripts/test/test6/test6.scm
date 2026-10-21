@@ -3,7 +3,7 @@
 ; Test a .scm file that does not register any procedure
 
 ; Expect in the console:
-; "(test6.scm:164): scriptfu-WARNING **: 10:06:07.966: No procedures defined in /work/.home/.config/GIMP/2.99/plug-ins/test6/test6.scm"
+; "(test6.scm:164): scriptfu-WARNING **: 10:06:07.966: No procedures defined in /work/.home/.config/Clay/2.99/plug-ins/test6/test6.scm"
 
 (define (script-fu-test6)
   (gimp-message "Hello script-fu-test6")

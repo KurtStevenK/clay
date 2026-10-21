@@ -5,7 +5,7 @@
  * (c) Mircea Purdea : 2009 : someone_else@exhalus.net
  * (c) Jehan : 2012 : jehan at girinstud.io
  *
- * GIMP - The GNU Image Manipulation Program
+ * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -338,7 +338,7 @@ play_create_procedure (GimpPlugIn  *plug_in,
       gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Animation/");
 
       gimp_procedure_set_documentation (procedure,
-                                        _("Preview a GIMP layer-based "
+                                        _("Preview a Clay layer-based "
                                           "animation"),
                                         NULL, name);
       gimp_procedure_set_attribution (procedure,

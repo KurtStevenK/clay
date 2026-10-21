@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpplugin.c
@@ -252,9 +252,9 @@ gimp_plug_in_recv_message (GIOChannel   *channel,
       gimp_message (plug_in->manager->gimp, G_OBJECT (progress),
                     GIMP_MESSAGE_ERROR,
                     _("Plug-in crashed: \"%s\"\n(%s)\n\n"
-                      "The dying plug-in may have messed up GIMP's internal "
+                      "The dying plug-in may have messed up Clay's internal "
                       "state. You may want to save your images and restart "
-                      "GIMP to be on the safe side."),
+                      "Clay to be on the safe side."),
                     gimp_object_get_name (plug_in),
                     gimp_file_get_utf8_name (plug_in->file));
     }

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -963,7 +963,7 @@ xcf_load_image (Gimp     *gimp,
               gimp_message (gimp, G_OBJECT (info->progress),
                             GIMP_MESSAGE_WARNING,
                             _("Corrupt XMP metadata saved by an older version of "
-                              "GIMP could not be converted and will be ignored.\n"
+                              "Clay could not be converted and will be ignored.\n"
                               "If you don't know what XMP is, you most likely don't "
                               "need it. Reported error: %s."),
                             my_error->message);
@@ -1529,7 +1529,7 @@ xcf_load_image (Gimp     *gimp,
        */
       if (g_list_length (info->linked_paths) > 1)
         g_printerr ("xcf: some paths were linked. "
-                    "GIMP does not support linked paths since version 3.0.\n");
+                    "Clay does not support linked paths since version 3.0.\n");
 
 #if 0
       GimpItemList *set;

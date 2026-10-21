@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -645,51 +645,4 @@ gimp_display_shell_canvas_draw_drop_zone (GimpDisplayShell *shell,
   gimp_cairo_draw_drop_wilber (shell->canvas, cr, shell->blink);
 
   cairo_restore (cr);
-
-#ifdef GIMP_UNSTABLE
-  {
-    GtkWidget       *widget  = GTK_WIDGET (shell);
-    GtkStyleContext *context = gtk_widget_get_style_context (widget);
-    PangoLayout     *layout;
-    gchar           *msg;
-    GtkAllocation    allocation;
-    gint             width;
-    gint             height;
-    gdouble          scale;
-    GdkRGBA          color;
-
-    layout = gtk_widget_create_pango_layout (shell->canvas, NULL);
-
-    msg = g_strdup_printf (_("<big>Unstable Development Version</big>\n\n"
-                             "<small>commit <tt>%s</tt></small>\n\n"
-                             "<small>Please test bugs against "
-                             "latest git master branch\n"
-                             "before reporting them.</small>"),
-                             GIMP_GIT_VERSION_ABBREV);
-    pango_layout_set_markup (layout, msg, -1);
-    g_free (msg);
-    pango_layout_set_alignment (layout, PANGO_ALIGN_CENTER);
-
-    pango_layout_get_pixel_size (layout, &width, &height);
-    gtk_widget_get_allocation (shell->canvas, &allocation);
-
-    scale = MIN (((gdouble) allocation.width  / 2.0) / (gdouble) width,
-                 ((gdouble) allocation.height / 2.0) / (gdouble) height);
-
-    gtk_style_context_get_color (context,
-                                 gtk_widget_get_state_flags (widget),
-                                 &color);
-    gdk_cairo_set_source_rgba (cr, &color);
-
-    cairo_move_to (cr,
-                   (allocation.width  - (width  * scale)) / 2,
-                   (allocation.height - (height * scale)) / 2);
-
-    cairo_scale (cr, scale, scale);
-
-    pango_cairo_show_layout (cr, layout);
-
-    g_object_unref (layout);
-  }
-#endif /* GIMP_UNSTABLE */
 }

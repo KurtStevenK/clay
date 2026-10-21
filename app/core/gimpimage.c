@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -3075,7 +3075,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
                                gimp_layer_get_mode (layer),
                                NULL, NULL, &enum_desc, NULL);
           ADD_REASON (g_strdup_printf (_("Layer mode '%s' was added in %s"),
-                                       enum_desc, "GIMP 2.6"));
+                                       enum_desc, "Clay 2.6"));
           version = MAX (2, version);
           break;
 
@@ -3089,7 +3089,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
                                gimp_layer_get_mode (layer),
                                NULL, NULL, &enum_desc, NULL);
           ADD_REASON (g_strdup_printf (_("Layer mode '%s' was added in %s"),
-                                       enum_desc, "GIMP 2.10"));
+                                       enum_desc, "Clay 2.10"));
           version = MAX (9, version);
           break;
 
@@ -3132,7 +3132,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
                                gimp_layer_get_mode (layer),
                                NULL, NULL, &enum_desc, NULL);
           ADD_REASON (g_strdup_printf (_("Layer mode '%s' was added in %s"),
-                                       enum_desc, "GIMP 2.10"));
+                                       enum_desc, "Clay 2.10"));
           version = MAX (10, version);
           break;
 
@@ -3157,7 +3157,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
           if (gimp_container_get_n_children (filters) > 0)
             {
               ADD_REASON (g_strdup_printf (_("Channel effects were saved "
-                                             "in %s"), "GIMP 3.2.6"));
+                                             "in %s"), "Clay 3.2.6"));
               version = MAX (26, version);
             }
         }
@@ -3166,28 +3166,28 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (gimp_viewable_get_children (GIMP_VIEWABLE (layer)))
         {
           ADD_REASON (g_strdup_printf (_("Layer groups were added in %s"),
-                                       "GIMP 2.8"));
+                                       "Clay 2.8"));
           version = MAX (3, version);
 
           /* need version 13 for group layers with masks */
           if (gimp_layer_get_mask (layer))
             {
               ADD_REASON (g_strdup_printf (_("Masks on layer groups were "
-                                             "added in %s"), "GIMP 2.10"));
+                                             "added in %s"), "Clay 2.10"));
               version = MAX (13, version);
             }
 
           if (gimp_item_get_lock_position (GIMP_ITEM (layer)))
             {
               ADD_REASON (g_strdup_printf (_("Position locks on layer groups were added in %s"),
-                                           "GIMP 3.0"));
+                                           "Clay 3.0"));
               version = MAX (17, version);
             }
 
           if (gimp_layer_get_lock_alpha (layer))
             {
               ADD_REASON (g_strdup_printf (_("Alpha channel locks on layer groups were added in %s"),
-                                           "GIMP 3.0"));
+                                           "Clay 3.0"));
               version = MAX (17, version);
             }
         }
@@ -3195,7 +3195,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (gimp_item_get_lock_visibility (GIMP_ITEM (layer)))
         {
           ADD_REASON (g_strdup_printf (_("Visibility locks were added in %s"),
-                                       "GIMP 3.0"));
+                                       "Clay 3.0"));
           version = MAX (17, version);
         }
 
@@ -3206,7 +3206,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
           ! GIMP_TEXT_LAYER (layer)->text_parasite_is_old)
         {
           ADD_REASON (g_strdup_printf (_("Format of font information in text layer was changed in %s"),
-                                       "GIMP 3.0"));
+                                       "Clay 3.0"));
           version = MAX (19, version);
         }
 
@@ -3214,7 +3214,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (gimp_container_get_n_children (filters) > 0)
         {
           ADD_REASON (g_strdup_printf (_("Layer effects were added in %s"),
-                                       "GIMP 3.0"));
+                                       "Clay 3.0"));
           /* Version 20 added layer effects; version 22 stored the effect
            * version as an additional field. Only ever store as XCF 22
            * when layer effects are used.
@@ -3226,7 +3226,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
         ||(gimp_layer_get_real_composite_space (layer) == GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL))
         {
           ADD_REASON (g_strdup_printf (_("A new perceptual blending space was added in %s"),
-                                       "GIMP 3.0"));
+                                       "Clay 3.0"));
           /* The blending space variant corresponding to SPACE_RGB_PERCEPTUAL in <3.0
            * corresponds to R'G'B'A which is NON_LINEAR in babl. Perceptual in babl is
            * R~G~B~A, >= 3.0 the code, comments and usage matches the existing enum value
@@ -3240,7 +3240,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (GIMP_IS_VECTOR_LAYER (layer))
         {
           ADD_REASON (g_strdup_printf (_("Vector layers were added in %s"),
-                                       "GIMP 3.2"));
+                                       "Clay 3.2"));
           version = MAX (24, version);
         }
 
@@ -3248,7 +3248,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (GIMP_IS_LINK_LAYER (layer))
         {
           ADD_REASON (g_strdup_printf (_("Link layers were added in %s"),
-                                       "GIMP 3.2"));
+                                       "Clay 3.2"));
           version = MAX (25, version);
         }
 
@@ -3272,7 +3272,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
               if (! gimp_matrix3_is_identity (&matrix))
                 {
                   ADD_REASON (g_strdup_printf (_("Transformed text layers were "
-                                                 "added in %s"), "GIMP 3.4"));
+                                                 "added in %s"), "Clay 3.4"));
                   version = MAX (27, version);
                 }
             }
@@ -3289,7 +3289,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (gimp_item_get_lock_visibility (GIMP_ITEM (channel)))
         {
           ADD_REASON (g_strdup_printf (_("Visibility locks were added in %s"),
-                                       "GIMP 3.0"));
+                                       "Clay 3.0"));
           version = MAX (17, version);
         }
 
@@ -3297,7 +3297,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (gimp_container_get_n_children (filters) > 0)
         {
           ADD_REASON (g_strdup_printf (_("Channel effects were saved in %s"),
-                                         "GIMP 3.2.6"));
+                                         "Clay 3.2.6"));
           version = MAX (26, version);
         }
     }
@@ -3306,7 +3306,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
   if (g_list_length (gimp_image_get_selected_paths (image)) > 1)
     {
       ADD_REASON (g_strdup_printf (_("Multiple path selection was "
-                                     "added in %s"), "GIMP 3.0.0"));
+                                     "added in %s"), "Clay 3.0.0"));
       version = MAX (18, version);
     }
 
@@ -3318,14 +3318,14 @@ gimp_image_get_xcf_version (GimpImage    *image,
       if (gimp_item_get_color_tag (GIMP_ITEM (path)) != GIMP_COLOR_TAG_NONE)
         {
           ADD_REASON (g_strdup_printf (_("Storing color tags in path was "
-                                         "added in %s"), "GIMP 3.0.0"));
+                                         "added in %s"), "Clay 3.0.0"));
           version = MAX (18, version);
         }
       if (gimp_item_get_lock_content (GIMP_ITEM (list->data)) ||
           gimp_item_get_lock_position (GIMP_ITEM (list->data)))
         {
           ADD_REASON (g_strdup_printf (_("Storing locks in path was "
-                                         "added in %s"), "GIMP 3.0.0"));
+                                         "added in %s"), "Clay 3.0.0"));
           version = MAX (18, version);
         }
     }
@@ -3339,7 +3339,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
   if (gimp_image_get_precision (image) != GIMP_PRECISION_U8_NON_LINEAR)
     {
       ADD_REASON (g_strdup_printf (_("High bit-depth images were added "
-                                     "in %s"), "GIMP 2.10"));
+                                     "in %s"), "Clay 2.10"));
       version = MAX (7, version);
     }
 
@@ -3347,7 +3347,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
   if (gimp_image_get_component_type (image) > GIMP_COMPONENT_TYPE_U8)
     {
       ADD_REASON (g_strdup_printf (_("Encoding of high bit-depth images was "
-                                     "fixed in %s"), "GIMP 2.10"));
+                                     "fixed in %s"), "Clay 2.10"));
       version = MAX (12, version);
     }
 
@@ -3355,7 +3355,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
   if (zlib_compression)
     {
       ADD_REASON (g_strdup_printf (_("Internal zlib compression was "
-                                     "added in %s"), "GIMP 2.10"));
+                                     "added in %s"), "Clay 2.10"));
       version = MAX (8, version);
     }
 
@@ -3372,14 +3372,14 @@ gimp_image_get_xcf_version (GimpImage    *image,
   if (gimp_object_get_memsize (GIMP_OBJECT (image), NULL) >= ((gint64) 1 << 32))
     {
       ADD_REASON (g_strdup_printf (_("Support for image files larger than "
-                                     "4GB was added in %s"), "GIMP 2.10"));
+                                     "4GB was added in %s"), "Clay 2.10"));
       version = MAX (11, version);
     }
 
   if (g_list_length (gimp_image_get_selected_layers (image)) > 1)
     {
       ADD_REASON (g_strdup_printf (_("Multiple layer selection was "
-                                     "added in %s"), "GIMP 3.0.0"));
+                                     "added in %s"), "Clay 3.0.0"));
       version = MAX (14, version);
     }
 
@@ -3396,7 +3396,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
                position > gimp_image_get_width (image)))
             {
               ADD_REASON (g_strdup_printf (_("Off-canvas guides "
-                                             "added in %s"), "GIMP 3.0.0"));
+                                             "added in %s"), "Clay 3.0.0"));
               version = MAX (15, version);
               break;
             }
@@ -3407,13 +3407,13 @@ gimp_image_get_xcf_version (GimpImage    *image,
       gimp_image_get_stored_item_sets (image, GIMP_TYPE_CHANNEL))
     {
       ADD_REASON (g_strdup_printf (_("Item set and pattern search in item's name were "
-                                     "added in %s"), "GIMP 3.0.0"));
+                                     "added in %s"), "Clay 3.0.0"));
       version = MAX (16, version);
     }
   if (g_list_length (gimp_image_get_selected_channels (image)) > 1)
     {
       ADD_REASON (g_strdup_printf (_("Multiple channel selection was "
-                                     "added in %s"), "GIMP 3.0.0"));
+                                     "added in %s"), "Clay 3.0.0"));
       version = MAX (16, version);
     }
 
@@ -3431,12 +3431,12 @@ gimp_image_get_xcf_version (GimpImage    *image,
     case 1:
     case 2:
       if (gimp_version)   *gimp_version   = 206;
-      if (version_string) *version_string = "GIMP 2.6";
+      if (version_string) *version_string = "Clay 2.6";
       break;
 
     case 3:
       if (gimp_version)   *gimp_version   = 208;
-      if (version_string) *version_string = "GIMP 2.8";
+      if (version_string) *version_string = "Clay 2.8";
       break;
 
     case 4:
@@ -3450,7 +3450,7 @@ gimp_image_get_xcf_version (GimpImage    *image,
     case 12:
     case 13:
       if (gimp_version)   *gimp_version   = 210;
-      if (version_string) *version_string = "GIMP 2.10";
+      if (version_string) *version_string = "Clay 2.10";
       break;
     case 14:
     case 15:
@@ -3463,20 +3463,20 @@ gimp_image_get_xcf_version (GimpImage    *image,
     case 22:
     case 23:
       if (gimp_version)   *gimp_version   = 300;
-      if (version_string) *version_string = "GIMP 3.0";
+      if (version_string) *version_string = "Clay 3.0";
       break;
     case 24:
     case 25:
       if (gimp_version)   *gimp_version   = 320;
-      if (version_string) *version_string = "GIMP 3.2";
+      if (version_string) *version_string = "Clay 3.2";
       break;
     case 26:
       if (gimp_version)   *gimp_version   = 326;
-      if (version_string) *version_string = "GIMP 3.2.6";
+      if (version_string) *version_string = "Clay 3.2.6";
       break;
     case 27:
       if (gimp_version)   *gimp_version   = 340;
-      if (version_string) *version_string = "GIMP 3.4";
+      if (version_string) *version_string = "Clay 3.4";
       break;
     default:
       /* We should have as many cases as there are function elements in

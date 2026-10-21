@@ -68,7 +68,7 @@
     (gimp-message palettecopy)
 
     ; Note equal? works for strings, but eq? and eqv? do not
-    (gimp-message "Expect resources from context have de novo installed GIMP names")
+    (gimp-message "Expect resources from context have de novo installed Clay names")
     (expect (equal? brush "2. Hardness 050")   #t)
     (expect (equal? font "Sans-serif")         #t)
     (expect (equal? gradient "FG to BG (RGB)") #t)

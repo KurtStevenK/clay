@@ -185,8 +185,8 @@ sparkle_create_procedure (GimpPlugIn  *plug_in,
                                           "for adding some sparkles (spikes)."),
                                         name);
       gimp_procedure_set_attribution (procedure,
-                                      "John Beale, & (ported to GIMP v0.54) "
-                                      "Michael J. Hammel & ted to GIMP v1.0) "
+                                      "John Beale, & (ported to Clay v0.54) "
+                                      "Michael J. Hammel & ted to Clay v1.0) "
                                       "& Seth Burgess & Spencer Kimball",
                                       "John Beale",
                                       "Version 1.27, September 2003");

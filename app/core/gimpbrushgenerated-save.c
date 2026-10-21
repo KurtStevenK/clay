@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimp_brush_generated module Copyright 1998 Jay Cox <jaycox@earthlink.net>
@@ -46,7 +46,7 @@ gimp_brush_generated_save (GimpData       *data,
   g_return_val_if_fail (name != NULL && *name != '\0', FALSE);
 
   /* write magic header */
-  string = g_string_new ("GIMP-VBR\n");
+  string = g_string_new ("Clay-VBR\n");
 
   /* write version */
   if (brush->shape != GIMP_BRUSH_GENERATED_CIRCLE || brush->spikes > 2)

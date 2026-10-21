@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -907,7 +907,7 @@ palette_import_file_set_filters (GtkFileChooser *file_chooser)
   gtk_file_chooser_add_filter (file_chooser, filter);
 
   filter = gtk_file_filter_new ();
-  gtk_file_filter_set_name (filter, _("GIMP Palette (*.gpl)"));
+  gtk_file_filter_set_name (filter, _("Clay Palette (*.gpl)"));
   gtk_file_filter_add_pattern (filter, "*.gpl");
   gtk_file_filter_add_pattern (filter, "*.GPL");
   gtk_file_chooser_add_filter (file_chooser, filter);

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -460,7 +460,7 @@ gui_dbus_bus_acquired (GDBusConnection *connection,
   GObject             *service;
 
   /* this should use GIMP_DBUS_SERVICE_PATH, but that's historically wrong */
-  dbus_manager = g_dbus_object_manager_server_new ("/org/gimp/GIMP");
+  dbus_manager = g_dbus_object_manager_server_new ("/org/gimp/Clay");
 
   object = g_dbus_object_skeleton_new (GIMP_DBUS_INTERFACE_PATH);
 

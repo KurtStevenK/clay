@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -171,6 +171,73 @@ static Gimp             *the_gui_gimp     = NULL;
 static GimpUIConfigurer *ui_configurer    = NULL;
 static GdkMonitor       *initial_monitor  = NULL;
 
+typedef struct
+{
+  GtkWidget  *window;
+  GdkMonitor *monitor;
+} ClayPlaceData;
+
+static GdkMonitor *
+clay_startup_monitor (Gimp *gimp)
+{
+  GdkDisplay *display;
+  gint        n_monitors;
+  gint        index;
+
+  display = gdk_display_get_default ();
+  n_monitors = gdk_display_get_n_monitors (display);
+
+  if (n_monitors < 1)
+    return NULL;
+
+  index = GIMP_GUI_CONFIG (gimp->config)->startup_monitor;
+
+  if (index < 0 || index >= n_monitors)
+    {
+      GdkMonitor *primary = gdk_display_get_primary_monitor (display);
+
+      if (primary)
+        return primary;
+
+      return gdk_display_get_monitor (display, 0);
+    }
+
+  return gdk_display_get_monitor (display, index);
+}
+
+static gboolean
+clay_place_main_window_idle (gpointer data)
+{
+  ClayPlaceData *place = data;
+  GdkRectangle   work;
+  gint           width;
+  gint           height;
+
+  if (GTK_IS_WINDOW (place->window) && GDK_IS_MONITOR (place->monitor))
+    {
+      gdk_monitor_get_workarea (place->monitor, &work);
+
+      width  = MAX (work.width  - 10, 640);
+      height = MAX (work.height - 10, 480);
+
+      gtk_window_unmaximize (GTK_WINDOW (place->window));
+      gtk_window_set_position (GTK_WINDOW (place->window), GTK_WIN_POS_NONE);
+      gtk_window_set_gravity (GTK_WINDOW (place->window), GDK_GRAVITY_NORTH_WEST);
+      gtk_window_move (GTK_WINDOW (place->window), work.x + 5, work.y + 5);
+      gtk_window_resize (GTK_WINDOW (place->window), width, height);
+
+      if (gtk_widget_get_window (place->window))
+        gdk_window_move_resize (gtk_widget_get_window (place->window),
+                                work.x + 5, work.y + 5, width, height);
+    }
+
+  g_clear_object (&place->window);
+  g_clear_object (&place->monitor);
+  g_free (place);
+
+  return G_SOURCE_REMOVE;
+}
+
 
 /*  public functions  */
 
@@ -193,7 +260,7 @@ gui_abort (const gchar *abort_message)
 
   g_return_if_fail (abort_message != NULL);
 
-  dialog = gimp_dialog_new (_("GIMP Message"), "gimp-abort",
+  dialog = gimp_dialog_new (_("Clay Message"), "gimp-abort",
                             NULL, GTK_DIALOG_MODAL, NULL, NULL,
 
                             _("_OK"), GTK_RESPONSE_OK,
@@ -298,7 +365,7 @@ gui_init (Gimp         *gimp,
   themes_init (gimp);
   gimp_canvas_styles_init ();
 
-  initial_monitor = gimp_get_monitor_at_pointer ();
+  initial_monitor = clay_startup_monitor (gimp);
 
   if (! no_splash)
     {
@@ -357,7 +424,7 @@ gui_recover (gint n_recoveries)
   gtk_widget_set_visible (box, TRUE);
 
   gimp_message_box_set_primary_text (GIMP_MESSAGE_BOX (box),
-                                     _("Eeek! It looks like GIMP recovered from a crash!"));
+                                     _("Eeek! It looks like Clay recovered from a crash!"));
 
   gimp_message_box_set_text (GIMP_MESSAGE_BOX (box),
                              /* TRANSLATORS: even if English singular form does
@@ -404,10 +471,10 @@ gui_sanity_check (void)
     {
       return g_strdup_printf
         ("%s\n\n"
-         "GIMP requires GTK version %d.%d.%d or later.\n"
+         "Clay requires GTK version %d.%d.%d or later.\n"
          "Installed GTK version is %d.%d.%d.\n\n"
          "Somehow you or your software packager managed\n"
-         "to install GIMP with an older GTK version.\n\n"
+         "to install Clay with an older GTK version.\n\n"
          "Please upgrade to GTK version %d.%d.%d or later.",
          mismatch,
          GTK_REQUIRED_MAJOR, GTK_REQUIRED_MINOR, GTK_REQUIRED_MICRO,
@@ -704,6 +771,19 @@ gui_restore_after_callback (Gimp               *gimp,
 #endif
       /*  move keyboard focus to the display  */
       gtk_window_present (GTK_WINDOW (toplevel));
+
+      /* Session restore runs on "show" and would put this window back
+       * on whichever screen it occupied last. Place it after that, on
+       * the configured startup screen, inset by 5px on every edge.
+       */
+      if (GTK_IS_WINDOW (toplevel) && GDK_IS_MONITOR (initial_monitor))
+        {
+          ClayPlaceData *place = g_new0 (ClayPlaceData, 1);
+
+          place->window  = g_object_ref (toplevel);
+          place->monitor = g_object_ref (initial_monitor);
+          g_idle_add (clay_place_main_window_idle, place);
+        }
     }
 
   /*  indicate that the application has finished loading  */

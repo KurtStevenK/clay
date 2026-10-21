@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationshrink.c
@@ -85,7 +85,7 @@ gimp_operation_shrink_class_init (GimpOperationShrinkClass *klass)
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:shrink",
                                  "categories",  "gimp",
-                                 "description", "GIMP Shrink operation",
+                                 "description", "Clay Shrink operation",
                                  NULL);
 
   operation_class->prepare                 = gimp_operation_shrink_prepare;

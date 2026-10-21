@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -102,7 +102,7 @@ script_fu_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_documentation (procedure,
                                         "A scheme interpreter for scripting "
-                                        "GIMP operations",
+                                        "Clay operations",
                                         NULL, NULL);
       gimp_procedure_set_attribution (procedure,
                                       "Spencer Kimball & Peter Mattis",

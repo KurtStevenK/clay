@@ -159,12 +159,12 @@ nlfilter_create_procedure (GimpPlugIn  *plug_in,
 
       gimp_procedure_set_documentation (procedure,
                                         _("Nonlinear swiss army knife filter"),
-                                        _("This is the pnmnlfilt, in GIMP's "
+                                        _("This is the pnmnlfilt, in Clay's "
                                           "clothing. See the pnmnlfilt manpage "
                                           "for details."),
                                         name);
       gimp_procedure_set_attribution (procedure,
-                                      "Graeme W. Gill, GIMP 0.99 plug-in "
+                                      "Graeme W. Gill, Clay 0.99 plug-in "
                                       "by Eric L. Hernes",
                                       "Graeme W. Gill, Eric L. Hernes",
                                       "1997");

@@ -39,13 +39,13 @@ msgstr ""
 "X-Project-Style: gnome\n"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:15
-msgid "The GIMP team"
-msgstr "Das GIMP-Team"
+msgid "The Clay team"
+msgstr "Das Clay-Team"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:16 desktop/gimp.desktop.in.in:4
 #: app/about.h:25
-msgid "GNU Image Manipulation Program"
-msgstr "GNU Image Manipulation Program"
+msgid "Clay Image Beautification Program"
+msgstr "Clay Image Beautification Program"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:17
 msgid "High-end image creation and manipulation"
@@ -53,10 +53,10 @@ msgstr "Professionelle Bilderzeugung und Bearbeitung"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:19
 msgid ""
-"GIMP is an acronym for GNU Image Manipulation Program. It is Community-"
+"Clay is an acronym for Clay Image Beautification Program. It is Community-"
 "driven Free Software for high-end image creation and manipulation."
 msgstr ""
-"GIMP ist ein Akronym für »GNU Image Manipulation Program«. Es ist eine von "
+"Clay ist ein Akronym für »Clay Image Beautification Program«. Es ist eine von "
 "der Community entwickelte freie Software für professionelle Bilderstellung "
 "und Bearbeitung."
 
@@ -74,49 +74,49 @@ msgstr ""
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:29
 msgid ""
-"GIMP is expandable and extensible. It is designed to be augmented with plug-"
+"Clay is expandable and extensible. It is designed to be augmented with plug-"
 "ins and extensions to do just about anything. The advanced scripting "
 "interface allows everything from the simplest task to the most complex image "
-"manipulation procedures to be easily scripted. GIMP is available for Linux, "
+"manipulation procedures to be easily scripted. Clay is available for Linux, "
 "Microsoft Windows and macOS."
 msgstr ""
-"GIMP ist erweiterbar. Es ist darauf ausgelegt, mit Plugins und Erweiterungen "
+"Clay ist erweiterbar. Es ist darauf ausgelegt, mit Plugins und Erweiterungen "
 "bereichert zu werden, um nahezu alles erledigen zu können. Die "
 "fortgeschrittene Skript-Schnittstelle ermöglicht alles von der einfachsten "
 "Aufgabe bis hin zu den komplexesten Bildbearbeitungsvorgängen zu skripten. "
-"GIMP ist für Linux, Microsoft Windows und MAC OS verfügbar."
+"Clay ist für Linux, Microsoft Windows und MAC OS verfügbar."
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:47
 msgid ""
-"Scene 4 cut 15 of \"ZeMarmot\" being edited in GIMP. Illustration by Aryeom "
+"Scene 4 cut 15 of \"ZeMarmot\" being edited in Clay. Illustration by Aryeom "
 "(CC by-sa 4.0 International)"
 msgstr ""
-"Szene 4 Cut 15 von »ZeMarmot« wird in GIMP bearbeitet. Illustration von "
+"Szene 4 Cut 15 von »ZeMarmot« wird in Clay bearbeitet. Illustration von "
 "Aryeom (CC by-sa 4.0 International)"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:51
 msgid ""
-"Gull on beach photograph being edited in GIMP. Photo by Iana (CC by-sa 4.0 "
+"Gull on beach photograph being edited in Clay. Photo by Iana (CC by-sa 4.0 "
 "International)"
 msgstr ""
-"Foto einer Möwe am Strand wird in GIMP bearbeitet. Foto von Iana (CC by-sa "
+"Foto einer Möwe am Strand wird in Clay bearbeitet. Foto von Iana (CC by-sa "
 "4.0 International)"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:55
 msgid ""
-"Portrait of Sofiia being edited in GIMP. Photo by Sofia (CC by-sa 4.0 "
+"Portrait of Sofiia being edited in Clay. Photo by Sofia (CC by-sa 4.0 "
 "International)"
 msgstr ""
-"Porträt von Sofiia wird in GIMP bearbeitet. Foto von Sofia (CC by-sa 4.0 "
+"Porträt von Sofiia wird in Clay bearbeitet. Foto von Sofia (CC by-sa 4.0 "
 "International)"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:59
-msgid "Scanned engraving being edited in GIMP. Artwork by Liam (CC0)"
-msgstr "Gescannte Gravur wird in GIMP bearbeitet. Kunstwerk von Liam (CC0)"
+msgid "Scanned engraving being edited in Clay. Artwork by Liam (CC0)"
+msgstr "Gescannte Gravur wird in Clay bearbeitet. Kunstwerk von Liam (CC0)"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:67 app/about.h:22
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: desktop/org.gimp.GIMP.appdata.xml.in.in:68
 msgid "Photoshop"
@@ -133,22 +133,22 @@ msgstr "Bilder erstellen und Fotografien bearbeiten"
 #. TRANSLATORS: Search terms to find this application.
 #. 1. Do NOT translate or localize the semicolons!
 #. 2. The list MUST also end with a semicolon!
-#. 3. Keep "GIMP" in the list as-is so that people can search with the
+#. 3. Keep "Clay" in the list as-is so that people can search with the
 #. original acronym too, though you may add translated version of the
 #. name when relevant (it's OK if a localization has more keywords).
 #: desktop/gimp.desktop.in.in:13
-msgid "GIMP;graphic;design;illustration;painting;"
-msgstr "GIMP;Grafik;Design;Illustration;Malen;"
+msgid "Clay;graphic;design;illustration;painting;"
+msgstr "Clay;Grafik;Design;Illustration;Malen;"
 
 #. The year of the last commit (UTC) will be inserted into this string.
 #: app/about.h:29
 #, c-format
 msgid ""
 "Copyright © 1995-%s\n"
-"Spencer Kimball, Peter Mattis and the GIMP Development Team"
+"Spencer Kimball, Peter Mattis and the Clay Development Team"
 msgstr ""
 "Copyright © 1995-%s\n"
-"Spencer Kimball, Peter Mattis und das GIMP-Entwicklerteam"
+"Spencer Kimball, Peter Mattis und das Clay-Entwicklerteam"
 
 #. TRANSLATORS: do not end the license URL with a dot, because it would
 #. * be in the link. Because of technical limitations, make sure the URL
@@ -157,30 +157,30 @@ msgstr ""
 #.
 #: app/about.h:38
 msgid ""
-"GIMP is free software: you can redistribute it and/or modify it under the "
+"Clay is free software: you can redistribute it and/or modify it under the "
 "terms of the GNU General Public License as published by the Free Software "
 "Foundation; either version 3 of the License, or (at your option) any later "
 "version.\n"
 "\n"
-"GIMP is distributed in the hope that it will be useful, but WITHOUT ANY "
+"Clay is distributed in the hope that it will be useful, but WITHOUT ANY "
 "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
 "FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more "
 "details.\n"
 "\n"
 "You should have received a copy of the GNU General Public License along with "
-"GIMP. If not, see: https://www.gnu.org/licenses/"
+"Clay. If not, see: https://www.gnu.org/licenses/"
 msgstr ""
-"GIMP ist freie Software. Sie können es unter den Bedingungen der GNU General "
+"Clay ist freie Software. Sie können es unter den Bedingungen der GNU General "
 "Public License, wie von der Free Software Foundation herausgegeben, "
 "weitergeben und/oder modifizieren, entweder unter Version 3 der Lizenz oder "
 "(wenn Sie es wünschen) jeder späteren Version.\n"
 "\n"
-"Die Veröffentlichung von GIMP erfolgt in der Hoffnung, dass es Ihnen von "
+"Die Veröffentlichung von Clay erfolgt in der Hoffnung, dass es Ihnen von "
 "Nutzen sein wird, aber OHNE JEDE GEWÄHRLEISTUNG - sogar ohne die implizite "
 "Gewährleistung der MARKTREIFE oder der EIGNUNG FÜR EINEN BESTIMMTEN ZWECK. "
 "Details finden Sie in der GNU General Public License.\n"
 "\n"
-"Sie sollten eine Kopie der GNU General Public License zusammen mit GIMP "
+"Sie sollten eine Kopie der GNU General Public License zusammen mit Clay "
 "erhalten haben. Falls nicht, finden Sie sie unter http://www.gnu.org/"
 "licenses/"
 
@@ -192,17 +192,17 @@ msgstr "INFO"
 #. TRANSLATORS: info message displayed in terminal window.
 #: app/app.c:571
 msgid ""
-"GIMP is now running as a background process. You can quit anytime with Ctrl-"
+"Clay is now running as a background process. You can quit anytime with Ctrl-"
 "C (SIGINT)."
 msgstr ""
-"GIMP läuft jetzt als Hintergrundprozess. Sie können es jederzeit mit Strg-C "
+"Clay läuft jetzt als Hintergrundprozess. Sie können es jederzeit mit Strg-C "
 "(SIGINT) beenden."
 
 #. TRANSLATORS: info message displayed in terminal window.
 #: app/app.c:574
-msgid "If you wanted to quit immediately instead, call GIMP with --quit."
+msgid "If you wanted to quit immediately instead, call Clay with --quit."
 msgstr ""
-"Wenn Sie stattdessen sofort beenden möchten, rufen Sie GIMP mit --quit auf."
+"Wenn Sie stattdessen sofort beenden möchten, rufen Sie Clay mit --quit auf."
 
 #: app/gimp-update.c:424
 msgid "Perhaps you are missing GIO backends and need to install GVFS?"
@@ -215,10 +215,10 @@ msgstr "Möglicherweise fehlen Ihnen GIO-Backends."
 #: app/gimp-update.c:466
 #, c-format
 msgid ""
-"A new version of GIMP (%s) was released.\n"
+"A new version of Clay (%s) was released.\n"
 "It is recommended to update."
 msgstr ""
-"Eine neue Version von GIMP (%s) wurde veröffentlicht.\n"
+"Eine neue Version von Clay (%s) wurde veröffentlicht.\n"
 "Es wird eine Aktualisierung empfohlen."
 
 #: app/gimp-version.c:72
@@ -256,8 +256,8 @@ msgid "Be more verbose"
 msgstr "Ausführlicher verhalten"
 
 #: app/main.c:179
-msgid "Start a new GIMP instance"
-msgstr "Eine neue GIMP-Instanz starten"
+msgid "Start a new Clay instance"
+msgstr "Eine neue Clay-Instanz starten"
 
 #: app/main.c:184
 msgid "Open images as new"
@@ -280,9 +280,9 @@ msgid "Do not show a splash screen"
 msgstr "Kein Startfenster anzeigen"
 
 #: app/main.c:222
-msgid "Do not use shared memory between GIMP and plug-ins"
+msgid "Do not use shared memory between Clay and plug-ins"
 msgstr ""
-"Keinen gemeinsam genutzten Speicher zwischen GIMP und den Plugins verwenden"
+"Keinen gemeinsam genutzten Speicher zwischen Clay und den Plugins verwenden"
 
 #: app/main.c:227
 msgid "Do not use special CPU acceleration functions"
@@ -358,16 +358,16 @@ msgstr "[DATEI|URI …]"
 
 #: app/main.c:862
 msgid ""
-"GIMP could not initialize the graphical user interface.\n"
+"Clay could not initialize the graphical user interface.\n"
 "Make sure a proper setup for your display environment exists."
 msgstr ""
-"GIMP konnte die grafische Benutzeroberfläche nicht initialisieren.\n"
+"Clay konnte die grafische Benutzeroberfläche nicht initialisieren.\n"
 "Bitte stellen Sie sicher, dass Ihre grafische Oberfläche korrekt "
 "eingerichtet ist."
 
 #: app/main.c:966
-msgid "Another GIMP instance is already running."
-msgstr "Eine andere GIMP-Instanz wird bereits ausgeführt."
+msgid "Another Clay instance is already running."
+msgstr "Eine andere Clay-Instanz wird bereits ausgeführt."
 
 #: app/main.c:1050
 #, c-format
@@ -389,14 +389,14 @@ msgstr ""
 #: app/sanity.c:565
 #, c-format
 msgid ""
-"The name of the directory holding the GIMP user configuration cannot be "
+"The name of the directory holding the Clay user configuration cannot be "
 "converted to UTF-8: %s\n"
 "\n"
 "Your filesystem probably stores files in an encoding other than UTF-8 and "
 "you didn't tell GLib about this. Please set the environment variable "
 "G_FILENAME_ENCODING."
 msgstr ""
-"Der Name des Ordners mit der GIMP-Benutzerkonfiguration kann nicht in UTF-8 "
+"Der Name des Ordners mit der Clay-Benutzerkonfiguration kann nicht in UTF-8 "
 "umgewandelt werden: %s\n"
 "\n"
 "Wahrscheinlich speichert Ihr Dateisystem Dateien in einer anderen Kodierung "
@@ -3188,8 +3188,8 @@ msgstr "_Tipp des Tages"
 
 #: app/actions/dialogs-actions.c:348
 msgctxt "dialogs-action"
-msgid "Show some helpful tips on using GIMP"
-msgstr "Zeigt hilfreiche Tipps zur Benutzung von GIMP"
+msgid "Show some helpful tips on using Clay"
+msgstr "Zeigt hilfreiche Tipps zur Benutzung von Clay"
 
 #: app/actions/dialogs-actions.c:353
 msgctxt "dialogs-action"
@@ -3198,13 +3198,13 @@ msgstr "Willkommen-Dialog"
 
 #: app/actions/dialogs-actions.c:355
 msgctxt "dialogs-action"
-msgid "Show information on running GIMP release"
-msgstr "Informationen zur laufenden Version von GIMP anzeigen"
+msgid "Show information on running Clay release"
+msgstr "Informationen zur laufenden Version von Clay anzeigen"
 
 #: app/actions/dialogs-actions.c:361 app/actions/dialogs-actions.c:366
 msgctxt "dialogs-action"
-msgid "About GIMP"
-msgstr "Über GIMP"
+msgid "About Clay"
+msgstr "Über Clay"
 
 #: app/actions/dialogs-actions.c:363
 msgctxt "dialogs-action"
@@ -4280,8 +4280,8 @@ msgstr "_Beenden"
 
 #: app/actions/file-actions.c:129
 msgctxt "file-action"
-msgid "Quit the GNU Image Manipulation Program"
-msgstr "Das GNU Image Manipulation Program beenden"
+msgid "Quit the Clay Image Beautification Program"
+msgstr "Das Clay Image Beautification Program beenden"
 
 #: app/actions/file-actions.c:137 app/actions/file-actions.c:305
 msgctxt "file-action"
@@ -5655,8 +5655,8 @@ msgstr "_Hilfe"
 
 #: app/actions/help-actions.c:40
 msgctxt "help-action"
-msgid "Open the GIMP user manual"
-msgstr "Das GIMP-Benutzerhandbuch öffnen"
+msgid "Open the Clay user manual"
+msgstr "Das Clay-Benutzerhandbuch öffnen"
 
 #: app/actions/help-actions.c:45
 msgctxt "help-action"
@@ -5675,8 +5675,8 @@ msgstr "Haupt_webseite"
 
 #: app/actions/help-actions.c:55
 msgctxt "help-action"
-msgid "Bookmark to the GIMP web site"
-msgstr "Lesezeichen zur Internet-Seite von GIMP"
+msgid "Bookmark to the Clay web site"
+msgstr "Lesezeichen zur Internet-Seite von Clay"
 
 #: app/actions/help-actions.c:60
 msgctxt "help-action"
@@ -5695,8 +5695,8 @@ msgstr "_Fehlermeldungen"
 
 #: app/actions/help-actions.c:67
 msgctxt "help-action"
-msgid "Bookmark to the bug tracker of GIMP"
-msgstr "Lesezeichen für die Fehlerverfolgung von GIMP"
+msgid "Bookmark to the bug tracker of Clay"
+msgstr "Lesezeichen für die Fehlerverfolgung von Clay"
 
 #: app/actions/help-actions.c:72
 msgctxt "help-action"
@@ -10394,10 +10394,10 @@ msgstr "_OK"
 #: app/actions/window-commands.c:88
 msgid ""
 "Experimental multi-display stuff!\n"
-"Click OK and have fun crashing GIMP..."
+"Click OK and have fun crashing Clay..."
 msgstr ""
 "Experimente mit mehreren Bildschirmen!\n"
-"Klicken Sie auf OK und viel Spaß beim Absturz von GIMP …"
+"Klicken Sie auf OK und viel Spaß beim Absturz von Clay …"
 
 #: app/actions/window-commands.c:92
 msgid "Please enter the name of the new display:"
@@ -10464,8 +10464,8 @@ msgstr "_Einzelfenster-Modus"
 
 #: app/actions/windows-actions.c:145
 msgctxt "windows-action"
-msgid "When enabled, GIMP is in a single-window mode."
-msgstr "Wenn aktiviert, wird GIMP im Einzelfenster-Modus verwendet."
+msgid "When enabled, Clay is in a single-window mode."
+msgstr "Wenn aktiviert, wird Clay im Einzelfenster-Modus verwendet."
 
 #: app/actions/windows-actions.c:154
 msgctxt "windows-tabs-position-action"
@@ -10822,7 +10822,7 @@ msgid "The comment for the last known release."
 msgstr "Der Kommentar zur letzten bekannten Version."
 
 #: app/config/gimprc-blurbs.h:30
-msgid "Show a welcome dialog when GIMP starts."
+msgid "Show a welcome dialog when Clay starts."
 msgstr "Zeigt den Willkommensdialog beim Start an."
 
 #: app/config/gimprc-blurbs.h:40
@@ -10847,9 +10847,9 @@ msgstr "Legt fest, wie der Bereich um das Bild herum dargestellt werden soll."
 
 #: app/config/gimprc-blurbs.h:51
 msgid ""
-"Check for availability of GIMP updates through background internet queries."
+"Check for availability of Clay updates through background internet queries."
 msgstr ""
-"Auf verfügbare Aktualisierungen für GIMP über Internet-Abfragen im "
+"Auf verfügbare Aktualisierungen für Clay über Internet-Abfragen im "
 "Hintergrund prüfen."
 
 #: app/config/gimprc-blurbs.h:54
@@ -11143,12 +11143,12 @@ msgstr "Legt die Sprache für die Benutzerschnittstelle fest."
 
 #: app/config/gimprc-blurbs.h:304
 msgid ""
-"The last known release version of GIMP as queried from official website."
-msgstr "Die neueste veröffentlichte GIMP-Version laut offizieller Webseite."
+"The last known release version of Clay as queried from official website."
+msgstr "Die neueste veröffentlichte Clay-Version laut offizieller Webseite."
 
 #: app/config/gimprc-blurbs.h:307
-msgid "The version of GIMP config files."
-msgstr "Die Version der GIMP config-Dateien."
+msgid "The version of Clay config files."
+msgstr "Die Version der Clay config-Dateien."
 
 #: app/config/gimprc-blurbs.h:310
 msgid "How many recently opened image filenames to keep on the File menu."
@@ -11174,10 +11174,10 @@ msgstr ""
 
 #: app/config/gimprc-blurbs.h:323
 msgid ""
-"GIMP will warn the user if an attempt is made to create an image that would "
+"Clay will warn the user if an attempt is made to create an image that would "
 "take more memory than the size specified here."
 msgstr ""
-"GIMP wird Sie benachrichtigen, falls versucht wird, ein Bild zu erstellen, "
+"Clay wird Sie benachrichtigen, falls versucht wird, ein Bild zu erstellen, "
 "das mehr Speicher belegen würde, als hier angegeben."
 
 #: app/config/gimprc-blurbs.h:327
@@ -11219,7 +11219,7 @@ msgid ""
 msgstr ""
 "Wenn diese Option aktiviert ist, wird bei der Verschiebung einer Ebene oder "
 "eines Pfades mit dem Verschiebewerkzeug diese Ebene bzw. derjenige Pfad "
-"aktiviert. Dies war in früheren Versionen von GIMP das Standardverhalten."
+"aktiviert. Dies war in früheren Versionen von Clay das Standardverhalten."
 
 #: app/config/gimprc-blurbs.h:358
 msgid ""
@@ -11230,28 +11230,28 @@ msgstr ""
 "Navigationsvorschau fest."
 
 #: app/config/gimprc-blurbs.h:362
-msgid "Sets how many threads GIMP should use for operations that support it."
+msgid "Sets how many threads Clay should use for operations that support it."
 msgstr ""
-"Legt fest, wie viele Threads GIMP versucht, gleichzeitig für Vorgänge zu "
+"Legt fest, wie viele Threads Clay versucht, gleichzeitig für Vorgänge zu "
 "verwenden, die dies unterstützen."
 
 #: app/config/gimprc-blurbs.h:384
 msgid ""
-"Sets whether GIMP should create previews of layers and channels. Previews in "
+"Sets whether Clay should create previews of layers and channels. Previews in "
 "the layers and channels dialog are nice to have but they can slow things "
 "down when working with large images."
 msgstr ""
-"Legt fest, ob GIMP Vorschaubilder von Ebenen und Kanälen anlegt. "
+"Legt fest, ob Clay Vorschaubilder von Ebenen und Kanälen anlegt. "
 "Vorschaubilder im Dialog für Ebenen und Kanäle kann die Übersicht erhöhen, "
 "führt aber auch dazu, dass das System beim Bearbeiten sehr großer Bilder "
 "langsamer reagiert."
 
 #: app/config/gimprc-blurbs.h:389
 msgid ""
-"Sets whether GIMP should create previews of layer groups. Layer group "
+"Sets whether Clay should create previews of layer groups. Layer group "
 "previews are more expensive than ordinary layer previews."
 msgstr ""
-"Legt fest, ob GIMP Vorschauen von Ebenengruppen erzeugen soll. Derartige "
+"Legt fest, ob Clay Vorschauen von Ebenengruppen erzeugen soll. Derartige "
 "Vorschauen sind aufwendiger als gewöhnliche Ebenenvorschauen."
 
 #: app/config/gimprc-blurbs.h:393
@@ -11285,26 +11285,26 @@ msgstr ""
 "Diese Einstellung ist nur im Mehrfenstermodus wirksam."
 
 #: app/config/gimprc-blurbs.h:410
-msgid "Let GIMP try to restore your last saved session on each startup."
+msgid "Let Clay try to restore your last saved session on each startup."
 msgstr ""
-"Wenn diese Option ausgewählt ist, versucht GIMP bei jedem Start, die letzte "
+"Wenn diese Option ausgewählt ist, versucht Clay bei jedem Start, die letzte "
 "Sitzung wieder herzustellen."
 
 #: app/config/gimprc-blurbs.h:413
 msgid ""
-"When enabled, GIMP will try to restore windows on the monitor they were open "
+"When enabled, Clay will try to restore windows on the monitor they were open "
 "before.  When disabled, windows will appear on the currently used monitor."
 msgstr ""
-"Wenn diese Option gewählt ist versucht GIMP die Fenster auf dem Bildschirm "
+"Wenn diese Option gewählt ist versucht Clay die Fenster auf dem Bildschirm "
 "wieder herzustellen, auf dem Sie zuvor geöffnet waren. Wenn abgewählt "
 "erscheinen die Fenster auf dem aktuellen Bildschirm."
 
 #: app/config/gimprc-blurbs.h:418
 msgid ""
-"Remember the current tool, pattern, color, and brush across GIMP sessions."
+"Remember the current tool, pattern, color, and brush across Clay sessions."
 msgstr ""
 "Das gewählte Werkzeug und Muster, die gewählte Farbe sowie den gewählten "
-"Pinsel über GIMP-Sitzungen hinweg merken."
+"Pinsel über Clay-Sitzungen hinweg merken."
 
 #: app/config/gimprc-blurbs.h:422
 msgid ""
@@ -11324,13 +11324,13 @@ msgstr ""
 "zuletzt verwendeter Dokumente erstellen."
 
 #: app/config/gimprc-blurbs.h:431
-msgid "Save the positions and sizes of the main dialogs when GIMP exits."
+msgid "Save the positions and sizes of the main dialogs when Clay exits."
 msgstr ""
-"Die Positionen und Größen der Hauptdialoge beim Beenden von GIMP speichern."
+"Die Positionen und Größen der Hauptdialoge beim Beenden von Clay speichern."
 
 #: app/config/gimprc-blurbs.h:434
-msgid "Save the tool options when GIMP exits."
-msgstr "Werkzeugeinstellungen beim Beenden von GIMP speichern."
+msgid "Save the tool options when Clay exits."
+msgstr "Werkzeugeinstellungen beim Beenden von Clay speichern."
 
 #: app/config/gimprc-blurbs.h:440
 msgid ""
@@ -11455,8 +11455,8 @@ msgstr ""
 "werden."
 
 #: app/config/gimprc-blurbs.h:499
-msgid "Use GIMP in a single-window mode."
-msgstr "GIMP im Einzelfenster-Modus verwenden."
+msgid "Use Clay in a single-window mode."
+msgstr "Clay im Einzelfenster-Modus verwenden."
 
 #: app/config/gimprc-blurbs.h:502
 msgid "Hide docks and other windows, leaving only image windows."
@@ -11496,18 +11496,18 @@ msgstr ""
 
 #: app/config/gimprc-blurbs.h:526
 msgid ""
-"Sets the swap file location. GIMP uses a tile based memory allocation "
+"Sets the swap file location. Clay uses a tile based memory allocation "
 "scheme. The swap file is used to quickly and easily swap tiles out to disk "
-"and back in. Be aware that the swap file can easily get very large if GIMP "
+"and back in. Be aware that the swap file can easily get very large if Clay "
 "is used with large images. Also, things can get horribly slow if the swap "
 "file is created on a folder that is mounted over NFS.  For these reasons, it "
 "may be desirable to put your swap file in \"/tmp\"."
 msgstr ""
-"Legt den Speicherort der Auslagerungsdatei fest. GIMP verwendet ein "
+"Legt den Speicherort der Auslagerungsdatei fest. Clay verwendet ein "
 "blockorientiertes Speicherzugriffssystem. Die Auslagerungsdatei wird "
 "verwendet, um einzelne Speicherblöcke schnell und einfach aus dem "
 "Hauptspeicher auf die Festplatte auszulagern. Beachten Sie, dass diese "
-"Auslagerungsdatei sehr groß werden kann, wenn Sie mit GIMP große Bilder "
+"Auslagerungsdatei sehr groß werden kann, wenn Sie mit Clay große Bilder "
 "bearbeiten. Weiterhin kann das Programm sehr langsam reagieren, wenn Sie die "
 "Auslagerungsdatei innerhalb eines Netzwerkordners erstellen. Aus diesem "
 "Grund ist eine Auslagerung in den Ordner »/tmp« zu empfehlen."
@@ -11523,25 +11523,25 @@ msgstr ""
 "ist."
 
 #: app/config/gimprc-blurbs.h:539
-msgid "Save changed keyboard shortcuts when GIMP exits."
-msgstr "Geänderte Tastenkombinationen beim Beenden von GIMP speichern."
+msgid "Save changed keyboard shortcuts when Clay exits."
+msgstr "Geänderte Tastenkombinationen beim Beenden von Clay speichern."
 
 #: app/config/gimprc-blurbs.h:542
-msgid "Restore saved keyboard shortcuts on each GIMP startup."
+msgid "Restore saved keyboard shortcuts on each Clay startup."
 msgstr ""
-"Stellt gespeicherte Tastenkombinationen bei jedem Neustart von GIMP wieder "
+"Stellt gespeicherte Tastenkombinationen bei jedem Neustart von Clay wieder "
 "her."
 
 #: app/config/gimprc-blurbs.h:545
 msgid ""
 "Sets the folder for temporary storage. Files will appear here during the "
-"course of running GIMP.  Most files will disappear when GIMP exits, but some "
+"course of running Clay.  Most files will disappear when Clay exits, but some "
 "files are likely to remain, so it is best if this folder not be one that is "
 "shared by other users."
 msgstr ""
 "Legt den Ordner für den temporären Speicher fest. Während der Benutzung von "
-"GIMP werden hier verschiedene Prozessdateien abgelegt. Die meisten Dateien "
-"verschwinden nach dem Beenden von GIMP. Weil jedoch einige Dateien "
+"Clay werden hier verschiedene Prozessdateien abgelegt. Die meisten Dateien "
+"verschwinden nach dem Beenden von Clay. Weil jedoch einige Dateien "
 "verbleiben könnten, sollte dieser Ordner nur für Sie und nicht für andere "
 "Benutzer zugänglich sein."
 
@@ -11869,12 +11869,12 @@ msgstr ""
 
 #: app/config/gimprc-blurbs.h:733
 msgid ""
-"When the amount of pixel data exceeds this limit, GIMP will start to swap "
+"When the amount of pixel data exceeds this limit, Clay will start to swap "
 "tiles to disk.  This is a lot slower but it makes it possible to work on "
 "images that wouldn't fit into memory otherwise.  If you have a lot of RAM, "
 "you may want to set this to a higher value."
 msgstr ""
-"Wenn die Größe der Bilddaten diesen Wert überschreitet, wird GIMP Daten auf "
+"Wenn die Größe der Bilddaten diesen Wert überschreitet, wird Clay Daten auf "
 "die Festplatte auslagern. Dies ist deutlich langsamer macht es aber möglich "
 "mit großen Bildern zu arbeiten, die andernfalls nicht in den Speicher passen "
 "würden. Wenn Ihr Rechner über sehr viel Arbeitsspeicher verfügt, sollten Sie "
@@ -11899,8 +11899,8 @@ msgid "Show the currently active image in the toolbox."
 msgstr "Das aktive Bild im Werkzeugkasten anzeigen."
 
 #: app/config/gimprc-blurbs.h:751
-msgid "Show the GIMP mascot at the top of the toolbox."
-msgstr "Das GIMP-Maskottchen oben im Werkzeugkasten anzeigen."
+msgid "Show the Clay mascot at the top of the toolbox."
+msgstr "Das Clay-Maskottchen oben im Werkzeugkasten anzeigen."
 
 #: app/config/gimprc-blurbs.h:754
 msgid ""
@@ -11930,10 +11930,10 @@ msgstr ""
 
 #: app/config/gimprc-blurbs.h:768
 msgid ""
-"When enabled, GIMP will not save an image if it has not been changed since "
+"When enabled, Clay will not save an image if it has not been changed since "
 "it was opened."
 msgstr ""
-"Wenn diese Option aktiviert ist, wird GIMP keine Bilder speichern, die seit "
+"Wenn diese Option aktiviert ist, wird Clay keine Bilder speichern, die seit "
 "deren Laden nicht verändert wurden."
 
 #: app/config/gimprc-blurbs.h:772
@@ -12270,8 +12270,8 @@ msgstr "Nur Abstürze diagnostizieren"
 
 #: app/core/core-enums.c:478
 msgctxt "debug-policy"
-msgid "Never debug GIMP"
-msgstr "Keine GIMP-Fehlerdiagnose"
+msgid "Never debug Clay"
+msgstr "Keine Clay-Fehlerdiagnose"
 
 #: app/core/core-enums.c:564
 msgctxt "dynamics-output-type"
@@ -13252,8 +13252,8 @@ msgstr ""
 
 #: app/core/gimpextension.c:452
 #, c-format
-msgid "Extension AppData must extend \"org.gimp.GIMP\"."
-msgstr "AppData der Erweiterung muss »org.gimp.GIMP« erweitern."
+msgid "Extension AppData must extend \"org.gimp.Clay\"."
+msgstr "AppData der Erweiterung muss »org.gimp.Clay« erweitern."
 
 #: app/core/gimpextension.c:466
 #, c-format
@@ -13275,10 +13275,10 @@ msgstr "Nicht unterstütztes <relation> »%s« (Typ %s)."
 #: app/core/gimpextension.c:535
 #, c-format
 msgid ""
-"<requires><id>org.gimp.GIMP</id></requires> for version comparison is "
+"<requires><id>org.gimp.Clay</id></requires> for version comparison is "
 "mandatory."
 msgstr ""
-"<requires><id>org.gimp.GIMP</id></requires> ist für den Versionsvergleich "
+"<requires><id>org.gimp.Clay</id></requires> ist für den Versionsvergleich "
 "notwendig."
 
 #: app/core/gimpextension.c:831
@@ -13398,19 +13398,19 @@ msgstr "Fehler beim Schließen von »%s«: %s"
 #: app/core/gimp-user-install.c:238
 #, c-format
 msgid ""
-"It seems you have used GIMP %d.%d before.  GIMP will now migrate your user "
+"It seems you have used Clay %d.%d before.  Clay will now migrate your user "
 "settings to '%s'."
 msgstr ""
-"Offenbar haben Sie GIMP %d.%d zuvor bereits benutzt. Ihre Einstellungen "
+"Offenbar haben Sie Clay %d.%d zuvor bereits benutzt. Ihre Einstellungen "
 "werden daher nach »%s« überführt."
 
 #: app/core/gimp-user-install.c:245
 #, c-format
 msgid ""
-"It appears that you are using GIMP for the first time.  GIMP will now create "
+"It appears that you are using Clay for the first time.  Clay will now create "
 "a folder named '%s' and copy some files to it."
 msgstr ""
-"Offenbar benutzen Sie GIMP zum ersten Mal. Deshalb wird der Ordner mit dem "
+"Offenbar benutzen Sie Clay zum ersten Mal. Deshalb wird der Ordner mit dem "
 "Namen »%s« angelegt und einige Dateien dorthin kopiert."
 
 #: app/core/gimp-user-install.c:607
@@ -13522,11 +13522,11 @@ msgstr "Unbenannt"
 msgid ""
 "Fatal parse error in brush file:\n"
 "Unsupported brush depth %d\n"
-"GIMP brushes must be GRAY or RGBA."
+"Clay brushes must be GRAY or RGBA."
 msgstr ""
 "Schwerwiegender Fehler beim Verarbeiten der Pinseldatei: Nicht unterstützte "
 "Farbtiefe %d\n"
-"GIMP-Pinsel müssen in Graustufen oder RGB vorliegen."
+"Clay-Pinsel müssen in Graustufen oder RGB vorliegen."
 
 #: app/core/gimpbrush-load.c:503
 #, c-format
@@ -13596,18 +13596,18 @@ msgstr "Zwischenablage-Bild"
 
 #: app/core/gimpbrushgenerated-load.c:76
 #, c-format
-msgid "Not a GIMP brush file."
-msgstr "Keine GIMP-Pinseldatei."
+msgid "Not a Clay brush file."
+msgstr "Keine Clay-Pinseldatei."
 
 #: app/core/gimpbrushgenerated-load.c:96
 #, c-format
-msgid "Unknown GIMP brush version."
-msgstr "Unbekannte GIMP-Pinselversion."
+msgid "Unknown Clay brush version."
+msgstr "Unbekannte Clay-Pinselversion."
 
 #: app/core/gimpbrushgenerated-load.c:153
 #, c-format
-msgid "Unknown GIMP brush shape."
-msgstr "Unbekannte GIMP-Pinselform."
+msgid "Unknown Clay brush shape."
+msgstr "Unbekannte Clay-Pinselform."
 
 #: app/core/gimpbrushgenerated-load.c:173
 #, c-format
@@ -14223,8 +14223,8 @@ msgstr "Mit Muster füllen"
 
 #: app/core/gimpgradient-load.c:73
 #, c-format
-msgid "Not a GIMP gradient file."
-msgstr "Keine GIMP-Gradientendatei."
+msgid "Not a Clay gradient file."
+msgstr "Keine Clay-Gradientendatei."
 
 #: app/core/gimpgradient-load.c:96
 #, c-format
@@ -15353,8 +15353,8 @@ msgstr "Ungültige ACB-Palettenversion."
 
 #: app/core/gimppalette-load.c:750
 #, c-format
-msgid "GIMP only supports version 1 ACB palettes"
-msgstr "GIMP unterstützt nur ACB Paletten in Version 1"
+msgid "Clay only supports version 1 ACB palettes"
+msgstr "Clay unterstützt nur ACB Paletten in Version 1"
 
 #: app/core/gimppalette-load.c:758
 #, c-format
@@ -15480,10 +15480,10 @@ msgstr "Unbekannte Musterformatversion %d."
 #, c-format
 msgid ""
 "Unsupported pattern depth %d.\n"
-"GIMP Patterns must be GRAY or RGB."
+"Clay Patterns must be GRAY or RGB."
 msgstr ""
 "Nicht unterstützte Mustertiefe %d.\n"
-"GIMP-Muster müssen in Graustufen oder RGB vorliegen."
+"Clay-Muster müssen in Graustufen oder RGB vorliegen."
 
 #: app/core/gimppattern-load.c:124
 #, c-format
@@ -15521,10 +15521,10 @@ msgstr "Fehler beim Lesen des Photoshop-Musters."
 #, c-format
 msgid ""
 "Unsupported pattern dimensions %d x %d.\n"
-"GIMP Patterns have a maximum size of %d x %d."
+"Clay Patterns have a maximum size of %d x %d."
 msgstr ""
 "Nicht unterstützte Muster-Ausmaße %d x %d.\n"
-"GIMP-Muster dürfen maximal %d x %d groß sein."
+"Clay-Muster dürfen maximal %d x %d groß sein."
 
 #: app/core/gimppdbprogress.c:259
 #, c-format
@@ -15955,12 +15955,12 @@ msgid "%s (revision %d)"
 msgstr "%s (Revision %d)"
 
 #: app/dialogs/about-dialog.c:271
-msgid "About GIMP"
-msgstr "Über GIMP"
+msgid "About Clay"
+msgstr "Über Clay"
 
 #: app/dialogs/about-dialog.c:280
-msgid "Visit the GIMP website"
-msgstr "Die Internet-Seite von GIMP öffnen"
+msgid "Visit the Clay website"
+msgstr "Die Internet-Seite von Clay öffnen"
 
 #. Translators: insert your names here,
 #. separated by newline
@@ -15994,8 +15994,8 @@ msgstr "Aktualisierung verfügbar!"
 #. This is actually a new revision of current version.
 #: app/dialogs/about-dialog.c:579
 #, c-format
-msgid "Download GIMP %s revision %d (released on %s)\n"
-msgstr "GIMP %s, Revision %d herunterladen (veröffentlicht am %s)\n"
+msgid "Download Clay %s revision %d (released on %s)\n"
+msgstr "Clay %s, Revision %d herunterladen (veröffentlicht am %s)\n"
 
 #. Translators: <> tags are Pango markup. Please keep these
 #. * markups in your translation.
@@ -16006,8 +16006,8 @@ msgstr "<u>Veröffentlichungshinweis</u>: <i>%s</i>"
 
 #: app/dialogs/about-dialog.c:594
 #, c-format
-msgid "Download GIMP %s (released on %s)\n"
-msgstr "GIMP %s herunterladen (veröffentlicht am %s)\n"
+msgid "Download Clay %s (released on %s)\n"
+msgstr "Clay %s herunterladen (veröffentlicht am %s)\n"
 
 #: app/dialogs/about-dialog.c:619 app/dialogs/about-dialog.c:642
 msgid "Check for updates"
@@ -16032,8 +16032,8 @@ msgid "Up to date as of %s at %s"
 msgstr "Aktuell zum Zeitpunkt %s um %s"
 
 #: app/dialogs/about-dialog.c:897
-msgid "GIMP is brought to you by"
-msgstr "GIMP wurde Ihnen gebracht von"
+msgid "Clay is brought to you by"
+msgstr "Clay wurde Ihnen gebracht von"
 
 #: app/dialogs/about-dialog.c:972
 #, c-format
@@ -16374,12 +16374,12 @@ msgstr ""
 
 #: app/dialogs/dialogs-constructors.c:238 app/gui/gui.c:189
 #: app/gui/gui-message.c:268
-msgid "GIMP Message"
-msgstr "GIMP-Meldung"
+msgid "Clay Message"
+msgstr "Clay-Meldung"
 
 #: app/dialogs/dialogs-constructors.c:247
-msgid "GIMP Debug"
-msgstr "GIMP-Fehlerdiagnose"
+msgid "Clay Debug"
+msgstr "Clay-Fehlerdiagnose"
 
 #: app/dialogs/dialogs.c:320
 msgid "Devices"
@@ -16448,7 +16448,7 @@ msgid "FG/BG Color"
 msgstr "VG/HG-Farbe"
 
 #: app/dialogs/extensions-dialog.c:76
-msgctxt "GIMP extensions"
+msgctxt "Clay extensions"
 msgid "Extensions"
 msgstr "Erweiterungen"
 
@@ -16525,10 +16525,10 @@ msgstr "Der angegebene Dateiname kann nicht zum Exportieren verwendet werden"
 #: app/dialogs/file-save-dialog.c:663
 msgid ""
 "You can use this dialog to export to various file formats. If you want to "
-"save the image to the GIMP XCF format, use File→Save instead."
+"save the image to the Clay XCF format, use File→Save instead."
 msgstr ""
 "Sie können diesen Dialog zum Exportieren nach verschiedenen Dateiformaten "
-"verwenden. Wenn Sie das Bild als GIMP XCF-Format speichern wollen, so "
+"verwenden. Wenn Sie das Bild als Clay XCF-Format speichern wollen, so "
 "verwenden Sie stattdessen bitte Datei→Speichern."
 
 #: app/dialogs/file-save-dialog.c:666
@@ -16541,10 +16541,10 @@ msgstr "Der angegebene Dateiname kann nicht zum Speichern verwendet werden"
 
 #: app/dialogs/file-save-dialog.c:671
 msgid ""
-"You can use this dialog to save to the GIMP XCF format. Use File→Export to "
+"You can use this dialog to save to the Clay XCF format. Use File→Export to "
 "export to other file formats."
 msgstr ""
-"Sie können diesen Dialog zum Speichern im GIMP XCF-Format verwenden. "
+"Sie können diesen Dialog zum Speichern im Clay XCF-Format verwenden. "
 "Verwenden Sie Datei→Exportieren zum Exportieren in andere Dateiformate."
 
 #: app/dialogs/file-save-dialog.c:673
@@ -16978,8 +16978,8 @@ msgid "_Refresh"
 msgstr "_Aktualisieren"
 
 #: app/dialogs/module-dialog.c:135
-msgid "You will have to restart GIMP for the changes to take effect."
-msgstr "Sie müssen GIMP neu starten, damit die Änderungen aktiv werden."
+msgid "You will have to restart Clay for the changes to take effect."
+msgstr "Sie müssen Clay neu starten, damit die Änderungen aktiv werden."
 
 #: app/dialogs/module-dialog.c:300
 msgid "Only in memory"
@@ -17096,8 +17096,8 @@ msgid "All palette files (*.*)"
 msgstr "Alle Paletten-Dateien (*.*)"
 
 #: app/dialogs/palette-import-dialog.c:910
-msgid "GIMP Palette (*.gpl)"
-msgstr "GIMP-Palette (*.gpl)"
+msgid "Clay Palette (*.gpl)"
+msgstr "Clay-Palette (*.gpl)"
 
 # Eigenname des Dateiformats
 #: app/dialogs/palette-import-dialog.c:916
@@ -17143,16 +17143,16 @@ msgstr ""
 "Möchten Sie wirklich alle Einstellungen auf die Standardwerte zurücksetzen?"
 
 #: app/dialogs/preferences-dialog.c:305 app/dialogs/welcome-dialog.c:428
-msgid "You will have to restart GIMP for the following changes to take effect:"
+msgid "You will have to restart Clay for the following changes to take effect:"
 msgstr ""
-"Sie müssen GIMP neu starten, damit die folgenden Änderungen aktiv werden:"
+"Sie müssen Clay neu starten, damit die folgenden Änderungen aktiv werden:"
 
 #: app/dialogs/preferences-dialog.c:590
 msgid ""
 "Your keyboard shortcuts will be reset to default values the next time you "
-"start GIMP."
+"start Clay."
 msgstr ""
-"Die Tastenkombinationen werden beim nächsten Start von GIMP auf die "
+"Die Tastenkombinationen werden beim nächsten Start von Clay auf die "
 "Standardwerte zurückgesetzt."
 
 #: app/dialogs/preferences-dialog.c:601
@@ -17167,25 +17167,25 @@ msgstr ""
 #: app/dialogs/preferences-dialog.c:664
 msgid ""
 "Your window setup will be reset to default values the next time you start "
-"GIMP."
+"Clay."
 msgstr ""
-"Die Fenstereinstellungen werden beim nächsten Start von GIMP auf die "
+"Die Fenstereinstellungen werden beim nächsten Start von Clay auf die "
 "Standardwerte zurückgesetzt."
 
 #: app/dialogs/preferences-dialog.c:699
 msgid ""
 "Your input device settings will be reset to default values the next time you "
-"start GIMP."
+"start Clay."
 msgstr ""
-"Die Einstellungen für Eingabegeräte werden beim nächsten Start von GIMP auf "
+"Die Einstellungen für Eingabegeräte werden beim nächsten Start von Clay auf "
 "die Standardwerte zurückgesetzt."
 
 #: app/dialogs/preferences-dialog.c:779
 msgid ""
 "Your tool options will be reset to default values the next time you start "
-"GIMP."
+"Clay."
 msgstr ""
-"Die Werkzeugeinstellungen werden beim nächsten Start von GIMP auf die "
+"Die Werkzeugeinstellungen werden beim nächsten Start von Clay auf die "
 "Standardwerte zurückgesetzt."
 
 #: app/dialogs/preferences-dialog.c:831 app/dialogs/preferences-dialog.c:2785
@@ -17345,12 +17345,12 @@ msgstr "Fehlerdiagnose"
 
 #: app/dialogs/preferences-dialog.c:1319
 msgid ""
-"We hope you will never need these settings, but as all software, GIMP has "
+"We hope you will never need these settings, but as all software, Clay has "
 "bugs, and crashes can occur. If it happens, you can help us by reporting "
 "bugs."
 msgstr ""
 "Wir hoffen, dass Sie diese Einstellungen niemals brauchen werden, aber wie "
-"jede Software enthält auch GIMP Fehler und kann abstürzen. Falls dies "
+"jede Software enthält auch Clay Fehler und kann abstürzen. Falls dies "
 "passiert, können Sie uns helfen, indem Sie Fehler melden."
 
 #: app/dialogs/preferences-dialog.c:1328
@@ -17586,11 +17586,11 @@ msgstr "Spielplatz"
 
 #: app/dialogs/preferences-dialog.c:1707
 msgid ""
-"These features are unfinished, buggy and may crash GIMP. It is unadvised to "
+"These features are unfinished, buggy and may crash Clay. It is unadvised to "
 "use them unless you really know what you are doing or you intend to "
 "contribute patches."
 msgstr ""
-"Diese Funktionsmerkmale sind unvollständig, fehlerbehaftet und können GIMP "
+"Diese Funktionsmerkmale sind unvollständig, fehlerbehaftet und können Clay "
 "zum Absturz bringen. Von deren Verwendung wird abgeraten, es sei denn, Sie "
 "wissen, was Sie tun oder Sie wollen Patches bereitstellen."
 
@@ -17880,8 +17880,8 @@ msgid "Appearance"
 msgstr "Darstellung"
 
 #: app/dialogs/preferences-dialog.c:2356
-msgid "Show GIMP _logo (drag-and-drop target)"
-msgstr "GIMP-_Logo anzeigen (Ziel beim Ziehen und Ablegen)"
+msgid "Show Clay _logo (drag-and-drop target)"
+msgstr "Clay-_Logo anzeigen (Ziel beim Ziehen und Ablegen)"
 
 #: app/dialogs/preferences-dialog.c:2360
 msgid "Show _foreground & background color"
@@ -18403,11 +18403,11 @@ msgstr "Menüleiste und Titelleiste vereinen"
 
 #: app/dialogs/preferences-dialog.c:3170
 msgid ""
-"GIMP will try to convince your system not to decorate image windows. If it "
+"Clay will try to convince your system not to decorate image windows. If it "
 "doesn't work properly on your system (i.e. you get 2 title bars), please "
 "report."
 msgstr ""
-"GIMP wird versuchen, Ihr System davon zu überzeugen, Bildfenster nicht zu "
+"Clay wird versuchen, Ihr System davon zu überzeugen, Bildfenster nicht zu "
 "dekorieren. Wenn es auf Ihrem System nicht richtig funktioniert (d.h. Sie "
 "erhalten 2 Titelleisten), melden Sie dies bitte."
 
@@ -18824,16 +18824,16 @@ msgid "pixels/%a"
 msgstr "Pixel/%a"
 
 #: app/dialogs/quit-dialog.c:144
-msgid "Quit GIMP"
-msgstr "GIMP beenden"
+msgid "Quit Clay"
+msgstr "Clay beenden"
 
 #: app/dialogs/quit-dialog.c:144
 msgid "Close All Images"
 msgstr "Alle Bilder schließen"
 
 #: app/dialogs/quit-dialog.c:222
-msgid "If you quit GIMP now, these changes will be lost."
-msgstr "Wenn Sie GIMP jetzt beenden, gehen diese Änderungen verloren."
+msgid "If you quit Clay now, these changes will be lost."
+msgstr "Wenn Sie Clay jetzt beenden, gehen diese Änderungen verloren."
 
 #: app/dialogs/quit-dialog.c:225
 msgid "If you close these images now, changes will be lost."
@@ -19016,12 +19016,12 @@ msgid "_Emulate brush dynamics"
 msgstr "_Pinseldynamik emulieren"
 
 #: app/dialogs/tips-dialog.c:88
-msgid "The GIMP tips file is empty!"
-msgstr "Die Datei mit den »GIMP-Tipps des Tages« ist leer!"
+msgid "The Clay tips file is empty!"
+msgstr "Die Datei mit den »Clay-Tipps des Tages« ist leer!"
 
 #: app/dialogs/tips-dialog.c:92
-msgid "The GIMP tips file appears to be missing!"
-msgstr "Die Datei für die »GIMP-Tipps des Tages« wurde nicht gefunden!"
+msgid "The Clay tips file appears to be missing!"
+msgstr "Die Datei für die »Clay-Tipps des Tages« wurde nicht gefunden!"
 
 #: app/dialogs/tips-dialog.c:94
 #, c-format
@@ -19031,13 +19031,13 @@ msgstr ""
 "Installation."
 
 #: app/dialogs/tips-dialog.c:100
-msgid "The GIMP tips file could not be parsed!"
+msgid "The Clay tips file could not be parsed!"
 msgstr ""
-"Die Datei mit den »GIMP-Tipps des Tages« konnte nicht analysiert werden!"
+"Die Datei mit den »Clay-Tipps des Tages« konnte nicht analysiert werden!"
 
 #: app/dialogs/tips-dialog.c:128
-msgid "GIMP Tip of the Day"
-msgstr "GIMP-Tipp des Tages"
+msgid "Clay Tip of the Day"
+msgstr "Clay-Tipp des Tages"
 
 #: app/dialogs/tips-dialog.c:135
 msgid "_Previous Tip"
@@ -19062,17 +19062,17 @@ msgid "tips-locale:C"
 msgstr "tips-locale:de"
 
 #: app/dialogs/user-install-dialog.c:86
-msgid "GIMP User Installation"
-msgstr "GIMP-Benutzerinstallation"
+msgid "Clay User Installation"
+msgstr "Clay-Benutzerinstallation"
 
 #: app/dialogs/user-install-dialog.c:95
 msgid "User installation failed!"
 msgstr "Benutzerinstallation fehlgeschlagen!"
 
 #: app/dialogs/user-install-dialog.c:97
-msgid "The GIMP user installation failed; see the log for details."
+msgid "The Clay user installation failed; see the log for details."
 msgstr ""
-"Die GIMP-Benutzerinstallation ist fehlgeschlagen. Weitere Details können Sie "
+"Die Clay-Benutzerinstallation ist fehlgeschlagen. Weitere Details können Sie "
 "dem Installationsprotokoll entnehmen."
 
 #: app/dialogs/user-install-dialog.c:100
@@ -19126,8 +19126,8 @@ msgstr "Pfad_sichtbarkeit sperren"
 #. Translators: the %s string will be the version, e.g. "3.0".
 #: app/dialogs/welcome-dialog.c:200
 #, c-format
-msgid "Welcome to GIMP %s"
-msgstr "Willkommen zu GIMP %s"
+msgid "Welcome to Clay %s"
+msgstr "Willkommen zu Clay %s"
 
 #: app/dialogs/welcome-dialog.c:249 app/dialogs/welcome-dialog.c:250
 msgid "Welcome"
@@ -19152,21 +19152,21 @@ msgstr "Veröffentlichungshinweise"
 #. Translators: the %s string will be the version, e.g. "3.0".
 #: app/dialogs/welcome-dialog.c:491
 #, c-format
-msgid "You installed GIMP %s"
-msgstr "Sie haben GIMP %s installiert"
+msgid "You installed Clay %s"
+msgstr "Sie haben Clay %s installiert"
 
 #. Welcome message: left
 #: app/dialogs/welcome-dialog.c:505
 msgid ""
-"GIMP is Free Software for image authoring and manipulation.\n"
+"Clay is Free Software for image authoring and manipulation.\n"
 "Want to know more?"
 msgstr ""
-"GIMP ist freie Software zur Bildbearbeitung und -erstellung.\n"
+"Clay ist freie Software zur Bildbearbeitung und -erstellung.\n"
 "Möchten Sie mehr erfahren?"
 
 #: app/dialogs/welcome-dialog.c:536
-msgid "GIMP website"
-msgstr "Die Internet-Seite von GIMP"
+msgid "Clay website"
+msgstr "Die Internet-Seite von Clay"
 
 #: app/dialogs/welcome-dialog.c:540
 msgid "Documentation"
@@ -19181,10 +19181,10 @@ msgstr "Community Anleitungen"
 #. Welcome message: right
 #: app/dialogs/welcome-dialog.c:553
 msgid ""
-"GIMP is Community Software under the GNU general public license v3.\n"
+"Clay is Community Software under the GNU general public license v3.\n"
 "Want to contribute?"
 msgstr ""
-"GIMP ist Gemeinschafts-Software mit der »GNU general public license v3«.\n"
+"Clay ist Gemeinschafts-Software mit der »GNU general public license v3«.\n"
 "Möchten Sie mitmachen?"
 
 #: app/dialogs/welcome-dialog.c:578
@@ -19258,10 +19258,10 @@ msgstr "Fehler melden"
 
 #: app/dialogs/welcome-dialog.c:858
 msgid ""
-"As any application, GIMP is not bug-free, so reporting bugs that you "
+"As any application, Clay is not bug-free, so reporting bugs that you "
 "encounter is very important to the development."
 msgstr ""
-"Wie jede Anwendung enthält auch GIMP Fehler. Daher ist es für die "
+"Wie jede Anwendung enthält auch Clay Fehler. Daher ist es für die "
 "Entwicklung sehr wichtig, dass Sie uns Fehler melden, auf die Sie stoßen."
 
 #: app/dialogs/welcome-dialog.c:871 app/dialogs/welcome-dialog.c:881
@@ -19289,9 +19289,9 @@ msgid "Donate"
 msgstr "Spenden"
 
 #: app/dialogs/welcome-dialog.c:901
-msgid "Donating money is important: it makes GIMP sustainable."
+msgid "Donating money is important: it makes Clay sustainable."
 msgstr ""
-"Geldspenden sind wichtig: Sie schaffen eine nachhaltige Entwicklung von GIMP."
+"Geldspenden sind wichtig: Sie schaffen eine nachhaltige Entwicklung von Clay."
 
 #: app/dialogs/welcome-dialog.c:909
 msgid "Donate via Liberapay"
@@ -19304,8 +19304,8 @@ msgstr "Weitere Spendenmöglichkeiten"
 #. Translators: the %s string will be the version, e.g. "3.0".
 #: app/dialogs/welcome-dialog.c:947
 #, c-format
-msgid "GIMP %s Release Notes"
-msgstr "Die Veröffentlichungshinweise zu GIMP %s"
+msgid "Clay %s Release Notes"
+msgstr "Die Veröffentlichungshinweise zu Clay %s"
 
 #: app/dialogs/welcome-dialog.c:1062
 #, c-format
@@ -20322,48 +20322,48 @@ msgstr "Ungültige Zeichenfolge in Adresse"
 
 #: app/file-data/file-data-gex.c:147
 #, c-format
-msgid "Absolute path are forbidden in GIMP extension '%s': %s"
-msgstr "Absolute Pfade sind in der GIMP-Erweiterung »%s« untersagt: %s"
+msgid "Absolute path are forbidden in Clay extension '%s': %s"
+msgstr "Absolute Pfade sind in der Clay-Erweiterung »%s« untersagt: %s"
 
 #: app/file-data/file-data-gex.c:158
 #, c-format
-msgid "File not allowed in root of GIMP extension '%s': %s"
-msgstr "Datei im Wurzelordner der GIMP-Erweiterung »%s« nicht erlaubt: %s"
+msgid "File not allowed in root of Clay extension '%s': %s"
+msgstr "Datei im Wurzelordner der Clay-Erweiterung »%s« nicht erlaubt: %s"
 
 #: app/file-data/file-data-gex.c:169
 #, c-format
-msgid "File not in GIMP extension '%s' folder id '%s': %s"
-msgstr "Datei nicht in GIMP-Erweiterung »%s« Ordner-Kennung »%s«: %s"
+msgid "File not in Clay extension '%s' folder id '%s': %s"
+msgstr "Datei nicht in Clay-Erweiterung »%s« Ordner-Kennung »%s«: %s"
 
 #: app/file-data/file-data-gex.c:268 app/file-data/file-data-gex.c:429
 #: app/file-data/file-data-gex.c:447 app/file-data/file-data-gex.c:464
 #: app/file-data/file-data-gex.c:478
 #, c-format
-msgid "Fatal error when uncompressing GIMP extension '%s': %s"
+msgid "Fatal error when uncompressing Clay extension '%s': %s"
 msgstr ""
-"Schwerwiegender Fehler bei der Dekomprimierung der GIMP-Erweiterung »%s«: %s"
+"Schwerwiegender Fehler bei der Dekomprimierung der Clay-Erweiterung »%s«: %s"
 
 #: app/file-data/file-data-gex.c:312
 #, c-format
-msgid "GIMP extension '%s' directory (%s) different from AppStream id: %s"
+msgid "Clay extension '%s' directory (%s) different from AppStream id: %s"
 msgstr ""
-"GIMP-Erweiterung »%s« Ordner (%s) unterscheidet sich von AppStream-Kennung: "
+"Clay-Erweiterung »%s« Ordner (%s) unterscheidet sich von AppStream-Kennung: "
 "%s"
 
 #: app/file-data/file-data-gex.c:326
 #, c-format
-msgid "GIMP extension '%s' requires an AppStream file: %s"
-msgstr "Die GIMP-Erweiterung »%s« erfordert eine AppStream-Datei: %s"
+msgid "Clay extension '%s' requires an AppStream file: %s"
+msgstr "Die Clay-Erweiterung »%s« erfordert eine AppStream-Datei: %s"
 
 #: app/file-data/file-data-gex.c:341 app/file-data/file-data-gex.c:488
 #, c-format
-msgid "Invalid GIMP extension '%s': %s"
-msgstr "Ungültige GIMP-Erweiterung »%s«: %s"
+msgid "Invalid Clay extension '%s': %s"
+msgstr "Ungültige Clay-Erweiterung »%s«: %s"
 
 #: app/file-data/file-data-gex.c:456
 #, c-format
-msgid "Warning when uncompressing GIMP extension '%s': %s\n"
-msgstr "Warnung bei der Dekomprimierung der GIMP-Erweiterung »%s«: %s\n"
+msgid "Warning when uncompressing Clay extension '%s': %s\n"
+msgstr "Warnung bei der Dekomprimierung der Clay-Erweiterung »%s«: %s\n"
 
 #: app/file-data/file-data-gih.c:300
 #, c-format
@@ -20376,20 +20376,20 @@ msgid "Negative y offset: %d for layer %s corrected."
 msgstr "Negativer Y-Versatz: %d für Ebene %s wurde korrigiert."
 
 #: app/file-data/file-data.c:60 app/file-data/file-data.c:116
-msgid "GIMP brush"
-msgstr "GIMP-Pinsel"
+msgid "Clay brush"
+msgstr "Clay-Pinsel"
 
 #: app/file-data/file-data.c:192 app/file-data/file-data.c:245
-msgid "GIMP brush (animated)"
-msgstr "GIMP-Pinsel (animiert)"
+msgid "Clay brush (animated)"
+msgstr "Clay-Pinsel (animiert)"
 
 #: app/file-data/file-data.c:328 app/file-data/file-data.c:380
-msgid "GIMP pattern"
-msgstr "GIMP-Muster"
+msgid "Clay pattern"
+msgstr "Clay-Muster"
 
 #: app/file-data/file-data.c:450
-msgid "GIMP extension"
-msgstr "GIMP-Erweiterung"
+msgid "Clay extension"
+msgstr "Clay-Erweiterung"
 
 #: app/gegl/gimp-babl.c:184 app/gegl/gimp-babl.c:185 app/gegl/gimp-babl.c:186
 #: app/gegl/gimp-babl.c:187 app/gegl/gimp-babl.c:188 app/gegl/gimp-babl.c:189
@@ -21096,8 +21096,8 @@ msgid "Curve"
 msgstr "Kurve"
 
 #: app/operations/gimpcurvesconfig.c:564
-msgid "not a GIMP Curves file"
-msgstr "keine GIMP-Kurvendatei"
+msgid "not a Clay Curves file"
+msgstr "keine Clay-Kurvendatei"
 
 #: app/operations/gimpcurvesconfig.c:600
 msgid "Parse error, didn't find 2 integers"
@@ -21177,8 +21177,8 @@ msgid "Clamp final output values."
 msgstr "Die endgültigen Ausgangswerte auf einen Bereich beschränken."
 
 #: app/operations/gimplevelsconfig.c:884
-msgid "not a GIMP Levels file"
-msgstr "keine GIMP-Datei mit Einstellungen für Werte"
+msgid "not a Clay Levels file"
+msgstr "keine Clay-Datei mit Einstellungen für Werte"
 
 #: app/operations/gimplevelsconfig.c:968 app/operations/gimplevelsconfig.c:1101
 #: app/operations/gimplevelsconfig.c:1104
@@ -21201,16 +21201,16 @@ msgid "Adjust brightness and contrast"
 msgstr "Helligkeit und Kontrast anpassen"
 
 #: app/operations/gimpoperationcagecoefcalc.c:69
-msgid "Compute a set of coefficient buffer for the GIMP cage tool"
+msgid "Compute a set of coefficient buffer for the Clay cage tool"
 msgstr ""
-"Eine Reihe von Koeffizienten-Puffern für das GIMP-Käfigwerkzeug berechnen"
+"Eine Reihe von Koeffizienten-Puffern für das Clay-Käfigwerkzeug berechnen"
 
 #: app/operations/gimpoperationcagetransform.c:104
 msgid ""
-"Convert a set of coefficient buffer to a coordinate buffer for the GIMP cage "
+"Convert a set of coefficient buffer to a coordinate buffer for the Clay cage "
 "tool"
 msgstr ""
-"Eine Reihe von Koeffizienten-Puffern in einen Koordinatenpuffer für das GIMP-"
+"Eine Reihe von Koeffizienten-Puffern in einen Koordinatenpuffer für das Clay-"
 "Käfigwerkzeug umwandeln"
 
 #: app/operations/gimpoperationcagetransform.c:129
@@ -21381,8 +21381,8 @@ msgid "_Recover"
 msgstr "_Wiederherstellen"
 
 #: app/gui/gui.c:350
-msgid "Eeek! It looks like GIMP recovered from a crash!"
-msgstr "Offensichtlich wurde GIMP nach einem Absturz wiederhergestellt!"
+msgid "Eeek! It looks like Clay recovered from a crash!"
+msgstr "Offensichtlich wurde Clay nach einem Absturz wiederhergestellt!"
 
 #. TRANSLATORS: even if English singular form does
 #. * not use %d, you can use %d for translation in
@@ -21397,10 +21397,10 @@ msgid ""
 msgid_plural ""
 "%d images were salvaged from the crash. Do you want to try and recover them?"
 msgstr[0] ""
-"Ein Bild wurde aus dem abgestürzten GIMP gerettet. Wollen Sie versuchen, es "
+"Ein Bild wurde aus dem abgestürzten Clay gerettet. Wollen Sie versuchen, es "
 "wiederherzustellen?"
 msgstr[1] ""
-"%d Bilder wurden aus dem abgestürzten GIMP gerettet. Wollen Sie versuchen, "
+"%d Bilder wurden aus dem abgestürzten Clay gerettet. Wollen Sie versuchen, "
 "sie wiederherzustellen?"
 
 #. load the recent documents after gimp_real_restore() because we
@@ -21411,8 +21411,8 @@ msgid "Documents"
 msgstr "Dokumente"
 
 #: app/gui/splash.c:203
-msgid "GIMP Startup"
-msgstr "GIMP-Start"
+msgid "Clay Startup"
+msgstr "Clay-Start"
 
 #: app/gui/splash.c:371
 msgid "Loading"
@@ -22774,14 +22774,14 @@ msgid ""
 "Plug-in crashed: \"%s\"\n"
 "(%s)\n"
 "\n"
-"The dying plug-in may have messed up GIMP's internal state. You may want to "
-"save your images and restart GIMP to be on the safe side."
+"The dying plug-in may have messed up Clay's internal state. You may want to "
+"save your images and restart Clay to be on the safe side."
 msgstr ""
 "Das Plugin »%s« ist abgestürzt\n"
 "(%s)\n"
 "\n"
-"Das abgestürzte Plugin hat GIMP eventuell instabil gemacht. Sie sollten "
-"sicherheitshalber Ihre Bilder jetzt abspeichern und anschließend GIMP neu "
+"Das abgestürzte Plugin hat Clay eventuell instabil gemacht. Sie sollten "
+"sicherheitshalber Ihre Bilder jetzt abspeichern und anschließend Clay neu "
 "starten."
 
 #: app/plug-in/gimpplugin-message.c:478
@@ -22911,8 +22911,8 @@ msgstr ""
 
 #: app/plug-in/plug-in-rc.c:243
 #, c-format
-msgid "Skipping '%s': wrong GIMP protocol version."
-msgstr "»%s« wird übersprungen: Falsche GIMP-Protokollversion."
+msgid "Skipping '%s': wrong Clay protocol version."
+msgstr "»%s« wird übersprungen: Falsche Clay-Protokollversion."
 
 #: app/plug-in/plug-in-rc.c:250
 #, c-format
@@ -25274,8 +25274,8 @@ msgid "A selected channel's position or pixels are locked."
 msgstr "Die Position oder Pixel eines gewählten Kanals ist gesperrt."
 
 #: app/tools/gimpmybrushtool.c:79
-msgid "MyPaint Brush Tool: Use MyPaint brushes in GIMP"
-msgstr "MyPaint-Pinselwerkzeug: MyPaint-Pinsel in GIMP verwenden"
+msgid "MyPaint Brush Tool: Use MyPaint brushes in Clay"
+msgstr "MyPaint-Pinselwerkzeug: MyPaint-Pinsel in Clay verwenden"
 
 #: app/tools/gimpmybrushtool.c:80
 msgid "M_yPaint Brush"
@@ -26169,8 +26169,8 @@ msgid "Exactly one path must be selected."
 msgstr "Es muss genau ein Pfad ausgewählt werden."
 
 #: app/tools/gimptexttool-editor.c:1492
-msgid "GIMP Text Editor"
-msgstr "GIMP-Texteditor"
+msgid "Clay Text Editor"
+msgstr "Clay-Texteditor"
 
 #: app/tools/gimpthresholdtool.c:95
 msgid "_Threshold..."
@@ -27545,10 +27545,10 @@ msgstr "Zur _Download-Seite gehen"
 #: app/widgets/gimpcriticaldialog.c:226
 #, c-format
 msgid ""
-"A new version of GIMP (%s) was released on %s.\n"
+"A new version of Clay (%s) was released on %s.\n"
 "It is recommended to update."
 msgstr ""
-"Eine neue Version von GIMP (%s) wurde am %s veröffentlicht.\n"
+"Eine neue Version von Clay (%s) wurde am %s veröffentlicht.\n"
 "Es wird eine Aktualisierung empfohlen."
 
 #: app/widgets/gimpcriticaldialog.c:232
@@ -27557,9 +27557,9 @@ msgstr "Sie nutzen eine nicht unterstütze Version!"
 
 #: app/widgets/gimpcriticaldialog.c:255 app/widgets/gimpcriticaldialog.c:664
 msgid ""
-"To help us improve GIMP, you can report the bug with these simple steps:"
+"To help us improve Clay, you can report the bug with these simple steps:"
 msgstr ""
-"Helfen Sie uns GIMP zu verbessern und melden Sie den Fehler, indem Sie "
+"Helfen Sie uns Clay zu verbessern und melden Sie den Fehler, indem Sie "
 "folgende Schritte durchführen:"
 
 #: app/widgets/gimpcriticaldialog.c:257 app/widgets/gimpcriticaldialog.c:666
@@ -27595,11 +27595,11 @@ msgstr ""
 
 #: app/widgets/gimpcriticaldialog.c:265
 msgid ""
-"This error may have left GIMP in an inconsistent state. It is advised to "
-"save your work and restart GIMP."
+"This error may have left Clay in an inconsistent state. It is advised to "
+"save your work and restart Clay."
 msgstr ""
-"Durch den Fehler könnte GIMP in einen inkonsistenten Zustand gekommen sein. "
-"Es ist ratsam, Ihre Arbeit zu speichern und GIMP neu zu starten."
+"Durch den Fehler könnte Clay in einen inkonsistenten Zustand gekommen sein. "
+"Es ist ratsam, Ihre Arbeit zu speichern und Clay neu zu starten."
 
 #: app/widgets/gimpcriticaldialog.c:270
 msgid ""
@@ -27682,26 +27682,26 @@ msgstr "Fehler beim Öffnen von »%s«: %s"
 
 #: app/widgets/gimpcriticaldialog.c:630
 #, c-format
-msgid "GIMP crashed with a fatal error: %s"
-msgstr "GIMP ist mit einem schwerwiegenden Fehler abgestürzt: %s"
+msgid "Clay crashed with a fatal error: %s"
+msgstr "Clay ist mit einem schwerwiegenden Fehler abgestürzt: %s"
 
 #. First error. Let's just display it.
 #: app/widgets/gimpcriticaldialog.c:637
 #, c-format
-msgid "GIMP encountered an error: %s"
-msgstr "GIMP hat einen Fehler erkannt: %s"
+msgid "Clay encountered an error: %s"
+msgstr "Clay hat einen Fehler erkannt: %s"
 
 #. Let's not display all errors. They will be in the bug report
 #. * part anyway.
 #.
 #: app/widgets/gimpcriticaldialog.c:645
 #, c-format
-msgid "GIMP encountered several critical errors!"
-msgstr "GIMP hat mehrere kritische Fehler erkannt!"
+msgid "Clay encountered several critical errors!"
+msgstr "Clay hat mehrere kritische Fehler erkannt!"
 
 #: app/widgets/gimpcriticaldialog.c:697
-msgid "_Restart GIMP"
-msgstr "GIMP _neu starten"
+msgid "_Restart Clay"
+msgstr "Clay _neu starten"
 
 #: app/widgets/gimpdashboard.c:473 app/widgets/gimpdashboard.c:525
 msgctxt "dashboard-variable"
@@ -28366,7 +28366,7 @@ msgid "Messages are redirected to stderr."
 msgstr "Die Ausgabe erfolgt nun auf der Standardfehlerausgabe."
 
 #. %s is a message domain,
-#. * like "GIMP Message" or
+#. * like "Clay Message" or
 #. * "PNG Message"
 #.
 #: app/widgets/gimperrordialog.c:203
@@ -28536,12 +28536,12 @@ msgid "_Background color:"
 msgstr "_Hintergrundfarbe:"
 
 #: app/widgets/gimphelp.c:591
-msgid "GIMP user manual is missing"
-msgstr "Das GIMP-Benutzerhandbuch fehlt"
+msgid "Clay user manual is missing"
+msgstr "Das Clay-Benutzerhandbuch fehlt"
 
 #: app/widgets/gimphelp.c:602
-msgid "The GIMP user manual is not installed in your language."
-msgstr "Das GIMP-Benutzerhandbuch ist in Ihrer Sprache nicht installiert."
+msgid "The Clay user manual is not installed in your language."
+msgstr "Das Clay-Benutzerhandbuch ist in Ihrer Sprache nicht installiert."
 
 #: app/widgets/gimphelp.c:613
 msgid "Read Selected _Language"
@@ -28980,15 +28980,15 @@ msgstr ""
 #: app/widgets/gimpsavedialog.c:398
 #, c-format
 msgid ""
-"The image uses features from %s and won't be readable by older GIMP versions."
+"The image uses features from %s and won't be readable by older Clay versions."
 msgstr ""
-"Das Bild verwendet Funktionen aus %s und kann in älteren Versionen von GIMP "
+"Das Bild verwendet Funktionen aus %s und kann in älteren Versionen von Clay "
 "nicht gelesen werden."
 
 #: app/widgets/gimpsavedialog.c:407
-msgid "Metadata won't be visible in GIMP older than version 2.10."
+msgid "Metadata won't be visible in Clay older than version 2.10."
 msgstr ""
-"Metadaten werden in GIMP-Versionen älter als Version 2.10 nicht sichtbar "
+"Metadaten werden in Clay-Versionen älter als Version 2.10 nicht sichtbar "
 "sein."
 
 #. TRANSLATORS: a helper label indicating the menu path for an action,
@@ -29647,8 +29647,8 @@ msgid "Status & desc"
 msgstr "Status und Beschreibung"
 
 #: app/xcf/xcf.c:127 app/xcf/xcf.c:182
-msgid "GIMP XCF image"
-msgstr "GIMP-XCF-Bild"
+msgid "Clay XCF image"
+msgstr "Clay-XCF-Bild"
 
 #: app/xcf/xcf.c:258 app/xcf/xcf.c:316
 msgid "Memory Stream"
@@ -29708,12 +29708,12 @@ msgstr ""
 #: app/xcf/xcf-load.c:963
 #, c-format
 msgid ""
-"Corrupt XMP metadata saved by an older version of GIMP could not be "
+"Corrupt XMP metadata saved by an older version of Clay could not be "
 "converted and will be ignored.\n"
 "If you don't know what XMP is, you most likely don't need it. Reported "
 "error: %s."
 msgstr ""
-"Korrupte XMP-Metadaten, die von einer älteren GIMP-Version gespeichert "
+"Korrupte XMP-Metadaten, die von einer älteren Clay-Version gespeichert "
 "wurden, konnten nicht konvertiert werden und werden daher ignoriert.\n"
 "Falls Ihnen der Begriff »XMP« nicht geläufig ist, ist das für Sie "
 "wahrscheinlich nicht von Bedeutung. Fehlermeldung: %s."
@@ -29830,8 +29830,8 @@ msgstr ""
 "Pixel: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP-Fehlerdiagnose eines Absturzes"
+msgid "Clay Crash Debug"
+msgstr "Clay-Fehlerdiagnose eines Absturzes"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"
@@ -30271,8 +30271,8 @@ msgstr "Benutzer_handbuch"
 
 #: menus/image-menu.ui.in.in:926
 msgctxt "help-action"
-msgid "_GIMP Online"
-msgstr "_GIMP im Internet"
+msgid "_Clay Online"
+msgstr "_Clay im Internet"
 
 #: menus/images-menu.ui:6
 msgctxt "images-action"
@@ -30389,14 +30389,14 @@ msgctxt "edit-action"
 msgid "Undo History Menu"
 msgstr "Journal-Menü"
 
-#~ msgid "GIMP output. Type any character to close this window."
+#~ msgid "Clay output. Type any character to close this window."
 #~ msgstr ""
-#~ "GIMP-Ausgabe. Drücken Sie eine beliebige Taste, um dieses Fenster zu "
+#~ "Clay-Ausgabe. Drücken Sie eine beliebige Taste, um dieses Fenster zu "
 #~ "schließen."
 
-#~ msgid "GIMP output. You can minimize this window, but don't close it."
+#~ msgid "Clay output. You can minimize this window, but don't close it."
 #~ msgstr ""
-#~ "GIMP-Ausgabe. Sie können dieses Fenster verkleinern, jedoch nicht "
+#~ "Clay-Ausgabe. Sie können dieses Fenster verkleinern, jedoch nicht "
 #~ "schließen."
 
 #~ msgctxt "dialogs-action"
@@ -30484,8 +30484,8 @@ msgstr "Journal-Menü"
 #~ msgstr "Ausgefallen"
 
 #~ msgctxt "help-browser-type"
-#~ msgid "GIMP help browser"
-#~ msgstr "GIMP-Hilfe-Browser"
+#~ msgid "Clay help browser"
+#~ msgstr "Clay-Hilfe-Browser"
 
 #~ msgctxt "help-browser-type"
 #~ msgid "Web browser"
@@ -30535,10 +30535,10 @@ msgstr "Journal-Menü"
 #~ msgstr "Zu verwendender Hilfe-_Browser:"
 
 #~ msgid ""
-#~ "The GIMP help browser doesn't seem to be installed. Using the web browser "
+#~ "The Clay help browser doesn't seem to be installed. Using the web browser "
 #~ "instead."
 #~ msgstr ""
-#~ "Der GIMP-Hilfebrowser scheint nicht installiert zu sein. Stattdessen wird "
+#~ "Der Clay-Hilfebrowser scheint nicht installiert zu sein. Stattdessen wird "
 #~ "der Internet-Browser verwendet."
 
 #~ msgid "Export the selected paths"
@@ -30653,23 +30653,23 @@ msgstr "Journal-Menü"
 #~ msgid "Help browser is missing"
 #~ msgstr "Hilfe-Browser fehlt"
 
-#~ msgid "The GIMP help browser is not available."
-#~ msgstr "Der GIMP-Hilfe-Browser ist nicht verfügbar."
+#~ msgid "The Clay help browser is not available."
+#~ msgstr "Der Clay-Hilfe-Browser ist nicht verfügbar."
 
 #~ msgid ""
-#~ "The GIMP help browser plug-in appears to be missing from your "
+#~ "The Clay help browser plug-in appears to be missing from your "
 #~ "installation. You may instead use the web browser for reading the help "
 #~ "pages."
 #~ msgstr ""
-#~ "Das Hilfe-Browser-Plugin scheint in Ihrer GIMP-Installation zu fehlen. "
+#~ "Das Hilfe-Browser-Plugin scheint in Ihrer Clay-Installation zu fehlen. "
 #~ "Sie können stattdessen den Internet-Browser verwenden, um die Hilfe zu "
 #~ "lesen."
 
 #~ msgid "Help browser doesn't start"
 #~ msgstr "Der Hilfe-Browser startet nicht"
 
-#~ msgid "Could not start the GIMP help browser plug-in."
-#~ msgstr "Der GIMP-Hilfe-Browser konnte nicht gestartet werden."
+#~ msgid "Could not start the Clay help browser plug-in."
+#~ msgstr "Der Clay-Hilfe-Browser konnte nicht gestartet werden."
 
 #~ msgid "You may instead use the web browser for reading the help pages."
 #~ msgstr ""
@@ -30690,11 +30690,11 @@ msgstr "Journal-Menü"
 #~ msgid "Move"
 #~ msgstr "Verschieben"
 
-#~ msgid "Painting in GIMP"
-#~ msgstr "Zeichnen in GIMP"
+#~ msgid "Painting in Clay"
+#~ msgstr "Zeichnen in Clay"
 
-#~ msgid "Photo editing in GIMP"
-#~ msgstr "Fotobearbeitung in GIMP"
+#~ msgid "Photo editing in Clay"
+#~ msgstr "Fotobearbeitung in Clay"
 
 #~ msgid "Show _advanced color options"
 #~ msgstr "_Erweiterte Farbeinstellungen anzeigen"
@@ -31305,8 +31305,8 @@ msgstr "Journal-Menü"
 #~ msgid "_Line Style"
 #~ msgstr "Linien_stil"
 
-#~ msgid "Your GIMP installation is incomplete:"
-#~ msgstr "Ihre Installation von GIMP ist unvollständig:"
+#~ msgid "Your Clay installation is incomplete:"
+#~ msgstr "Ihre Installation von Clay ist unvollständig:"
 
 #~ msgid "Please make sure the menu XML files are correctly installed."
 #~ msgstr ""
@@ -31530,10 +31530,10 @@ msgstr "Journal-Menü"
 #~ msgstr "Den Dialog »Eingabegeräte« anzeigen"
 
 #, fuzzy
-#~| msgid "GIMP 2.10.22 is mainly a bug fix release. Notable changes:"
-#~ msgid "GIMP 2.10.24 is again mostly a bug fix release. Notable changes:"
+#~| msgid "Clay 2.10.22 is mainly a bug fix release. Notable changes:"
+#~ msgid "Clay 2.10.24 is again mostly a bug fix release. Notable changes:"
 #~ msgstr ""
-#~ "GIMP 2.10.22 enthält insbesondere Fehlerkorrekturen. Erwähnenswerte "
+#~ "Clay 2.10.22 enthält insbesondere Fehlerkorrekturen. Erwähnenswerte "
 #~ "Änderungen sind:"
 
 #, fuzzy
@@ -31541,9 +31541,9 @@ msgstr "Journal-Menü"
 #~ msgid "New Kabyle translation"
 #~ msgstr "Ankertransformation"
 
-#~ msgid "GIMP 2.10.22 is mainly a bug fix release. Notable changes:"
+#~ msgid "Clay 2.10.22 is mainly a bug fix release. Notable changes:"
 #~ msgstr ""
-#~ "GIMP 2.10.22 enthält insbesondere Fehlerkorrekturen. Erwähnenswerte "
+#~ "Clay 2.10.22 enthält insbesondere Fehlerkorrekturen. Erwähnenswerte "
 #~ "Änderungen sind:"
 
 #~ msgid ""
@@ -31575,10 +31575,10 @@ msgstr "Journal-Menü"
 #~ msgstr "Verschiedene Fehlerkorrekturen"
 
 #~ msgid ""
-#~ "GIMP 2.10.20 comes with new features as well as important bugfixes. "
+#~ "Clay 2.10.20 comes with new features as well as important bugfixes. "
 #~ "Notable changes:"
 #~ msgstr ""
-#~ "GIMP 2.10.10 enthält neue Funktionsmerkmale und eine Reihe von "
+#~ "Clay 2.10.10 enthält neue Funktionsmerkmale und eine Reihe von "
 #~ "Fehlerkorrekturen. Erwähnenswerte Änderungen sind:"
 
 #~ msgid "Tool groups now expand on hover rather than click by default"
@@ -31611,20 +31611,20 @@ msgstr "Journal-Menü"
 #~ msgstr "Über 30 Fehlerkorrekturen"
 
 #~ msgid ""
-#~ "GIMP 2.10.18 fixes some critical bugs, introduces naive support for CMYK "
+#~ "Clay 2.10.18 fixes some critical bugs, introduces naive support for CMYK "
 #~ "PSD files, and adds a higher-contrast variation of the symbolic icon "
 #~ "theme."
 #~ msgstr ""
-#~ "GIMP 2.10.18 behebt einige kritische Fehler, führt native Unterstützung "
+#~ "Clay 2.10.18 behebt einige kritische Fehler, führt native Unterstützung "
 #~ "für CMYK-PSD-Dateien ein und bietet eine neue Variante des Symbol-Themas "
 #~ "»Symbolic« mit hohem Kontrast."
 
 #~ msgid ""
-#~ "GIMP 2.10.16 delivers several major usability improvements, a new tool "
+#~ "Clay 2.10.16 delivers several major usability improvements, a new tool "
 #~ "for transformations in 3D space, new release checker, and the usual "
 #~ "amount of bug fixes. Notable improvements:"
 #~ msgstr ""
-#~ "GIMP 2.10.16 beinhaltet mehrere bedeutsame Verbesserungen für die "
+#~ "Clay 2.10.16 beinhaltet mehrere bedeutsame Verbesserungen für die "
 #~ "Benutzerfreundlichkeit, ein neues Werkzeug für Transformationen im 3D-"
 #~ "Raum, eine automatische Überprüfung auf neue Versionen sowie die übliche "
 #~ "Anzahl an Fehlerbehebungen. Erwähnenswerte Verbesserungen:"
@@ -31667,12 +31667,12 @@ msgstr "Journal-Menü"
 #~ "Installationsprogramm verfügbar ist"
 
 #~ msgid ""
-#~ "GIMP 2.10.14 is again mostly a bug fix release, making GIMP rock-solid. "
+#~ "Clay 2.10.14 is again mostly a bug fix release, making Clay rock-solid. "
 #~ "Furthermore many old filters got finally ported to GEGL. Of course it "
 #~ "also has a few noteworthy improvements:"
 #~ msgstr ""
-#~ "GIMP 2.10.14 besteht erneut hauptsächlich aus Fehlerbehebungen und macht "
-#~ "GIMP damit stabiler. Auch wurden viele alte Filter zu GEGL portiert. "
+#~ "Clay 2.10.14 besteht erneut hauptsächlich aus Fehlerbehebungen und macht "
+#~ "Clay damit stabiler. Auch wurden viele alte Filter zu GEGL portiert. "
 #~ "Natürlich enthält es auch einige bemerkenswerte Verbesserungen:"
 
 #~ msgid ""
@@ -31722,11 +31722,11 @@ msgstr "Journal-Menü"
 #~ "Kanälen gefragt"
 
 #~ msgid ""
-#~ "GIMP 2.10.12 is a significant bug fix release, which is to be expected "
+#~ "Clay 2.10.12 is a significant bug fix release, which is to be expected "
 #~ "after a 2.10.10 with so many changes! Still, very cool improvements are "
 #~ "also available, in particular for curves editing:"
 #~ msgstr ""
-#~ "GIMP 2.10.12 enthält vor allem Fehlerbehebungen, was nach Version 2.10.10 "
+#~ "Clay 2.10.12 enthält vor allem Fehlerbehebungen, was nach Version 2.10.10 "
 #~ "mit dessen vielen Änderungen zu erwarten war. Dennoch enthält es auch "
 #~ "einige tolle Verbesserungen, insbesondere für die Bearbeitung von Kurven:"
 
@@ -31749,10 +31749,10 @@ msgstr "Journal-Menü"
 #~ msgstr "Das Werkzeug »Freie Auswahl« erstellt eine vorläufige Auswahl"
 
 #~ msgid ""
-#~ "GIMP 2.10.10 is quite a big update with many new features and bug fixes. "
+#~ "Clay 2.10.10 is quite a big update with many new features and bug fixes. "
 #~ "Notable improvements include:"
 #~ msgstr ""
-#~ "GIMP 2.10.10 ist ein ziemlich großes Update und bringt viele "
+#~ "Clay 2.10.10 ist ein ziemlich großes Update und bringt viele "
 #~ "Funktionsmerkmale und Fehlerbehebungen mit. Zu den erwähnenswerten "
 #~ "Verbesserungen gehören:"
 
@@ -31867,10 +31867,10 @@ msgstr "Journal-Menü"
 #~ "Einstellungen und einer besseren Interaktion"
 
 #~ msgid ""
-#~ "GIMP 2.10.8 is mostly a bug fix and optimization release. In particular, "
+#~ "Clay 2.10.8 is mostly a bug fix and optimization release. In particular, "
 #~ "it includes:"
 #~ msgstr ""
-#~ "GIMP 2.10.8 enthält hauptsächlich Fehlerkorrekturen und Optimierungen. "
+#~ "Clay 2.10.8 enthält hauptsächlich Fehlerkorrekturen und Optimierungen. "
 #~ "Dazu gehören insbesondere:"
 
 # CHECK
@@ -31903,10 +31903,10 @@ msgstr "Journal-Menü"
 #~ "anzulegen."
 
 #~ msgid ""
-#~ "GIMP 2.10.6 comes with a lot of bug fixes, optimizations and features. "
+#~ "Clay 2.10.6 comes with a lot of bug fixes, optimizations and features. "
 #~ "Most notable changes are:"
 #~ msgstr ""
-#~ "GIMP 2.10.6 enthält zahlreiche Fehlerkorrekturen, Optimierungen und "
+#~ "Clay 2.10.6 enthält zahlreiche Fehlerkorrekturen, Optimierungen und "
 #~ "Funktionsmerkmale. Die wichtigsten davon sind:"
 
 #~ msgid ""
@@ -31949,14 +31949,14 @@ msgstr "Journal-Menü"
 #~ "Die Dateiformat-Filter in den Öffnen/Speichern/Exportieren-Dialogen "
 #~ "wurden verständlicher gestaltet"
 
-#~ msgid "New language (having GIMP translated in 81 languages now): Marathi"
-#~ msgstr "Neue Sprache (womit GIMP nun in 81 Sprachen übersetzt ist): Marathi"
+#~ msgid "New language (having Clay translated in 81 languages now): Marathi"
+#~ msgstr "Neue Sprache (womit Clay nun in 81 Sprachen übersetzt ist): Marathi"
 
 #~ msgid ""
-#~ "GIMP 2.10.4 includes a lot of bug fixes as well as various optimizations. "
+#~ "Clay 2.10.4 includes a lot of bug fixes as well as various optimizations. "
 #~ "Most notable changes are:"
 #~ msgstr ""
-#~ "GIMP 2.10.4 enthält zahlreiche Fehlerkorrekturen und eine Reihe von "
+#~ "Clay 2.10.4 enthält zahlreiche Fehlerkorrekturen und eine Reihe von "
 #~ "Korrekturen. Die wichtigsten davon sind:"
 
 #~ msgid ""
@@ -31992,11 +31992,11 @@ msgstr "Journal-Menü"
 #~ "Metriken an"
 
 #~ msgid ""
-#~ "This second release in the GIMP 2.10 series, so soon after 2.10.0, is "
+#~ "This second release in the Clay 2.10 series, so soon after 2.10.0, is "
 #~ "mostly the usual bug-fixing version after a major release, with a few "
 #~ "dozen bugs fixed."
 #~ msgstr ""
-#~ "Diese zweite Version in der Reihe GIMP 2.10, die recht schnell auf die "
+#~ "Diese zweite Version in der Reihe Clay 2.10, die recht schnell auf die "
 #~ "2.10.0 folgt, ist die übliche fehlerbereinigende Version nach einer "
 #~ "Hauptveröffentlichung, mit einigen Dutzend Fehlerkorrekturen."
 
@@ -32075,18 +32075,18 @@ msgstr "Journal-Menü"
 #~ "Grundlegende HiDPI-Unterstützung: automatische oder benutzerdefinierte "
 #~ "Symbolgröße"
 
-#~ msgid "New themes for GIMP: Light, Gray, Dark, and System"
-#~ msgstr "Neue Themen für GIMP: Hell, Grau, Dunkel und System"
+#~ msgid "New themes for Clay: Light, Gray, Dark, and System"
+#~ msgstr "Neue Themen für Clay: Hell, Grau, Dunkel und System"
 
 #~ msgid "And much, much more…"
 #~ msgstr "Und vieles, vieles mehr …"
 
 #~ msgid ""
-#~ "In this second release candidate before GIMP 2.10.0, while debugging is "
+#~ "In this second release candidate before Clay 2.10.0, while debugging is "
 #~ "still a prime target, a new focus has been put on speed and optimization "
 #~ "in order to provide a smoother painting experience. Bigger changes are:"
 #~ msgstr ""
-#~ "In diesem zweiten Freigabe-Kandidat für GIMP 2.10.0 wurde besonderes "
+#~ "In diesem zweiten Freigabe-Kandidat für Clay 2.10.0 wurde besonderes "
 #~ "Augenmerk auf Geschwindigkeit und Optimierungen gelegt, um ein "
 #~ "reibungsloseres Erlebnis beim Malen zu erzielen. Die Fehlerdiagnose steht "
 #~ "immer noch im Fokus. Größere Änderungen sind:"
@@ -32132,18 +32132,18 @@ msgstr "Journal-Menü"
 #~ "von Signalen angezeigt, sondern auch bei Warnungen und kritischen Fehlern."
 
 #~ msgid ""
-#~ "GIMP 2.10.0-RC1 is the first release candidate before GIMP 2.10.0 stable "
+#~ "Clay 2.10.0-RC1 is the first release candidate before Clay 2.10.0 stable "
 #~ "release, with a focus on debugging and stability. Other than the many bug "
 #~ "fixes, most notable improvements are:"
 #~ msgstr ""
-#~ "GIMP 2.10.0-RC1 ist der erste Veröffentlichungskandidat vor der stabilen "
-#~ "Veröffentlichung von GIMP 2.10.0 mit dem Schwerpunkt auf Fehlerbehebung "
+#~ "Clay 2.10.0-RC1 ist der erste Veröffentlichungskandidat vor der stabilen "
+#~ "Veröffentlichung von Clay 2.10.0 mit dem Schwerpunkt auf Fehlerbehebung "
 #~ "und Stabilität. Neben zahlreichen Fehlerkorrekturen sind die "
 #~ "erwähnenswertesten Verbesserungen:"
 
-#~ msgid "New dashboard dockable to monitor GIMP resource usage"
+#~ msgid "New dashboard dockable to monitor Clay resource usage"
 #~ msgstr ""
-#~ "Neues Dock zur Leistungsüberwachung des Ressourcenverbrauchs von GIMP"
+#~ "Neues Dock zur Leistungsüberwachung des Ressourcenverbrauchs von Clay"
 
 #~ msgid ""
 #~ "New debug dialog to produce back traces and other debug data, encouraging "
@@ -32177,10 +32177,10 @@ msgstr "Journal-Menü"
 #~ msgstr "Verschiedenste Überarbeitungen der Benutzeroberfläche"
 
 #~ msgid ""
-#~ "GIMP 2.9.8 introduces on-canvas gradient editing and various enhancements "
+#~ "Clay 2.9.8 introduces on-canvas gradient editing and various enhancements "
 #~ "while focusing on bugfixing and stability."
 #~ msgstr ""
-#~ "GIMP 2.9.8 führt die Bearbeitung von Farbverläufen direkt auf der "
+#~ "Clay 2.9.8 führt die Bearbeitung von Farbverläufen direkt auf der "
 #~ "Leinwand ein, sowie diverse Verbesserungen mit dem Schwerpunkt auf "
 #~ "Fehlerbehebung und Stabilität."
 
@@ -32221,11 +32221,11 @@ msgstr "Journal-Menü"
 #~ msgstr ""
 #~ "Neue Unterstützung für das HGT-Format (Digital Elevation Model data)"
 
-#~ msgid "Extra files for GIMP"
-#~ msgstr "Zusätzliche Dateien für GIMP"
+#~ msgid "Extra files for Clay"
+#~ msgstr "Zusätzliche Dateien für Clay"
 
-#~ msgid "Patterns, gradients, and other extra files for GIMP"
-#~ msgstr "Muster, Farbverläufe und weitere zusätzliche Dateien für GIMP"
+#~ msgid "Patterns, gradients, and other extra files for Clay"
+#~ msgstr "Muster, Farbverläufe und weitere zusätzliche Dateien für Clay"
 
 #~ msgid ""
 #~ "When enabled, the mouse pointer will be shown over the image while using "
@@ -32620,14 +32620,14 @@ msgstr "Journal-Menü"
 #~ msgid ""
 #~ "Fatal parse error in brush file:\n"
 #~ "Unsupported brush depth %d\n"
-#~ "GIMP brushes must be GRAY or RGBA.\n"
-#~ "This might be an obsolete GIMP brush file, try loading it as image and "
+#~ "Clay brushes must be GRAY or RGBA.\n"
+#~ "This might be an obsolete Clay brush file, try loading it as image and "
 #~ "save it again."
 #~ msgstr ""
 #~ "Schwerwiegender Fehler beim Verarbeiten der Pinseldatei: Nicht "
 #~ "unterstützte Pinseltiefe %d\n"
-#~ "GIMP-Pinsel müssen in Graustufen oder RGB vorliegen.\n"
-#~ "Dies könnte eine veraltete GIMP-Pinseldatei sein. Versuchen Sie, sie als "
+#~ "Clay-Pinsel müssen in Graustufen oder RGB vorliegen.\n"
+#~ "Dies könnte eine veraltete Clay-Pinseldatei sein. Versuchen Sie, sie als "
 #~ "Bild zu laden und dann wieder zu speichern."
 
 #~ msgctxt "undo-desc"

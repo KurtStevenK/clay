@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gen-languages.c (formerly gimplanguagestore-parser.c)
@@ -105,7 +105,7 @@ main (int    argc,
   gpointer        code;
   gpointer        name;
   const gchar    *license_header = "\
-/* GIMP - The GNU Image Manipulation Program\n\
+/* xyz.kainzmayer.ClayDesign\n\
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis\n\
  *\n\
  * gimplanguagestore-data.h\n\

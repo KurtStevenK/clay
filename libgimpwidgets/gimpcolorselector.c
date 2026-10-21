@@ -208,7 +208,7 @@ gimp_color_selector_dispose (GObject *object)
  *
  * Note that this is mostly internal API to be used by other widgets.
  *
- * Please use gimp_color_selection_new() for the "GIMP-typical" color
+ * Please use gimp_color_selection_new() for the "Clay-typical" color
  * selection widget. Also see gimp_color_button_new().
  *
  * Returns: the new #GimpColorSelector widget.

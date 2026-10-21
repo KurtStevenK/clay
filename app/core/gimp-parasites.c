@@ -139,7 +139,7 @@ void
 gimp_parasiterc_save (Gimp *gimp)
 {
   const gchar *header =
-    "GIMP parasiterc\n"
+    "Clay parasiterc\n"
     "\n"
     "This file will be entirely rewritten each time you exit.";
   const gchar *footer =

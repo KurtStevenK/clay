@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpextension.c
@@ -440,7 +440,7 @@ gimp_extension_load (GimpExtension  *extension,
 
   extends = as_component_get_extends (component);
   if (success &&
-      ! g_ptr_array_find_with_equal_func (extends, "org.gimp.GIMP",
+      ! g_ptr_array_find_with_equal_func (extends, "org.gimp.Clay",
                                           g_str_equal, NULL))
     {
       /* Properly setting the <extends> will allow extensions to be
@@ -449,7 +449,7 @@ gimp_extension_load (GimpExtension  *extension,
       if (error && *error == NULL)
         *error = g_error_new (GIMP_EXTENSION_ERROR,
                               GIMP_EXTENSION_BAD_APPDATA,
-                              _("Extension AppData must extend \"org.gimp.GIMP\"."));
+                              _("Extension AppData must extend \"org.gimp.Clay\"."));
       success = FALSE;
     }
 
@@ -503,7 +503,7 @@ gimp_extension_load (GimpExtension  *extension,
           AsRelation *relation = g_ptr_array_index(relations, i);
 
           if (as_relation_get_item_kind(relation) == AS_RELATION_ITEM_KIND_ID &&
-              g_strcmp0(as_relation_get_value_str(relation), "org.gimp.GIMP") == 0)
+              g_strcmp0(as_relation_get_value_str(relation), "org.gimp.Clay") == 0)
             {
               has_require = TRUE;
 
@@ -532,7 +532,7 @@ gimp_extension_load (GimpExtension  *extension,
         {
           *error = g_error_new (GIMP_EXTENSION_ERROR,
                                 GIMP_EXTENSION_FAILED,
-                                _("<requires><id>org.gimp.GIMP</id></requires> for version comparison is mandatory."));
+                                _("<requires><id>org.gimp.Clay</id></requires> for version comparison is mandatory."));
         }
     }
 
@@ -562,70 +562,70 @@ gimp_extension_run (GimpExtension  *extension,
   gimp_extension_clean (extension);
   metadata = as_component_get_custom (extension->p->component);
 
-  value = g_hash_table_lookup (metadata, "GIMP::brush-path");
+  value = g_hash_table_lookup (metadata, "Clay::brush-path");
   extension->p->brush_paths = gimp_extension_validate_paths (extension,
                                                              value, TRUE,
                                                              error);
 
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::dynamics-path");
+      value = g_hash_table_lookup (metadata, "Clay::dynamics-path");
       extension->p->dynamics_paths = gimp_extension_validate_paths (extension,
                                                                     value, TRUE,
                                                                     error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::mypaint-brush-path");
+      value = g_hash_table_lookup (metadata, "Clay::mypaint-brush-path");
       extension->p->mypaint_brush_paths = gimp_extension_validate_paths (extension,
                                                                          value, TRUE,
                                                                          error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::pattern-path");
+      value = g_hash_table_lookup (metadata, "Clay::pattern-path");
       extension->p->pattern_paths = gimp_extension_validate_paths (extension,
                                                                    value, TRUE,
                                                                    error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::gradient-path");
+      value = g_hash_table_lookup (metadata, "Clay::gradient-path");
       extension->p->gradient_paths = gimp_extension_validate_paths (extension,
                                                                     value, TRUE,
                                                                     error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::palette-path");
+      value = g_hash_table_lookup (metadata, "Clay::palette-path");
       extension->p->palette_paths = gimp_extension_validate_paths (extension,
                                                                    value, TRUE,
                                                                    error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::tool-preset-path");
+      value = g_hash_table_lookup (metadata, "Clay::tool-preset-path");
       extension->p->tool_preset_paths = gimp_extension_validate_paths (extension,
                                                                        value, TRUE,
                                                                        error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::plug-in-path");
+      value = g_hash_table_lookup (metadata, "Clay::plug-in-path");
       extension->p->plug_in_paths = gimp_extension_validate_paths (extension,
                                                                    value, FALSE,
                                                                    error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::splash-path");
+      value = g_hash_table_lookup (metadata, "Clay::splash-path");
       extension->p->splash_paths = gimp_extension_validate_paths (extension,
                                                                   value, TRUE,
                                                                   error);
     }
   if (! (*error))
     {
-      value = g_hash_table_lookup (metadata, "GIMP::theme-path");
+      value = g_hash_table_lookup (metadata, "Clay::theme-path");
       extension->p->theme_paths = gimp_extension_validate_paths (extension,
                                                                  value, TRUE,
                                                                  error);

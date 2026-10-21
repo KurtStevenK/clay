@@ -154,7 +154,7 @@ msgstr "Παράδειγμα προσθέτου σε JavaScript (GJS)"
 msgid "_OK"
 msgstr "Ε_ντάξει"
 
-#. GIMP - The GNU Image Manipulation Program
+#. xyz.kainzmayer.ClayDesign
 #. Copyright (C) 1995 Spencer Kimball and Peter Mattis
 #.
 #. goat-exercise-lua.lua

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
  * controller_midi.c
@@ -423,9 +423,9 @@ midi_set_device (ControllerMidi *midi,
                               SND_SEQ_OPEN_INPUT, 0);
           if (ret >= 0)
             {
-              snd_seq_set_client_name (midi->sequencer, _("GIMP"));
+              snd_seq_set_client_name (midi->sequencer, _("Clay"));
               ret = snd_seq_create_simple_port (midi->sequencer,
-                                                _("GIMP MIDI Input Controller"),
+                                                _("Clay MIDI Input Controller"),
                                                 SND_SEQ_PORT_CAP_WRITE |
                                                 SND_SEQ_PORT_CAP_SUBS_WRITE,
                                                 SND_SEQ_PORT_TYPE_APPLICATION);

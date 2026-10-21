@@ -2,7 +2,7 @@
 gimpdbusservice_gen = gnome.gdbus_codegen(
   'gimpdbusservice-generated',
   'dbus-service.xml',
-  interface_prefix: 'org.gimp.GIMP.',
+  interface_prefix: 'xyz.kainzmayer.ClayDesign.',
   namespace: 'GimpDBusService',
 )
 

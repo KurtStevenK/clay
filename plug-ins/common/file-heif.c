@@ -997,7 +997,7 @@ nclx_to_gimp_profile (const struct heif_color_profile_nclx *nclx)
       heifplugin_color_profile_set_tag (profile, cmsSigProfileDescriptionTag,
                                         description);
       heifplugin_color_profile_set_tag (profile, cmsSigDeviceMfgDescTag,
-                                        "GIMP");
+                                        "Clay");
       heifplugin_color_profile_set_tag (profile, cmsSigDeviceModelDescTag,
                                         description);
       heifplugin_color_profile_set_tag (profile, cmsSigCopyrightTag,

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 2010 Øyvind Kolås <pippin@gimp.org>
  *               2012 Ville Sokk   <ville.sokk@gmail.com>
  *

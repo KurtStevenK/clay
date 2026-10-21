@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * GimpRc, the object for GIMPs user configuration file gimprc.
@@ -500,13 +500,13 @@ gimp_rc_save (GimpRc *rc)
   GError  *error = NULL;
 
   const gchar *top =
-    "GIMP gimprc\n"
+    "Clay gimprc\n"
     "\n"
     "This is your personal gimprc file.  Any variable defined in this file "
     "takes precedence over the value defined in the system-wide gimprc: ";
   const gchar *bottom =
     "\n"
-    "Most values can be set within GIMP by changing some options in "
+    "Most values can be set within Clay by changing some options in "
     "the Preferences dialog.";
   const gchar *footer =
     "end of gimprc";

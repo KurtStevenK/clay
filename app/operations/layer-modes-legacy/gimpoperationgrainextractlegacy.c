@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationgrainextractmode.c
@@ -50,7 +50,7 @@ gimp_operation_grain_extract_legacy_class_init (GimpOperationGrainExtractLegacyC
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:grain-extract-legacy",
-                                 "description", "GIMP grain extract mode operation",
+                                 "description", "Clay grain extract mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_grain_extract_legacy_process;

@@ -103,7 +103,7 @@
 #else
   #define CUSTOM_GIMP_VERSION ORIGINAL_GIMP_VERSION + "-" + REVISION
 #endif
-#define DISPLAY_NAME "GIMP " + CUSTOM_GIMP_VERSION
+#define DISPLAY_NAME "Clay " + CUSTOM_GIMP_VERSION
 
 ;This script supports creating both an installer per arch or an universal installer with all arches
 #if Defined(ARM64_BUNDLE) && !Defined(X64_BUNDLE)
@@ -159,13 +159,13 @@ NotRecognizedMessagesWarning=no
 
 ;3.2.1 INNO INTERNAL VERSIONING (used to rule how different versions are installed)
 ;GIMP process identifier for Inno
-AppMutex=GIMP-{#GIMP_MUTEX_VERSION}
+AppMutex=Clay-{#GIMP_MUTEX_VERSION}
 ;Inno installer identifier
-SetupMutex=GIMP-{#GIMP_MUTEX_VERSION}-setup
+SetupMutex=Clay-{#GIMP_MUTEX_VERSION}-setup
 ;Inno installer (default) install location
-DefaultDirName={autopf}\GIMP {#GIMP_MUTEX_VERSION}
+DefaultDirName={autopf}\Clay {#GIMP_MUTEX_VERSION}
 ;Inno uninstaller identifier
-AppID=GIMP-{#GIMP_MUTEX_VERSION}
+AppID=Clay-{#GIMP_MUTEX_VERSION}
 ;Inno unninstaller identifier logs location
 UninstallFilesDir={app}\uninst
 
@@ -179,13 +179,13 @@ AppVersion={#FULL_GIMP_VERSION}
 ;ImmersiveControlPanel 'DisplayName'
 AppVerName={#DISPLAY_NAME}
 ;ImmersiveControlPanel 'DisplayIcon'
-UninstallDisplayIcon={app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe
+UninstallDisplayIcon={app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe
 ;ImmersiveControlPanel 'Publisher'
-AppPublisher=The GIMP Team
+AppPublisher=xyz.kainzmayer.ClayDesign
 ;ControlPanel 'URLInfoAbout'
-AppPublisherURL=https://www.gimp.org/
+AppPublisherURL=https://claydesign.web.app
 ;ControlPanel 'HelpLink'
-AppSupportURL=https://www.gimp.org/docs/
+AppSupportURL=https://claydesign.web.app
 #if Defined(GIMP_UNSTABLE)
   ;ControlPanel 'URLUpdateInfo'
   AppUpdatesURL=https://www.gimp.org/downloads/devel/
@@ -220,10 +220,10 @@ LZMANumFastBytes=273
 ;SignedUninstallerDir=_Uninst
 
 ;3.3.3 EXE FILE DETAILS
-AppName=GIMP
+AppName=Clay Image Beautification Program
 SetupIconFile={#ASSETS_DIR}\setup.ico
 OutputDir=..\..\..
-OutputBaseFileName=gimp-{#CUSTOM_GIMP_VERSION}-setup
+OutputBaseFileName=clay-{#CUSTOM_GIMP_VERSION}-setup
 OutputManifestFile=inno.log
 ArchitecturesAllowed={#ARCHS_ALLOWED}
 ArchitecturesInstallIn64BitMode={#ARCHS_INSTALLED}
@@ -264,10 +264,10 @@ WelcomeFontSize=12
 [Tasks]
 Name: desktopicon; Description: "{cm:AdditionalIconsDesktop}"; GroupDescription: "{cm:AdditionalIcons}"
 [Icons]
-Name: "{autoprograms}\{#DISPLAY_NAME}"; Filename: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"; WorkingDir: "%USERPROFILE%"; Comment: "{#DISPLAY_NAME}"
-Name: "{autodesktop}\{#DISPLAY_NAME}"; Filename: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"; WorkingDir: "%USERPROFILE%"; Comment: "{#DISPLAY_NAME}"; Tasks: desktopicon
+Name: "{autoprograms}\{#DISPLAY_NAME}"; Filename: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"; WorkingDir: "%USERPROFILE%"; Comment: "{#DISPLAY_NAME}"
+Name: "{autodesktop}\{#DISPLAY_NAME}"; Filename: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"; WorkingDir: "%USERPROFILE%"; Comment: "{#DISPLAY_NAME}"; Tasks: desktopicon
 [Run]
-Filename: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"; Description: "{cm:LaunchGimp}"; Flags: unchecked postinstall nowait skipifsilent
+Filename: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"; Description: "{cm:LaunchGimp}"; Flags: unchecked postinstall nowait skipifsilent
 
 
 ;4.1 GIMP FILES (make sure that the resulting .exe installer content is identical to the .msix and vice-versa)
@@ -536,19 +536,19 @@ Type: files; Name: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ\pygimp_win.
 ;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-{#GIMP_MUTEX_VERSION}_is1"; //(auto registered by Inno)
 
 ;Add GIMP .exe to PATH/'Win + R' (conflicts with MSIX. See: ..\store\AppxManifest.xml)
-;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\gimp-{#GIMP_MUTEX_VERSION}.exe"; Flags: uninsdeletekey
-;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\gimp-{#GIMP_MUTEX_VERSION}.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"
-;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\gimp-{#GIMP_MUTEX_VERSION}.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\bin"
+;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\clay-{#GIMP_MUTEX_VERSION}.exe"; Flags: uninsdeletekey
+;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\clay-{#GIMP_MUTEX_VERSION}.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"
+;Root: HKA; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\clay-{#GIMP_MUTEX_VERSION}.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app}\bin"
 
 ;Shell "Open with"
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "{#DISPLAY_NAME}"
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe,1"
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "{#DISPLAY_NAME}"
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe,1"
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
 ;'ms-settings:defaultapps' page
 Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "{#DISPLAY_NAME}"
-Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities"; ValueType: string; ValueName: "ApplicationIcon"; ValueData: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe,0"
+Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities"; ValueType: string; ValueName: "ApplicationIcon"; ValueData: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe,0"
 Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "GIMP is a free raster graphics editor used for image retouching and editing, free-form drawing, converting between different image formats, and more specialized tasks."
 Root: HKA; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "GIMP {#GIMP_MUTEX_VERSION}"; ValueData: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities"; Flags: uninsdeletevalue
 ;Associations
@@ -564,9 +564,9 @@ Root: HKA; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueNa
       #pragma message "Processing file_associations.list: " + FileLine
 Root: HKA; Subkey: "Software\Classes\.{#FileLine}\OpenWithProgids"; ValueType: string; ValueName: "GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}"; ValueType: string; ValueName: ""; ValueData: "{#DISPLAY_NAME} {#UpperCase(FileLine)}"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe,2"
-Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe\SupportedTypes"; ValueType: string; ValueName: ".{#FileLine}"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe,2"
+Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe\SupportedTypes"; ValueType: string; ValueName: ".{#FileLine}"; ValueData: ""
 Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".{#FileLine}"; ValueData: "GIMP{#GIMP_MUTEX_VERSION}.{#FileLine}"
     #endif
   #endif
@@ -581,16 +581,16 @@ Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities\FileAssocia
 ;Associations (special case for .xcf files)
 Root: HKA; Subkey: "Software\Classes\.xcf\OpenWithProgids"; ValueType: string; ValueName: "GIMP{#GIMP_MUTEX_VERSION}.xcf"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.xcf"; ValueType: string; ValueName: ""; ValueData: "{#DISPLAY_NAME} XCF"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.xcf\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe,1"
-Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.xcf\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe\SupportedTypes"; ValueType: string; ValueName: ".xcf"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.xcf\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe,1"
+Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.xcf\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe\SupportedTypes"; ValueType: string; ValueName: ".xcf"; ValueData: ""
 Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".xcf"; ValueData: "GIMP{#GIMP_MUTEX_VERSION}.xcf"
 ;Associations (make association for .ico files but do not set DefaultIcon since their content is the DefaultIcon)
 Root: HKA; Subkey: "Software\Classes\.ico\OpenWithProgids"; ValueType: string; ValueName: "GIMP{#GIMP_MUTEX_VERSION}.ico"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.ico"; ValueType: string; ValueName: ""; ValueData: "{#DISPLAY_NAME} ICO"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.ico\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "%1"
-Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.ico\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\gimp-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
-Root: HKA; Subkey: "Software\Classes\Applications\gimp-{#GIMP_MUTEX_VERSION}.exe\SupportedTypes"; ValueType: string; ValueName: ".ico"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\GIMP{#GIMP_MUTEX_VERSION}.ico\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\clay-{#GIMP_MUTEX_VERSION}.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\clay-{#GIMP_MUTEX_VERSION}.exe\SupportedTypes"; ValueType: string; ValueName: ".ico"; ValueData: ""
 Root: HKA; Subkey: "Software\GIMP {#GIMP_MUTEX_VERSION}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ico"; ValueData: "GIMP{#GIMP_MUTEX_VERSION}.ico"
 
 

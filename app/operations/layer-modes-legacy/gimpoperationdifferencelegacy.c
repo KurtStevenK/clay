@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationdifferencemode.c
@@ -50,7 +50,7 @@ gimp_operation_difference_legacy_class_init (GimpOperationDifferenceLegacyClass 
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:difference-legacy",
-                                 "description", "GIMP difference mode operation",
+                                 "description", "Clay difference mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_difference_legacy_process;

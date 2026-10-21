@@ -27,7 +27,7 @@ _("Specifies the language the user interface was previously displayed in.")
 _("The comment for the last known release.")
 
 #define SHOW_WELCOME_DIALOG_BLURB \
-_("Show a welcome dialog when GIMP starts.")
+_("Show a welcome dialog when Clay starts.")
 
 #define DYNAMICS_PATH_WRITABLE_BLURB ""
 
@@ -48,7 +48,7 @@ _("Specifies whether to keep the canvas padding when \"View -> Show All\" " \
 _("Specifies how the area around the image should be drawn.")
 
 #define CHECK_UPDATES_BLURB \
-_("Check for availability of GIMP updates through background internet queries.")
+_("Check for availability of Clay updates through background internet queries.")
 
 #define CHECK_UPDATE_TIMESTAMP_BLURB \
 _("Timestamp of the last update check.")
@@ -301,10 +301,10 @@ _("Sets the level of interpolation used for scaling and other " \
 _("Specifies the language to use for the user interface.")
 
 #define LAST_KNOWN_RELEASE_BLURB \
-_("The last known release version of GIMP as queried from official website.")
+_("The last known release version of Clay as queried from official website.")
 
 #define CONFIG_VERSION_BLURB \
-_("The version of GIMP config files.")
+_("The version of Clay config files.")
 
 #define LAST_OPENED_SIZE_BLURB \
 _("How many recently opened image filenames to keep on the File menu.")
@@ -320,7 +320,7 @@ _("Speed of marching ants in the selection outline.  This value is in " \
   "milliseconds (less time indicates faster marching).")
 
 #define MAX_NEW_IMAGE_SIZE_BLURB  \
-_("GIMP will warn the user if an attempt is made to create an image that " \
+_("Clay will warn the user if an attempt is made to create an image that " \
   "would take more memory than the size specified here.")
 
 #define METADATA_ROTATION_POLICY_BLURB \
@@ -330,7 +330,7 @@ _("How to handle \"Orientation\" metadata when opening a file.")
 "Sets the module search path."
 
 #define MONITOR_RES_FROM_GDK_BLURB \
-"When enabled, GIMP will use the monitor resolution from the windowing system."
+"When enabled, Clay will use the monitor resolution from the windowing system."
 
 #define MONITOR_XRESOLUTION_BLURB \
 _("Sets the monitor's horizontal resolution, in dots per inch.  If set to " \
@@ -359,7 +359,7 @@ _("Sets the size of the navigation preview available in the lower right " \
   "corner of the image window.")
 
 #define NUM_PROCESSORS_BLURB \
-_("Sets how many threads GIMP should use for operations that support it.")
+_("Sets how many threads Clay should use for operations that support it.")
 
 #define PALETTE_PATH_BLURB \
 "Sets the palette search path."
@@ -381,12 +381,12 @@ _("Sets how many threads GIMP should use for operations that support it.")
 "Sets the pluginrc search path."
 
 #define LAYER_PREVIEWS_BLURB \
-_("Sets whether GIMP should create previews of layers and channels. " \
+_("Sets whether Clay should create previews of layers and channels. " \
   "Previews in the layers and channels dialog are nice to have but they " \
   "can slow things down when working with large images.")
 
 #define GROUP_LAYER_PREVIEWS_BLURB \
-_("Sets whether GIMP should create previews of layer groups. " \
+_("Sets whether Clay should create previews of layer groups. " \
   "Layer group previews are more expensive than ordinary layer previews.")
 
 #define LAYER_PREVIEW_SIZE_BLURB \
@@ -407,15 +407,19 @@ _("When enabled, the image window will automatically resize itself " \
   "effect in multi-window mode.")
 
 #define RESTORE_SESSION_BLURB \
-_("Let GIMP try to restore your last saved session on each startup.")
+_("Let Clay try to restore your last saved session on each startup.")
 
 #define RESTORE_MONITOR_BLURB \
-_("When enabled, GIMP will try to restore windows on the monitor they " \
+_("When enabled, Clay will try to restore windows on the monitor they " \
   "were open before.  When disabled, windows will appear on the currently " \
   "used monitor.")
 
+#define STARTUP_MONITOR_BLURB \
+_("Screen Clay opens on. -1 is the primary display. Any other value is " \
+  "the display index reported by the window system.")
+
 #define SAVE_DEVICE_STATUS_BLURB \
-_("Remember the current tool, pattern, color, and brush across GIMP " \
+_("Remember the current tool, pattern, color, and brush across Clay " \
   "sessions.")
 
 #define DEVICES_SHARE_TOOL_BLURB \
@@ -428,10 +432,10 @@ _("Keep a permanent record of all opened and saved files in the Recent " \
   "Documents list.")
 
 #define SAVE_SESSION_INFO_BLURB \
-_("Save the positions and sizes of the main dialogs when GIMP exits.")
+_("Save the positions and sizes of the main dialogs when Clay exits.")
 
 #define SAVE_TOOL_OPTIONS_BLURB \
-_("Save the tool options when GIMP exits.")
+_("Save the tool options when Clay exits.")
 
 #define SCRIPT_FU_PATH_BLURB \
 "This path will be searched for scripts when the Script-Fu plug-in is run."
@@ -496,7 +500,7 @@ _("When enabled, the sample points are visible by default. This can also be " \
   "toggled with the \"View->Show Sample Points\" command.")
 
 #define SINGLE_WINDOW_MODE_BLURB \
-_("Use GIMP in a single-window mode.")
+_("Use Clay in a single-window mode.")
 
 #define HIDE_DOCKS_BLURB \
 _("Hide docks and other windows, leaving only image windows.")
@@ -523,10 +527,10 @@ _("What to do when the space bar is pressed in the image window.")
 _("The compression method used for tile data stored in the swap file.")
 
 #define SWAP_PATH_BLURB \
-_("Sets the swap file location. GIMP uses a tile based memory allocation " \
+_("Sets the swap file location. Clay uses a tile based memory allocation " \
   "scheme. The swap file is used to quickly and easily swap tiles out to " \
   "disk and back in. Be aware that the swap file can easily get very large " \
-  "if GIMP is used with large images. " \
+  "if Clay is used with large images. " \
   "Also, things can get horribly slow if the swap file is created on " \
   "a folder that is mounted over NFS.  For these reasons, it may be " \
   "desirable to put your swap file in \"/tmp\".")
@@ -536,15 +540,15 @@ _("When enabled, you can change keyboard shortcuts for menu items " \
   "by hitting a key combination while the menu item is highlighted.")
 
 #define SAVE_ACCELS_BLURB \
-_("Save changed keyboard shortcuts when GIMP exits.")
+_("Save changed keyboard shortcuts when Clay exits.")
 
 #define RESTORE_ACCELS_BLURB \
-_("Restore saved keyboard shortcuts on each GIMP startup.")
+_("Restore saved keyboard shortcuts on each Clay startup.")
 
 #define TEMP_PATH_BLURB \
 _("Sets the folder for temporary storage. Files will appear here " \
-  "during the course of running GIMP.  Most files will disappear " \
-  "when GIMP exits, but some files are likely to remain, so it " \
+  "during the course of running Clay.  Most files will disappear " \
+  "when Clay exits, but some files are likely to remain, so it " \
   "is best if this folder not be one that is shared by other users.")
 
 #define THEME_BLURB \
@@ -730,7 +734,7 @@ _("The thumbnail in the Open dialog will be automatically updated " \
   "if the file being previewed is smaller than the size set here.")
 
 #define TILE_CACHE_SIZE_BLURB \
-_("When the amount of pixel data exceeds this limit, GIMP will start to " \
+_("When the amount of pixel data exceeds this limit, Clay will start to " \
   "swap tiles to disk.  This is a lot slower but it makes it possible to " \
   "work on images that wouldn't fit into memory otherwise.  If you have a " \
   "lot of RAM, you may want to set this to a higher value.")
@@ -748,7 +752,7 @@ _("Use a single toolbox button for grouped tools.")
 _("Show the currently active image in the toolbox.")
 
 #define TOOLBOX_WILBER_BLURB \
-_("Show the GIMP mascot at the top of the toolbox.")
+_("Show the Clay mascot at the top of the toolbox.")
 
 #define TRANSPARENCY_CUSTOM_COLOR1_BLURB \
 _("The first color to use in the transparency checkerboard, " \
@@ -765,7 +769,7 @@ _("Sets the manner in which transparency is displayed in images.")
 _("Sets the size of the checkerboard used to display transparency.")
 
 #define TRUST_DIRTY_FLAG_BLURB \
-_("When enabled, GIMP will not save an image if it has not been changed " \
+_("When enabled, Clay will not save an image if it has not been changed " \
   "since it was opened.")
 
 #define UNDO_LEVELS_BLURB \

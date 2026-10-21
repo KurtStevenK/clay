@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * X10 and X11 bitmap (XBM) loading and exporting file filter for GIMP.
@@ -822,7 +822,7 @@ load_image (GFile   *file,
 
   if (width > GIMP_MAX_IMAGE_SIZE)
     {
-      g_message (_("'%s':\nImage width is larger than GIMP can handle"),
+      g_message (_("'%s':\nImage width is larger than Clay can handle"),
                  gimp_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
@@ -838,7 +838,7 @@ load_image (GFile   *file,
 
   if (height > GIMP_MAX_IMAGE_SIZE)
     {
-      g_message (_("'%s':\nImage height is larger than GIMP can handle"),
+      g_message (_("'%s':\nImage height is larger than Clay can handle"),
                  gimp_file_get_utf8_name (file));
       fclose (fp);
       return NULL;

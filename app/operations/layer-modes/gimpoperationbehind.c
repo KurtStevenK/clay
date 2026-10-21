@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationbehind.c
@@ -51,7 +51,7 @@ gimp_operation_behind_class_init (GimpOperationBehindClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:behind",
-                                 "description", "GIMP behind mode operation",
+                                 "description", "Clay behind mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_behind_process;

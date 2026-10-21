@@ -1,0 +1,9 @@
+_build/
+_install/
+_ico-preview-config/
+_clay-launch.err
+_clay-launch.out
+_pacman.log
+website/.firebase/
+*.obj
+*.pdb

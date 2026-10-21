@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1999 Spencer Kimball and Peter Mattis
  *
  * gimpunit.c
@@ -212,7 +212,7 @@ gimp_unitrc_save (Gimp *gimp)
   writer =
     gimp_config_writer_new_from_file (file,
                                       TRUE,
-                                      "GIMP units\n\n"
+                                      "Clay units\n\n"
                                       "This file contains the user unit database. "
                                       "You can edit this list with the unit "
                                       "editor. You are not supposed to edit it "

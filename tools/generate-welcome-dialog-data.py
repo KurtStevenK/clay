@@ -81,7 +81,7 @@ if __name__ == "__main__":
   parser.add_argument('--header', action='store_true')
   args = parser.parse_args(sys.argv[1:])
 
-  top_comment = '''/* GIMP - The GNU Image Manipulation Program
+  top_comment = '''/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * welcome-dialog-data.h

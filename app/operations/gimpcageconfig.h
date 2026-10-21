@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  *
  * gimpcageconfig.h
  * Copyright (C) 2010 Michael Muré <batolettre@gmail.com>

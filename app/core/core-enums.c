@@ -475,7 +475,7 @@ gimp_debug_policy_get_type (void)
     { GIMP_DEBUG_POLICY_WARNING, NC_("debug-policy", "Debug warnings, critical errors and crashes"), NULL },
     { GIMP_DEBUG_POLICY_CRITICAL, NC_("debug-policy", "Debug critical errors and crashes"), NULL },
     { GIMP_DEBUG_POLICY_FATAL, NC_("debug-policy", "Debug crashes only"), NULL },
-    { GIMP_DEBUG_POLICY_NEVER, NC_("debug-policy", "Never debug GIMP"), NULL },
+    { GIMP_DEBUG_POLICY_NEVER, NC_("debug-policy", "Never debug Clay"), NULL },
     { 0, NULL, NULL }
   };
 

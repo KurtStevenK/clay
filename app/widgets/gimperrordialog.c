@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimperrordialog.c
@@ -197,7 +197,7 @@ gimp_error_dialog_add (GimpErrorDialog *dialog,
   else
     gimp_message_box_set_primary_text (GIMP_MESSAGE_BOX (item->box),
                                        /* %s is a message domain,
-                                        * like "GIMP Message" or
+                                        * like "Clay Message" or
                                         * "PNG Message"
                                         */
                                        _("%s Message"), domain);

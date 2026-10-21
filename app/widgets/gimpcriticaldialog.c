@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpcriticaldialog.c
@@ -223,7 +223,7 @@ gimp_critical_dialog_constructed (GObject *object)
                               NULL);
 
       /* Recommend an update. */
-      text = g_strdup_printf (_("A new version of GIMP (%s) was released on %s.\n"
+      text = g_strdup_printf (_("A new version of Clay (%s) was released on %s.\n"
                                 "It is recommended to update."),
                               dialog->last_version, dialog->release_date);
       gtk_label_set_text (GTK_LABEL (dialog->center_label), text);
@@ -252,7 +252,7 @@ gimp_critical_dialog_constructed (GObject *object)
                               " \xe2\x80\xa2 %s\n"
                               " \xe2\x80\xa2 %s\n"
                               " \xe2\x80\xa2 %s",
-                              _("To help us improve GIMP, you can report the bug with "
+                              _("To help us improve Clay, you can report the bug with "
                                 "these simple steps:"),
                               _("Copy the bug information to the clipboard by clicking: "),
                               BUTTON1_TEXT,
@@ -262,8 +262,8 @@ gimp_critical_dialog_constructed (GObject *object)
                               _("Paste the clipboard text in a new bug report."),
                               _("Add relevant information in English in the bug report "
                                 "explaining what you were doing when this error occurred."),
-                              _("This error may have left GIMP in an inconsistent state. "
-                                "It is advised to save your work and restart GIMP."));
+                              _("This error may have left Clay in an inconsistent state. "
+                                "It is advised to save your work and restart Clay."));
       gtk_label_set_text (GTK_LABEL (dialog->center_label), text);
       g_free (text);
 
@@ -627,14 +627,14 @@ gimp_critical_dialog_add (GtkWidget   *dialog,
   /* The user text, which should be localized. */
   if (is_fatal)
     {
-      text = g_strdup_printf (_("GIMP crashed with a fatal error: %s"),
+      text = g_strdup_printf (_("Clay crashed with a fatal error: %s"),
                               message);
     }
   else if (! gtk_label_get_text (GTK_LABEL (critical->top_label)) ||
            strlen (gtk_label_get_text (GTK_LABEL (critical->top_label))) == 0)
     {
       /* First error. Let's just display it. */
-      text = g_strdup_printf (_("GIMP encountered an error: %s"),
+      text = g_strdup_printf (_("Clay encountered an error: %s"),
                               message);
     }
   else
@@ -642,7 +642,7 @@ gimp_critical_dialog_add (GtkWidget   *dialog,
       /* Let's not display all errors. They will be in the bug report
        * part anyway.
        */
-      text = g_strdup_printf (_("GIMP encountered several critical errors!"));
+      text = g_strdup_printf (_("Clay encountered several critical errors!"));
     }
   gtk_label_set_text (GTK_LABEL (critical->top_label),
                       text);
@@ -661,7 +661,7 @@ gimp_critical_dialog_add (GtkWidget   *dialog,
                               " \xe2\x80\xa2 %s\n"
                               " \xe2\x80\xa2 %s\n"
                               " \xe2\x80\xa2 %s",
-                              _("To help us improve GIMP, you can report the bug with "
+                              _("To help us improve Clay, you can report the bug with "
                                 "these simple steps:"),
                               _("Copy the bug information to the clipboard by clicking: "),
                               BUTTON1_TEXT,
@@ -694,7 +694,7 @@ gimp_critical_dialog_add (GtkWidget   *dialog,
   if (is_fatal)
     {
       gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                              _("_Restart GIMP"), GIMP_CRITICAL_RESPONSE_RESTART,
+                              _("_Restart Clay"), GIMP_CRITICAL_RESPONSE_RESTART,
                               NULL);
       critical->program = g_strdup (program);
       critical->pid     = pid;

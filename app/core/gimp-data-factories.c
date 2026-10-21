@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-2002 Spencer Kimball, Peter Mattis, and others
  *
  * This program is free software: you can redistribute it and/or modify
@@ -78,12 +78,12 @@ gimp_data_factories_init (Gimp *gimp)
   gimp_object_set_static_name (GIMP_OBJECT (gimp->brush_factory),
                                "brush factory");
   gimp_data_loader_factory_add_loader (gimp->brush_factory,
-                                       "GIMP Brush",
+                                       "Clay Brush",
                                        gimp_brush_load,
                                        GIMP_BRUSH_FILE_EXTENSION,
                                        TRUE);
   gimp_data_loader_factory_add_loader (gimp->brush_factory,
-                                       "GIMP Brush Pixmap",
+                                       "Clay Brush Pixmap",
                                        gimp_brush_load,
                                        GIMP_BRUSH_PIXMAP_FILE_EXTENSION,
                                        FALSE);
@@ -98,12 +98,12 @@ gimp_data_factories_init (Gimp *gimp)
                                        GIMP_BRUSH_PSP_FILE_EXTENSION,
                                        FALSE);
  gimp_data_loader_factory_add_loader (gimp->brush_factory,
-                                       "GIMP Generated Brush",
+                                       "Clay Generated Brush",
                                        gimp_brush_generated_load,
                                        GIMP_BRUSH_GENERATED_FILE_EXTENSION,
                                        TRUE);
   gimp_data_loader_factory_add_loader (gimp->brush_factory,
-                                       "GIMP Brush Pipe",
+                                       "Clay Brush Pipe",
                                        gimp_brush_pipe_load,
                                        GIMP_BRUSH_PIPE_FILE_EXTENSION,
                                        TRUE);
@@ -119,7 +119,7 @@ gimp_data_factories_init (Gimp *gimp)
   gimp_object_set_static_name (GIMP_OBJECT (gimp->dynamics_factory),
                                "dynamics factory");
   gimp_data_loader_factory_add_loader (gimp->dynamics_factory,
-                                       "GIMP Paint Dynamics",
+                                       "Clay Paint Dynamics",
                                        gimp_dynamics_load,
                                        GIMP_DYNAMICS_FILE_EXTENSION,
                                        TRUE);
@@ -151,7 +151,7 @@ gimp_data_factories_init (Gimp *gimp)
   gimp_object_set_static_name (GIMP_OBJECT (gimp->pattern_factory),
                                "pattern factory");
   gimp_data_loader_factory_add_loader (gimp->pattern_factory,
-                                       "GIMP Pattern",
+                                       "Clay Pattern",
                                        gimp_pattern_load,
                                        GIMP_PATTERN_FILE_EXTENSION,
                                        TRUE);
@@ -170,7 +170,7 @@ gimp_data_factories_init (Gimp *gimp)
   gimp_object_set_static_name (GIMP_OBJECT (gimp->gradient_factory),
                                "gradient factory");
   gimp_data_loader_factory_add_loader (gimp->gradient_factory,
-                                       "GIMP Gradient",
+                                       "Clay Gradient",
                                        gimp_gradient_load,
                                        GIMP_GRADIENT_FILE_EXTENSION,
                                        TRUE);
@@ -191,7 +191,7 @@ gimp_data_factories_init (Gimp *gimp)
   gimp_object_set_static_name (GIMP_OBJECT (gimp->palette_factory),
                                "palette factory");
   gimp_data_loader_factory_add_loader (gimp->palette_factory,
-                                       "GIMP Palette",
+                                       "Clay Palette",
                                        gimp_palette_load,
                                        GIMP_PALETTE_FILE_EXTENSION,
                                        TRUE);
@@ -214,7 +214,7 @@ gimp_data_factories_init (Gimp *gimp)
   gimp_object_set_static_name (GIMP_OBJECT (gimp->tool_preset_factory),
                                "tool preset factory");
   gimp_data_loader_factory_add_loader (gimp->tool_preset_factory,
-                                       "GIMP Tool Preset",
+                                       "Clay Tool Preset",
                                        gimp_tool_preset_load,
                                        GIMP_TOOL_PRESET_FILE_EXTENSION,
                                        TRUE);

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * This program is free software: you can redistribute it and/or modify
@@ -125,7 +125,7 @@ xcf_init (Gimp *gimp)
   procedure->marshal_func = xcf_save_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP XCF image"));
+  proc->menu_label = g_strdup (_("Clay XCF image"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-wilber",
                                    strlen ("gimp-wilber") + 1,
@@ -140,7 +140,7 @@ xcf_init (Gimp *gimp)
                                   "Saves file in the .xcf file format",
                                   "The XCF file format has been designed "
                                   "specifically for loading and saving "
-                                  "tiled and layered images in GIMP. "
+                                  "tiled and layered images in Clay. "
                                   "This procedure will save the specified "
                                   "image in the xcf file format.",
                                   NULL);
@@ -180,7 +180,7 @@ xcf_init (Gimp *gimp)
   procedure->marshal_func = xcf_load_invoker;
 
   proc = GIMP_PLUG_IN_PROCEDURE (procedure);
-  proc->menu_label = g_strdup (_("GIMP XCF image"));
+  proc->menu_label = g_strdup (_("Clay XCF image"));
   gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
                                    (const guint8 *) "gimp-wilber",
                                    strlen ("gimp-wilber") + 1,
@@ -196,7 +196,7 @@ xcf_init (Gimp *gimp)
                                   "Loads file saved in the .xcf file format",
                                   "The XCF file format has been designed "
                                   "specifically for loading and saving "
-                                  "tiled and layered images in GIMP. "
+                                  "tiled and layered images in Clay. "
                                   "This procedure will load the specified "
                                   "file.",
                                   NULL);

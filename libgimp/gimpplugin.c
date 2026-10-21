@@ -262,7 +262,7 @@ gimp_plug_in_class_init (GimpPlugInClass *klass)
   props[PROP_READ_CHANNEL] =
     g_param_spec_boxed ("read-channel",
                         "Read channel",
-                        "The GIOChanel to read from GIMP",
+                        "The GIOChanel to read from Clay",
                         G_TYPE_IO_CHANNEL,
                         GIMP_PARAM_READWRITE |
                         G_PARAM_CONSTRUCT_ONLY);
@@ -275,7 +275,7 @@ gimp_plug_in_class_init (GimpPlugInClass *klass)
   props[PROP_WRITE_CHANNEL] =
     g_param_spec_boxed ("write-channel",
                         "Write channel",
-                        "The GIOChanel to write to GIMP",
+                        "The GIOChanel to write to Clay",
                         G_TYPE_IO_CHANNEL,
                         GIMP_PARAM_READWRITE |
                         G_PARAM_CONSTRUCT_ONLY);
@@ -1315,7 +1315,7 @@ gimp_plug_in_io_error_handler (GIOChannel   *channel,
                                GIOCondition  cond,
                                gpointer      data)
 {
-  g_printerr ("%s: fatal error: GIMP crashed\n", gimp_get_progname ());
+  g_printerr ("%s: fatal error: Clay crashed\n", gimp_get_progname ());
   _gimp_quit ();
 
   /* never reached */

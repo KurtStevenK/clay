@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationnormalmode.c
@@ -59,7 +59,7 @@ gimp_operation_normal_class_init (GimpOperationNormalClass *klass)
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",                  "gimp:normal",
-                                 "description",           "GIMP normal mode operation",
+                                 "description",           "Clay normal mode operation",
                                  "reference-image",       "normal-mode.png",
                                  "reference-composition", reference_xml,
                                  NULL);

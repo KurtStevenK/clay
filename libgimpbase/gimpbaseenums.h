@@ -839,9 +839,9 @@ GType gimp_pdb_proc_type_get_type (void);
 
 typedef enum
 {
-  GIMP_PDB_PROC_TYPE_INTERNAL,   /*< desc="Internal GIMP procedure" >*/
-  GIMP_PDB_PROC_TYPE_PLUGIN,     /*< desc="GIMP Plug-In" >*/
-  GIMP_PDB_PROC_TYPE_PERSISTENT, /*< desc="GIMP Persistent Plug-In" >*/
+  GIMP_PDB_PROC_TYPE_INTERNAL,   /*< desc="Internal Clay procedure" >*/
+  GIMP_PDB_PROC_TYPE_PLUGIN,     /*< desc="Clay Plug-In" >*/
+  GIMP_PDB_PROC_TYPE_PERSISTENT, /*< desc="Clay Persistent Plug-In" >*/
   GIMP_PDB_PROC_TYPE_TEMPORARY   /*< desc="Temporary Procedure" >*/
 } GimpPDBProcType;
 

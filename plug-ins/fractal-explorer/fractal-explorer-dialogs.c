@@ -1,5 +1,5 @@
 /**********************************************************************
-   GIMP - The GNU Image Manipulation Program
+   xyz.kainzmayer.ClayDesign
    Copyright (C) 1995 Spencer Kimball and Peter Mattis
 
    This program is free software: you can redistribute it and/or modify
@@ -1401,7 +1401,7 @@ save_callback (void)
   /* Write header out */
   fputs (FRACTAL_HEADER, fp);
   fputs ("#**********************************************************************\n", fp);
-  fputs ("# This is a data file for the Fractal Explorer plug-in for GIMP       *\n", fp);
+  fputs ("# This is a data file for the Fractal Explorer plug-in for Clay       *\n", fp);
   fputs ("#**********************************************************************\n", fp);
 
   save_options (fp);

@@ -1,4 +1,4 @@
-/* GIMP - The GNU Image Manipulation Program
+/* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
  * gimpoperationvaluemode.c
@@ -55,7 +55,7 @@ gimp_operation_hsv_value_legacy_class_init (GimpOperationHsvValueLegacyClass *kl
 
   gegl_operation_class_set_keys (operation_class,
                                  "name",        "gimp:hsv-value-legacy",
-                                 "description", "GIMP value mode operation",
+                                 "description", "Clay value mode operation",
                                  NULL);
 
   layer_mode_class->process = gimp_operation_hsv_value_legacy_process;
