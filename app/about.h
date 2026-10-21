@@ -25,8 +25,7 @@
   "Clay Image Beautification Program"
 
 #define GIMP_COPYRIGHT \
-  _("Copyright © 2026 xyz.kainzmayer.ClayDesign\n" \
-    "and the contributors")
+  _("© 2026 ClayDesign Contributors.")
 
 /* TRANSLATORS: do not end the license URL with a dot, because it would
  * be in the link. Because of technical limitations, make sure the URL

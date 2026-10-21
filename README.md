@@ -6,7 +6,7 @@ Maintained by [xyz.kainzmayer.ClayDesign](https://claydesign.web.app).
 
 Clay is a free image editor for Windows, Linux, and macOS. Mobile editions for iOS, Android, Huawei, and Microsoft are planned. The current release is 3.36 for Windows.
 
-© 2026 xyz.kainzmayer.ClayDesign and the contributors.
+© 2026 ClayDesign Contributors.
 
 ## License
 
