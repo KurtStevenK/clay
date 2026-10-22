@@ -22,30 +22,30 @@ gimprc_man = custom_target('gimprc-' + gimp_app_version + '.5',
                            install_dir: get_option('mandir') / 'man5')
 
 gimptool_man = configure_file(input : 'gimptool.1.in',
-                              output: 'gimptool-' + gimp_app_version + '.1',
+                              output: 'claytool-' + gimp_app_version + '.1',
                               configuration: manconf)
 man_files = [ gimptool_man ]
 
 if enable_console_bin
   gimp_console_man = configure_file(input : 'gimp.1.in',
-                                    output: 'gimp-console-' + gimp_app_version + '.1',
+                                    output: 'clay-console-' + gimp_app_version + '.1',
                                     configuration: manconf)
   man_files += [ gimp_console_man ]
 endif
 
 gimp_man = configure_file(input : 'gimp.1.in',
-                          output: 'gimp-' + gimp_app_version + '.1',
+                          output: 'clay-' + gimp_app_version + '.1',
                           configuration: manconf)
 man_files += [ gimp_man ]
 
 install_man(man_files)
 
 if enable_default_bin and not platform_windows
-  install_symlink('gimptool.1',
-                  pointing_to: 'gimptool-' + gimp_app_version + '.1',
+  install_symlink('claytool.1',
+                  pointing_to: 'claytool-' + gimp_app_version + '.1',
                   install_dir: get_option('mandir') + '/man1')
-  install_symlink('gimptool-@0@.1'.format(api_version_major),
-                  pointing_to: 'gimptool-' + gimp_app_version + '.1',
+  install_symlink('claytool-@0@.1'.format(api_version_major),
+                  pointing_to: 'claytool-' + gimp_app_version + '.1',
                   install_dir: get_option('mandir') + '/man1')
 
   install_symlink('gimprc.5',
@@ -56,19 +56,19 @@ if enable_default_bin and not platform_windows
                   install_dir: get_option('mandir') + '/man5')
 
   if enable_console_bin
-    install_symlink('gimp-console.1',
-                    pointing_to: 'gimp-console-' + gimp_app_version + '.1',
+    install_symlink('clay-console.1',
+                    pointing_to: 'clay-console-' + gimp_app_version + '.1',
                     install_dir: get_option('mandir') + '/man1')
-    install_symlink('gimp-console-@0@.1'.format(api_version_major),
-                    pointing_to: 'gimp-console-' + gimp_app_version + '.1',
+    install_symlink('clay-console-@0@.1'.format(api_version_major),
+                    pointing_to: 'clay-console-' + gimp_app_version + '.1',
                     install_dir: get_option('mandir') + '/man1')
   endif
 
-  install_symlink('gimp.1',
-                  pointing_to: 'gimp-' + gimp_app_version + '.1',
+  install_symlink('clay.1',
+                  pointing_to: 'clay-' + gimp_app_version + '.1',
                   install_dir: get_option('mandir') + '/man1')
-  install_symlink('gimp-@0@.1'.format(api_version_major),
-                  pointing_to: 'gimp-' + gimp_app_version + '.1',
+  install_symlink('clay-@0@.1'.format(api_version_major),
+                  pointing_to: 'clay-' + gimp_app_version + '.1',
                   install_dir: get_option('mandir') + '/man1')
 endif
 

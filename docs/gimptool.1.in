@@ -1,11 +1,11 @@
-.TH GIMPTOOL 1 "Version @GIMP_VERSION@" "GIMP Manual Pages"
+.TH CLAYTOOL 1 "Version @GIMP_VERSION@" "Clay Manual Pages"
 
 .SH NAME
-gimptool - script to perform various GIMPy functions
+claytool - build and install Clay plug-ins and scripts
 
 
 .SH SYNOPSIS
-.B gimptool
+.B claytool
 [\-\-prefix\fI[=DIR]\fP] [\-\-exec\-prefix\fI[=DIR]\fP] [\-\-version]
 [\-\-help] [\-\-quiet] [\-\-silent] [\-n] [\-\-just-print] [\-\-dry-run]
 [\-\-recon] [\-\-msvc-syntax]
@@ -29,21 +29,21 @@ gimptool - script to perform various GIMPy functions
 
 .SH DESCRIPTION
 .PP
-\fIgimptool\fP is a tool that can, among other things, build
+\fIclaytool\fP is a tool that can, among other things, build
 plug-ins or scripts and install them if they are distributed in one
 source file.
 .PP
-\fIgimptool\fP can also be used by programs that need to know what
-libraries and include-paths \fIGIMP\fP was compiled with. \fIgimptool\fP
+\fIclaytool\fP can also be used by programs that need to know what
+libraries and include-paths \fIClay\fP was compiled with. \fIclaytool\fP
 uses \fIpkg-config\fP for this task. For use in Makefiles, it is recommended
-that you use \fIpkg-config\fP directly instead of calling \fIgimptool\fP.
+that you use \fIpkg-config\fP directly instead of calling \fIclaytool\fP.
 
 
 .SH OPTIONS
-\fIgimptool\fP accepts the following options:
+\fIclaytool\fP accepts the following options:
 .TP 8
 .B  \-\-version
-Print the currently installed version of \fIGIMP\fP on the standard output.
+Print the currently installed version of \fIClay\fP on the standard output.
 .TP 8
 .B \-\-help
 Print out the help blurb, showing commonly used commandline options.
@@ -70,128 +70,128 @@ Test mode. Print the commands but don't actually execute them. Same as \-n.
 .B \-\-msvc-syntax
 Useful on Windows. Outputs the compiler and linker flags in the syntax
 used by Microsoft's toolchain. Passed to the pkg-config command that
-does most of \fIgimptool\fP's work.
+does most of \fIclaytool\fP's work.
 .TP 8
 .B \-\-bindir
-Outputs the bindir used to install the \fIGIMP\fP.
+Outputs the bindir used to install the \fIClay\fP.
 .TP 8
 .B \-\-sbindir
-Outputs the sbindir used to install the \fIGIMP\fP.
+Outputs the sbindir used to install the \fIClay\fP.
 .TP 8
 .B \-\-libexecdir
-Outputs the libexecdir used to install the \fIGIMP\fP.
+Outputs the libexecdir used to install the \fIClay\fP.
 .TP 8
 .B \-\-datadir
-Outputs the datadir used to install the \fIGIMP\fP.
+Outputs the datadir used to install the \fIClay\fP.
 .TP 8
 .B \-\-sysconfdir
-Outputs the sysconfdir used to install the \fIGIMP\fP.
+Outputs the sysconfdir used to install the \fIClay\fP.
 .TP 8
 .B \-\-sharedstatedir
-Outputs the sharedstatedir used to install the \fIGIMP\fP.
+Outputs the sharedstatedir used to install the \fIClay\fP.
 .TP 8
 .B \-\-localstatedir
-Outputs the localstatedir used to install the \fIGIMP\fP.
+Outputs the localstatedir used to install the \fIClay\fP.
 .TP 8
 .B \-\-libdir
-Outputs the libdir used to install the \fIGIMP\fP.
+Outputs the libdir used to install the \fIClay\fP.
 .TP 8
 .B \-\-infodir
-Outputs the infodir used to install the \fIGIMP\fP.
+Outputs the infodir used to install the \fIClay\fP.
 .TP 8
 .B \-\-mandir
-Outputs the mandir used to install the \fIGIMP\fP.
+Outputs the mandir used to install the \fIClay\fP.
 .TP 8
 .B \-\-includedir
-Outputs the includedir used to install the \fIGIMP\fP.
+Outputs the includedir used to install the \fIClay\fP.
 .TP 8
 .B \-\-gimpdatadir
-Outputs the actual directory where the \fIGIMP\fP data files were installed.
+Outputs the actual directory where the \fIClay\fP data files were installed.
 .TP 8
 .B \-\-gimpplugindir
-Outputs the actual directory where the \fIGIMP\fP plug-ins were installed.
+Outputs the actual directory where the \fIClay\fP plug-ins were installed.
 .TP 8
 .B  \-\-build \fIplug-in.c\fP
-Compile and link \fIplug-in.c\fP into a \fIGIMP\fP plug-in.
+Compile and link \fIplug-in.c\fP into a \fIClay\fP plug-in.
 .TP 8
 .B  \-\-build\-strip \fIplug-in.c\fP
-Compile,link, and strip \fIplug-in.c\fP into a \fIGIMP\fP plug-in.
+Compile,link, and strip \fIplug-in.c\fP into a \fIClay\fP plug-in.
 .TP 8
 .B  \-\-install \fIplug-in.c\fP
 Compile, link, and install \fIplug-in.c\fP into the user's personal
-\fIGIMP\fP plug-in directory (@manpage_gimpdir@/plug-ins)
+\fIClay\fP plug-in directory (@manpage_gimpdir@/plug-ins)
 .TP 8
 .B  \-\-install\-strip \fIplug-in.c\fP
 Compile, link,strip, and install \fIplug-in.c\fP into the user's
-personal \fIGIMP\fP
+personal \fIClay\fP
 plug-in directory (@manpage_gimpdir@/plug-ins)
 .TP 8
 .B  \-\-install\-admin \fIplug-in.c\fP
-Compile, link, and install \fIplug-in.c\fP into the system-wide \fIGIMP\fP
+Compile, link, and install \fIplug-in.c\fP into the system-wide \fIClay\fP
 plug-in directory (@gimpplugindir@/plug-ins)
 .TP 8
 .B  \-\-install\-bin \fIplug-in\fP
-Install \fIplug-in\fP into the user's personal \fIGIMP\fP
+Install \fIplug-in\fP into the user's personal \fIClay\fP
 plug-in directory (@manpage_gimpdir@/plug-ins)
 .TP 8
 .B  \-\-install\-admin\-bin \fIplug-in\fP
-Install \fIplug-in\fP into the system-wide \fIGIMP\fP
+Install \fIplug-in\fP into the system-wide \fIClay\fP
 plug-in directory (@gimpplugindir@/plug-ins)
 .TP 8
 .B  \-\-install\-bin\-strip \fIplug-in\fP
-Install stripped \fIplug-in\fP into the user's personal \fIGIMP\fP
+Install stripped \fIplug-in\fP into the user's personal \fIClay\fP
 plug-in directory (@manpage_gimpdir@/plug-ins)
 .TP 8
 .B  \-\-install\-admin\-bin\-strip \fIplug-in\fP
-Install stripped \fIplug-in\fP into the system-wide \fIGIMP\fP
+Install stripped \fIplug-in\fP into the system-wide \fIClay\fP
 plug-in directory (@gimpplugindir@/plug-ins)
 .TP 8
 .B  \-\-install\-script \fIscript.scm\fP
-Install \fIscript.scm\fP into the user's personal \fIGIMP\fP
+Install \fIscript.scm\fP into the user's personal \fIClay\fP
 script directory (@manpage_gimpdir@/scripts)
 .TP 8
 .B  \-\-install\-admin\-script \fIscript.scm\fP
-Install \fIscript.scm\fP into the system-wide \fIGIMP\fP
+Install \fIscript.scm\fP into the system-wide \fIClay\fP
 script directory (@gimpdatadir@/scripts)
 .TP 8
 .B  \-\-uninstall\-bin \fIplug-in\fP
-Uninstall \fIplug-in\fP from the user's personal \fIGIMP\fP
+Uninstall \fIplug-in\fP from the user's personal \fIClay\fP
 plug-in directory (@manpage_gimpdir@/plug-ins)
 .TP 8
 .B  \-\-uninstall\-admin\-bin \fIplug-in\fP
-Uninstall \fIplug-in\fP from the system-wide \fIGIMP\fP
+Uninstall \fIplug-in\fP from the system-wide \fIClay\fP
 plug-in directory (@gimpplugindir@/plug-ins)
 .TP 8
 .B  \-\-uninstall\-script \fIscript.scm\fP
-Uninstall \fIscript.scm\fP from the user's personal \fIGIMP\fP
+Uninstall \fIscript.scm\fP from the user's personal \fIClay\fP
 script directory (@manpage_gimpdir@/scripts)
 .TP 8
 .B  \-\-uninstall\-admin\-script \fIscript.scm\fP
-Uninstall \fIscript.scm\fP from the system-wide \fIGIMP\fP
+Uninstall \fIscript.scm\fP from the system-wide \fIClay\fP
 script directory (@gimpdatadir@/scripts)
 .TP 8
 .B  \-\-libs
-Print the linker flags that are necessary to link a \fIGIMP\fP plug-in.
+Print the linker flags that are necessary to link a \fIClay\fP plug-in.
 .TP 8
 .B \-\-libs-noui
-Print the linker flags that are necessary to link a \fIGIMP\fP plug-in, for
+Print the linker flags that are necessary to link a \fIClay\fP plug-in, for
 plug-ins that do not require the GTK libraries.
 .TP 8
 .B \-\-libs\-geglop
 Print the linker flags that are necessary to link a \fIGEGL\fP filter.
 .TP 8
 .B  \-\-cflags
-Print the compiler flags that are necessary to compile a \fIGIMP\fP plug-in.
+Print the compiler flags that are necessary to compile a \fIClay\fP plug-in.
 .TP 8
 .B \-\-clags-noui
-Print the compiler flags that are necessary to compile a \fIGIMP\fP plug-in
+Print the compiler flags that are necessary to compile a \fIClay\fP plug-in
 for plug-ins that do not require the GTK libraries.
 .TP 8
 .B \-\-clags\-geglop
 Print the compiler flags that are necessary to compile a \fIGEGL\fP filter.
 .TP 8
 .B  \-\-prefix=PREFIX
-If specified, use PREFIX instead of the installation prefix that \fIGIMP\fP
+If specified, use PREFIX instead of the installation prefix that \fIClay\fP
 was built with when computing the output for the \-\-cflags and
 \-\-libs options. This option is also used for the exec prefix
 if \-\-exec\-prefix was not specified. This option must be specified
@@ -199,7 +199,7 @@ before any \-\-libs or \-\-cflags options.
 .TP 8
 .B  \-\-exec\-prefix=PREFIX
 If specified, use PREFIX instead of the installation exec prefix that
-\fIGIMP\fP was built with when computing the output for the \-\-cflags
+\fIClay\fP was built with when computing the output for the \-\-cflags
 and \-\-libs options. This option must be specified before any
 \-\-libs or \-\-cflags options.
 
@@ -222,11 +222,11 @@ LIBS=-lintl .
 .TP 8
 .B PKG_CONFIG
 to get the location of the \fIpkg-config\fP program that is used to determine
-details about your glib, pango, gtk and gimp installation.
+details about your glib, pango, gtk and Clay installation.
 
 
 .SH SEE ALSO
-.BR gimp (1),
+.BR clay (1),
 .BR gimprc (5),
 .BR pkg\-config (1)
 
