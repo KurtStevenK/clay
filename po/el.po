@@ -29775,8 +29775,8 @@ msgstr ""
 "%d"
 
 #: app-tools/gimp-debug-tool.c:108
-msgid "GIMP Crash Debug"
-msgstr "Αποσφαλμάτωση κατάρρευσης GIMP"
+msgid "Clay Crash Debug"
+msgstr "Αποσφαλμάτωση κατάρρευσης Clay"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

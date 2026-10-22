@@ -29200,8 +29200,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Eraro dum skribo de XCF: nesubtenata BPC dum skribo de pikselo: %d"
 
 #: app-tools/gimp-debug-tool.c:108
-msgid "GIMP Crash Debug"
-msgstr "GIMP-frakasa senarariĝo"
+msgid "Clay Crash Debug"
+msgstr "Clay-frakasa senarariĝo"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

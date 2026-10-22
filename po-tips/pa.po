@@ -69,7 +69,7 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP. You should probably disable &quot;Dynamic Keyboard "
+"you exit Clay. You should probably disable &quot;Dynamic Keyboard "
 "Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning "
 "shortcuts."
 msgstr ""
@@ -89,7 +89,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:8
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
 msgstr ""
@@ -99,7 +99,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:9
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
@@ -177,7 +177,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:17
 msgid ""
-"When you save an image to work on it again later, try using XCF, GIMP's "
+"When you save an image to work on it again later, try using XCF, Clay's "
 "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 "the layers and every aspect of your work-in-progress. Once a project is "
 "completed, you can save it as JPEG, PNG, GIF, ..."
@@ -218,7 +218,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:21
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
@@ -237,10 +237,10 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:23
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
-"ਕਦੀ ਵੀ ਸਵਿੱਚ F1 ਦਬਾ ਕੇ ਤੁਸੀਂ GIMP ਦੀਆਂ ਜਿਆਦਾਤਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਾਸਤੇ ਮੱਦਦ ਸੰਖੇਪ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ "
+"ਕਦੀ ਵੀ ਸਵਿੱਚ F1 ਦਬਾ ਕੇ ਤੁਸੀਂ Clay ਦੀਆਂ ਜਿਆਦਾਤਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਾਸਤੇ ਮੱਦਦ ਸੰਖੇਪ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ "
 "ਹੋ। ਇਹ ਮੇਨੂ ਵਿੱਚ ਵੀ ਕੰਮ ਕਰਦਾ ਹੈ।"
 
 #: ../data/tips/gimp-tips.xml.in.h:24

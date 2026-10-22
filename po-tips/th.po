@@ -19,17 +19,17 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing the F1 key at any "
+"You can get context-sensitive help for most of Clay's features by pressing the F1 key at any "
 "time. This also works inside the menus."
 msgstr ""
-"คุณสามารถดูวิธีใช้ตามบริบทสำหรับคุณลักษณะส่วนใหญ่ของ GIMP ได้โดยกดปุ่ม F1 เมื่อไรก็ได้ ซึ่งใช้ได้ภายในเมนูด้วยเช่นกัน"
+"คุณสามารถดูวิธีใช้ตามบริบทสำหรับคุณลักษณะส่วนใหญ่ของ Clay ได้โดยกดปุ่ม F1 เมื่อไรก็ได้ ซึ่งใช้ได้ภายในเมนูด้วยเช่นกัน"
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of slides or "
+"Clay uses layers to let you organize your image. Think of them as a stack of slides or "
 "filters, such that looking through them you see a composite of their contents."
 msgstr ""
-"GIMP ใช้เลเยอร์เพื่อให้คุณสามารถจัดระเบียบภาพของคุณได้ ให้ลองนึกภาพเลเยอร์เหล่านี้เหมือนสไลด์หรือฟิลเตอร์ซ้อนกัน "
+"Clay ใช้เลเยอร์เพื่อให้คุณสามารถจัดระเบียบภาพของคุณได้ ให้ลองนึกภาพเลเยอร์เหล่านี้เหมือนสไลด์หรือฟิลเตอร์ซ้อนกัน "
 "เมื่อมองผ่านเลเยอร์เหล่านี้ คุณจะเห็นภาพรวมของเนื้อหาทั้งหมด"
 
 #: data/tips/gimp-tips.xml.in:31
@@ -40,11 +40,11 @@ msgstr "คุณสามารถดำเนินการเกี่ยว
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension <tt>.xcf</tt>). This "
+"Saving an image uses XCF, Clay's native file format (file extension <tt>.xcf</tt>). This "
 "preserves the layers and many aspects of your work-in-progress, allowing to work on it again "
 "later. Once a project is completed, you can export it as JPEG, PNG, GIF, etc."
 msgstr ""
-"การบันทึกภาพจะใช้รูปแบบไฟล์ XCF ซึ่งเป็นรูปแบบไฟล์ดั้งเดิมของ GIMP (นามสกุลไฟล์ <tt>.xcf</tt>) "
+"การบันทึกภาพจะใช้รูปแบบไฟล์ XCF ซึ่งเป็นรูปแบบไฟล์ดั้งเดิมของ Clay (นามสกุลไฟล์ <tt>.xcf</tt>) "
 "วิธีนี้จะช่วยรักษาเลเยอร์และองค์ประกอบต่าง ๆ ของงานที่กำลังทำอยู่ ทำให้สามารถกลับมาทำงานต่อในภายหลังได้ "
 "เมื่อโครงการเสร็จสมบูรณ์ คุณสามารถส่งออกเป็นไฟล์ JPEG, PNG, GIF และอื่น ๆ ได้"
 
@@ -87,11 +87,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color from the toolbox or "
+"You can drag and drop many things in Clay. For example, dragging a color from the toolbox or "
 "from a color palette and dropping it into an image will fill the current selection with that "
 "color."
 msgstr ""
-"คุณสามารถลากและวางสิ่งต่าง ๆ ได้มากมายใน GIMP ตัวอย่างเช่น "
+"คุณสามารถลากและวางสิ่งต่าง ๆ ได้มากมายใน Clay ตัวอย่างเช่น "
 "การลากสีจากกล่องเครื่องมือหรือจากจานสีแล้ววางลงในภาพ จะทำให้พื้นที่เลือกปัจจุบันเต็มไปด้วยสีนั้น"
 
 #: data/tips/gimp-tips.xml.in:89
@@ -128,11 +128,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you "
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you "
 "have bzip2 installed) to the filename and your image will be saved compressed. Of course "
 "loading compressed images works too."
 msgstr ""
-"GIMP รองรับการบีบอัดไฟล์ gzip แบบทันที เพียงเพิ่ม <tt>.gz</tt> (หรือ <tt>.bz2</tt> หากคุณติดตั้ง bzip2 ไว้) "
+"Clay รองรับการบีบอัดไฟล์ gzip แบบทันที เพียงเพิ่ม <tt>.gz</tt> (หรือ <tt>.bz2</tt> หากคุณติดตั้ง bzip2 ไว้) "
 "ลงในชื่อไฟล์ แล้วภาพของคุณจะถูกบันทึกในรูปแบบบีบอัด แน่นอนว่าการโหลดภาพที่บีบอัดก็ใช้งานได้เช่นกัน"
 
 #: data/tips/gimp-tips.xml.in:124

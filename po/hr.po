@@ -28132,8 +28132,8 @@ msgstr ""
 "Greška u zapisivanju XCF: nepodržani BPC prilikom zapisivanja piksela: %d"
 
 #: ../app-tools/gimp-debug-tool.c:87
-msgid "GIMP Crash Debug"
-msgstr "Otklanjanje urušavanja GIMP-a"
+msgid "Clay Crash Debug"
+msgstr "Otklanjanje urušavanja Clay-a"
 
 #: ../data/tags/gimp-tags-default.xml.in.h:1
 msgid "round"

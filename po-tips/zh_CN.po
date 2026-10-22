@@ -25,19 +25,19 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
-"任何时候您只要按 F1 键就可以得到大多数的 GIMP 特性的上下文相关的帮助。这在菜"
+"任何时候您只要按 F1 键就可以得到大多数的 Clay 特性的上下文相关的帮助。这在菜"
 "单里面也可以。"
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
-"GIMP 使用图层来让您组织您的图像。可以把它们想像成一叠胶片或滤镜，然后您从上面"
+"Clay 使用图层来让您组织您的图像。可以把它们想像成一叠胶片或滤镜，然后您从上面"
 "朝下看，看到的是它们的内容的叠加。"
 
 #: data/tips/gimp-tips.xml.in:31
@@ -48,12 +48,12 @@ msgstr "您可以在图层对话框中右点图层的文本标签进行许多图
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension "
+"Saving an image uses XCF, Clay's native file format (file extension "
 "<tt>.xcf</tt>). This preserves the layers and many aspects of your work-in-"
 "progress, allowing to work on it again later. Once a project is completed, "
 "you can export it as JPEG, PNG, GIF, etc."
 msgstr ""
-"使用 GIMP 的原生文件格式 XCF（文件扩展名 <tt>.xcf</tt>）保存图像。这将完整保"
+"使用 Clay 的原生文件格式 XCF（文件扩展名 <tt>.xcf</tt>）保存图像。这将完整保"
 "存图层和您的工作进度，允许之后的再次工作。一旦项目完成，您就可以把它导出为 "
 "JPEG、PNG、GIF 等。"
 
@@ -99,11 +99,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
-"在 GIMP 里您可以拖放很多东西。例如，从工具箱或者从一个色板拖动一种颜色到一幅"
+"在 Clay 里您可以拖放很多东西。例如，从工具箱或者从一个色板拖动一种颜色到一幅"
 "图像当中释放，就会以那种颜色填充当前的选区。"
 
 #: data/tips/gimp-tips.xml.in:89
@@ -142,11 +142,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or "
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or "
 "<tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image "
 "will be saved compressed. Of course loading compressed images works too."
 msgstr ""
-"GIMP 支持实时的 gzip 压缩。只要在文件名后面加上 <tt>.gz</tt>（或者 <tt>.bz2</"
+"Clay 支持实时的 gzip 压缩。只要在文件名后面加上 <tt>.gz</tt>（或者 <tt>.bz2</"
 "tt>，如果您安装了 bzip2 的话）您的图像就会被压缩保存起来。当然加载压缩的图像"
 "也没问题。"
 

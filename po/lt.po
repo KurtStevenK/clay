@@ -29256,8 +29256,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Klaida įrašant XCF: nepalaikomas BPC įrašant pikselį: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP lūžimo derinimas"
+msgid "Clay Crash Debug"
+msgstr "Clay lūžimo derinimas"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

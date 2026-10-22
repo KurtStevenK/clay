@@ -77,7 +77,7 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP. You should probably disable &quot;Dynamic Keyboard "
+"you exit Clay. You should probably disable &quot;Dynamic Keyboard "
 "Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning "
 "shortcuts."
 msgstr ""
@@ -98,7 +98,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:9
 msgid ""
-"GIMP allows you to undo most changes to the image, so feel free to "
+"Clay allows you to undo most changes to the image, so feel free to "
 "experiment."
 msgstr ""
 "गिम्पले छविको धेरै परिवर्तनहरूलाई पूर्वावस्थामा फर्काउन अनुमति दिन्छ, त्यसैले प्रयोग गर्न "
@@ -106,7 +106,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:10
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
 msgstr ""
@@ -116,7 +116,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:11
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
@@ -207,12 +207,12 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:20
 msgid ""
-"When you save an image to work on it again later, try using XCF, GIMP's "
+"When you save an image to work on it again later, try using XCF, Clay's "
 "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 "the layers and every aspect of your work-in-progress. Once a project is "
 "completed, you can save it as JPEG, PNG, GIF, ..."
 msgstr ""
-"जब तपाईँले छविमा फेरि पछि काम गर्न बचत गर्नुहुन्छ, GIMP को नजिकको फाइल ढाँचा (फाइल "
+"जब तपाईँले छविमा फेरि पछि काम गर्न बचत गर्नुहुन्छ, Clay को नजिकको फाइल ढाँचा (फाइल "
 "विस्तार <tt>.xcf</tt> प्रयोग गर्नुहोस्) XCF प्रयोग गर्ने प्रयास गर्नुहोस्। यसले तहहरू र "
 "तपाईँको कामको प्रगतिको हरेक भावको सुरक्षा गर्दछ। एकपटक परियोजना पूरा भएपछि, तपाईँले "
 "JPEG, PNG, GIF, ... को रूपमा त्यसलाई बचत गर्न सक्नुहुन्छ।"
@@ -245,7 +245,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:24
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
@@ -261,7 +261,7 @@ msgstr "तपाईँ सम्पादन ->स्ट्रोक चयन 
 
 #: ../data/tips/gimp-tips.xml.in.h:26
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
 "तपाईँले कुनै पनि समयमा F1 थिचेर गिम्पको विशेषताहरूको सामाग्री सम्वेदनशील मद्दत पाउन "

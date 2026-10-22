@@ -28811,8 +28811,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "寫入 XCF 發生錯誤：寫入像素時遇到不支援的每色版位元數 BPC：%d"
 
 #: app-tools/gimp-debug-tool.c:108
-msgid "GIMP Crash Debug"
-msgstr "GIMP 程式崩潰除錯"
+msgid "Clay Crash Debug"
+msgstr "Clay 程式崩潰除錯"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

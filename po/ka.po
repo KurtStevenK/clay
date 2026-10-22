@@ -29075,8 +29075,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "შეცდომა XCF-ის ჩაწერისას: პიქსელის ჩაწერის მხარდაუჭერელი BCP: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP-ის ავარიის გამოკვლევა"
+msgid "Clay Crash Debug"
+msgstr "Clay-ის ავარიის გამოკვლევა"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

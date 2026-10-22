@@ -28700,8 +28700,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Errorea XCF fitxategia idaztean: onartzen ez den BPC %d pixela idaztean"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMPen akatsen arazketa"
+msgid "Clay Crash Debug"
+msgstr "Clayen akatsen arazketa"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

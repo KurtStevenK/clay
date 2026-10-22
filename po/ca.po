@@ -28905,8 +28905,8 @@ msgstr ""
 "píxel: %d"
 
 #: app-tools/gimp-debug-tool.c:87
-msgid "GIMP Crash Debug"
-msgstr "Depuració de la fallada de GIMP"
+msgid "Clay Crash Debug"
+msgstr "Depuració de la fallada de Clay"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

@@ -29778,8 +29778,8 @@ msgstr ""
 "Erreur d’écriture du XCF : BPC non géré lors de l’écriture de pixel : %d"
 
 #: ../app-tools/gimp-debug-tool.c:87
-msgid "GIMP Crash Debug"
-msgstr "Débogage d’un plantage de GIMP"
+msgid "Clay Crash Debug"
+msgstr "Débogage d’un plantage de Clay"
 
 #: ../data/tags/gimp-tags-default.xml.in.h:1
 msgid "round"

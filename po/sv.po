@@ -29313,8 +29313,8 @@ msgstr ""
 "Fel vid skrivning av XCF: BPC stöds inte vid skrivning av bildpunkt: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP-kraschfelsökning"
+msgid "Clay Crash Debug"
+msgstr "Clay-kraschfelsökning"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

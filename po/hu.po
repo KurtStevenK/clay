@@ -29856,8 +29856,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Hiba az XCF írásakor: nem támogatott BPC a képpont írásakor: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP összeomlási hibakeresés"
+msgid "Clay Crash Debug"
+msgstr "Clay összeomlási hibakeresés"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

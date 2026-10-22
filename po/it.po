@@ -29722,8 +29722,8 @@ msgstr ""
 "pixel: %d"
 
 #: ../app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "Correzione dei crash di GIMP"
+msgid "Clay Crash Debug"
+msgstr "Correzione dei crash di Clay"
 
 #: ../menus/dockable-menu.ui.in.in:6
 msgctxt "file-action"

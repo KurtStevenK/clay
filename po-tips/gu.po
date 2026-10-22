@@ -66,8 +66,8 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP."
-msgstr "પસંદગીઓ સંવાદમાં તમે &quot;વૈશ્વિક કીબોર્ડ ટુંકાણઓ&quot; સક્રિય કર્યા પછી, તમે ટુંકાણ કીઓ ફરીથી સોંપી શકો છો. મેનુ લાવીને, મેનુ વસ્તુ પસંદ કરીને, અને જરૂરી કી જોડાણ દબાવીને આવું કરો. જો &quot;કીબોર્ડ ટુંકાણો સંગ્રહો&quot; સક્રિય કરેલ હોય, તો કી બાઈન્ડીંગ જ્યારે તમે GIMP માંથી બહાર નીકળો ત્યારે સંગ્રહાય છે."
+"you exit Clay."
+msgstr "પસંદગીઓ સંવાદમાં તમે &quot;વૈશ્વિક કીબોર્ડ ટુંકાણઓ&quot; સક્રિય કર્યા પછી, તમે ટુંકાણ કીઓ ફરીથી સોંપી શકો છો. મેનુ લાવીને, મેનુ વસ્તુ પસંદ કરીને, અને જરૂરી કી જોડાણ દબાવીને આવું કરો. જો &quot;કીબોર્ડ ટુંકાણો સંગ્રહો&quot; સક્રિય કરેલ હોય, તો કી બાઈન્ડીંગ જ્યારે તમે Clay માંથી બહાર નીકળો ત્યારે સંગ્રહાય છે."
 
 #: ../tips/gimp-tips.xml.in.h:9
 msgid ""
@@ -78,23 +78,23 @@ msgstr "ચિત્ર પર માર્ગદર્શન મૂકવા �
 
 #: ../tips/gimp-tips.xml.in.h:10
 msgid ""
-"GIMP allows you to undo most changes to the image, so feel free to "
+"Clay allows you to undo most changes to the image, so feel free to "
 "experiment."
-msgstr "GIMP તમને ચિત્રના મોટા ભાગના ફેરફારો રદ કરવા માટે પરવાનગી આપે છે, તેથી પરીક્ષણ કરવામાં મુક્તિ અનુભવો."
+msgstr "Clay તમને ચિત્રના મોટા ભાગના ફેરફારો રદ કરવા માટે પરવાનગી આપે છે, તેથી પરીક્ષણ કરવામાં મુક્તિ અનુભવો."
 
 #: ../tips/gimp-tips.xml.in.h:11
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
-msgstr "GIMP એ મુક્ત રીતે gzip સંકોચનને આધાર આપે છે. ફાઈલનામમાં ખાલી <tt>.gz</tt> (અથવા <tt>.bz2</tt>, જો તમે bzip2 સ્થાપિત કરેલ હોય) ઉમેરો અને તમારું ચિત્ર સંકોચાઈને સંગ્રહાશે. ખરેખર સંકુચિત ચિત્ર લાવવાનું કામ પણ કરશે."
+msgstr "Clay એ મુક્ત રીતે gzip સંકોચનને આધાર આપે છે. ફાઈલનામમાં ખાલી <tt>.gz</tt> (અથવા <tt>.bz2</tt>, જો તમે bzip2 સ્થાપિત કરેલ હોય) ઉમેરો અને તમારું ચિત્ર સંકોચાઈને સંગ્રહાશે. ખરેખર સંકુચિત ચિત્ર લાવવાનું કામ પણ કરશે."
 
 #: ../tips/gimp-tips.xml.in.h:12
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
-msgstr "GIMP તમને તમારું ચિત્ર આયોજિત કરવા માટે સ્તરો વાપરે છે. તેમના વિસે તકતીઓ અથવા ગાળકોના સ્ટેકની જેમ વિચારો, જેમ કે તેમના મારફતે જોવાનું તમને તેમના સમાવિષ્ટોનું જોડાણ બતાવે છે."
+msgstr "Clay તમને તમારું ચિત્ર આયોજિત કરવા માટે સ્તરો વાપરે છે. તેમના વિસે તકતીઓ અથવા ગાળકોના સ્ટેકની જેમ વિચારો, જેમ કે તેમના મારફતે જોવાનું તમને તેમના સમાવિષ્ટોનું જોડાણ બતાવે છે."
 
 #: ../tips/gimp-tips.xml.in.h:13
 msgid ""
@@ -165,11 +165,11 @@ msgstr "જ્યારે દોરનાર સાધન (પેઈન્ટ�
 
 #: ../tips/gimp-tips.xml.in.h:22
 msgid ""
-"When you save an image to work on it again later, try using XCF, GIMP's "
+"When you save an image to work on it again later, try using XCF, Clay's "
 "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 "the layers and every aspect of your work-in-progress. Once a project is "
 "completed, you can save it as JPEG, PNG, GIF, ..."
-msgstr "જ્યારે તમે ચિત્રને તેના પર ફરીથી કામ કરવા માટે સંગ્રહો, તો XCF, GIMP નું નેટીલ ફાઈલ બંધારણ (ફાઈલ એક્સટેન્સન <tt>.xcf</tt> વાપરો) વાપરવાનો પ્રયત્ન કરો. આ સ્તરોને સાચવી રાખે છે અને તમારા પ્રગતિ-ના-કામના દરેક પાસાંઓને પણ. એકવાર પ્રોજેક્ટ પૂર્ણ થઈ જાય, તો તમે તેને JPEG, PNG, GIF, સંગ્રહી શકો ..."
+msgstr "જ્યારે તમે ચિત્રને તેના પર ફરીથી કામ કરવા માટે સંગ્રહો, તો XCF, Clay નું નેટીલ ફાઈલ બંધારણ (ફાઈલ એક્સટેન્સન <tt>.xcf</tt> વાપરો) વાપરવાનો પ્રયત્ન કરો. આ સ્તરોને સાચવી રાખે છે અને તમારા પ્રગતિ-ના-કામના દરેક પાસાંઓને પણ. એકવાર પ્રોજેક્ટ પૂર્ણ થઈ જાય, તો તમે તેને JPEG, PNG, GIF, સંગ્રહી શકો ..."
 
 #: ../tips/gimp-tips.xml.in.h:23
 msgid ""
@@ -199,10 +199,10 @@ msgstr "તમે સ્તરો સંવાદમાંથી સ્તર �
 
 #: ../tips/gimp-tips.xml.in.h:27
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current image or selection with that color."
-msgstr "તમે GIMP માં ઘણી વસ્તુઓ ખેંચી અને મૂકી શકો છો. ઉદાહરણ તરીકે, સાધનબોક્સમાંથી અથવા રંગ તકતીમાંથી રંગ ખેંચવાનું અને તેને ચિત્રમાં મૂકવાનું વર્તમાન ચિત્ર ભરશે અથવા તે રંગ સાથે પસંદગી કરશે."
+msgstr "તમે Clay માં ઘણી વસ્તુઓ ખેંચી અને મૂકી શકો છો. ઉદાહરણ તરીકે, સાધનબોક્સમાંથી અથવા રંગ તકતીમાંથી રંગ ખેંચવાનું અને તેને ચિત્રમાં મૂકવાનું વર્તમાન ચિત્ર ભરશે અથવા તે રંગ સાથે પસંદગી કરશે."
 
 #: ../tips/gimp-tips.xml.in.h:28
 msgid ""
@@ -213,9 +213,9 @@ msgstr "તમે સાદા ચોરસો અથવા વતૃળો ફ�
 
 #: ../tips/gimp-tips.xml.in.h:29
 msgid ""
-"You can get context-sensitive help for most of the GIMP's features by "
+"You can get context-sensitive help for most of the Clay's features by "
 "pressing the F1 key at any time. This also works inside the menus."
-msgstr "તમે GIMP ના લક્ષણોમાંના મોટા ભાગના માટે સંદર્ભ-સંવેદનશીલ મદદ કોઈપણ સમયે F1 કી દબાવીને મેળવી શકો છો. આ મેનુઓની અંદર પણ કામ કરે છે."
+msgstr "તમે Clay ના લક્ષણોમાંના મોટા ભાગના માટે સંદર્ભ-સંવેદનશીલ મદદ કોઈપણ સમયે F1 કી દબાવીને મેળવી શકો છો. આ મેનુઓની અંદર પણ કામ કરે છે."
 
 #: ../tips/gimp-tips.xml.in.h:30
 msgid ""

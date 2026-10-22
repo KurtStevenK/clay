@@ -17,12 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../data/tips/gimp-tips.xml.in.h:1
-msgid "You can get context-sensitive help for most of GIMP's features by pressing the F1 key at any time. This also works inside the menus."
-msgstr "Ur skoazell gizidik gant ar c'hemparzh zo hegerz evit tost holl geweriusterioù GIMP dre bouezañ war ar stokell F1 ne vern pegoulz. El lañserioù ez a en-dro ivez."
+msgid "You can get context-sensitive help for most of Clay's features by pressing the F1 key at any time. This also works inside the menus."
+msgstr "Ur skoazell gizidik gant ar c'hemparzh zo hegerz evit tost holl geweriusterioù Clay dre bouezañ war ar stokell F1 ne vern pegoulz. El lañserioù ez a en-dro ivez."
 
 #: ../data/tips/gimp-tips.xml.in.h:2
-msgid "GIMP uses layers to let you organize your image. Think of them as a stack of slides or filters, such that looking through them you see a composite of their contents."
-msgstr "Treuzfollennoù a vez arveret gant GIMP a-benn o skoazellañ da gempenn ho skeudennoù. O gwelit evel ur berniad treyonennoù pe siloù dre ma vefe gwelet ur skeudenn savet gant ho parzhioù drezo."
+msgid "Clay uses layers to let you organize your image. Think of them as a stack of slides or filters, such that looking through them you see a composite of their contents."
+msgstr "Treuzfollennoù a vez arveret gant Clay a-benn o skoazellañ da gempenn ho skeudennoù. O gwelit evel ur berniad treyonennoù pe siloù dre ma vefe gwelet ur skeudenn savet gant ho parzhioù drezo."
 
 #: ../data/tips/gimp-tips.xml.in.h:3
 msgid "You can perform many layer operations by right-clicking on the text label of a layer in the Layers dialog."
@@ -34,8 +34,8 @@ msgstr "Kalz gwezhadurioù a c'hallot ober war ho treuzfollennoù dre glikañ a-
 #| "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 #| "the layers and every aspect of your work-in-progress. Once a project is "
 #| "completed, you can save it as JPEG, PNG, GIF, ..."
-msgid "When you save an image to work on it again later, try using XCF, GIMP's native file format (use the file extension <tt>.xcf</tt>). This preserves the layers and many aspects of your work-in-progress. Once a project is completed, you can export it as JPEG, PNG, GIF, etc."
-msgstr "Pa vo enrollet ur skeudenn evit adlabourat warni diwezhatoc'h, klaskit ar mentrezh XCF, mentrezh genidik GIMP (askouezhadenn <tt>.xcf</tt>). Miret e vo gantañ an treuzfollennoù hag holl neuzioù ho labour war ar stern. Ur wech echu al labour e vezo enrollet ho skeudenn e mod JPEG, PNG, GIF, ..."
+msgid "When you save an image to work on it again later, try using XCF, Clay's native file format (use the file extension <tt>.xcf</tt>). This preserves the layers and many aspects of your work-in-progress. Once a project is completed, you can export it as JPEG, PNG, GIF, etc."
+msgstr "Pa vo enrollet ur skeudenn evit adlabourat warni diwezhatoc'h, klaskit ar mentrezh XCF, mentrezh genidik Clay (askouezhadenn <tt>.xcf</tt>). Miret e vo gantañ an treuzfollennoù hag holl neuzioù ho labour war ar stern. Ur wech echu al labour e vezo enrollet ho skeudenn e mod JPEG, PNG, GIF, ..."
 
 #: ../data/tips/gimp-tips.xml.in.h:5
 msgid "Most plug-ins work on the current layer of the current image. In some cases, you will have to merge all layers (Image→Flatten Image) if you want the plug-in to work on the whole image."
@@ -54,8 +54,8 @@ msgid "You can adjust or move a selection by using <tt>Alt</tt>-drag. If this ma
 msgstr "Dre arverañ <tt>Alt</tt>-riklañ e vez kengeidet pe dilec'hiet un diuzad. Mar bez dilec'hiet ar prenestr gant an ober-mañ e talv ez eo arveret ar stokell <tt>Alt</tt> gant hoc'h ardoer endeo. An darn vrasañ eus an ardoerioù a c'hall bezañ kefluniet evit leuskel a-gostez ar stokell <tt>Alt</tt>pe evit arverañ ar stokell <tt>Dreist</tt>  (pe \"Siell Windows\") kentoc'h."
 
 #: ../data/tips/gimp-tips.xml.in.h:9
-msgid "You can drag and drop many things in GIMP. For example, dragging a color from the toolbox or from a color palette and dropping it into an image will fill the current selection with that color."
-msgstr "Kalz traoù a vez paket ha kiklet e-barzh GIMP. Da skouer, riklañ ul liv diwar ar voestad binvioù pe ziwar ul livaoueg hag he lakaat war ur skeudenn a leunio ar an diuzad bremanel gant al liv-mañ."
+msgid "You can drag and drop many things in Clay. For example, dragging a color from the toolbox or from a color palette and dropping it into an image will fill the current selection with that color."
+msgstr "Kalz traoù a vez paket ha kiklet e-barzh Clay. Da skouer, riklañ ul liv diwar ar voestad binvioù pe ziwar ul livaoueg hag he lakaat war ur skeudenn a leunio ar an diuzad bremanel gant al liv-mañ."
 
 #: ../data/tips/gimp-tips.xml.in.h:10
 msgid "You can use the middle mouse button to pan around the image (or optionally hold <tt>Spacebar</tt> while you move the mouse)."
@@ -74,7 +74,7 @@ msgid "A floating selection must be anchored to a new layer or to the last activ
 msgstr "Ret eo d'un diuzad war neuñv bezañ eoriet ouzh un dreuzfollenn nevez pe ouzh an dreuzfollenn oberiant diwezhañ a-raok ma vo graet gwezhiadurioù all war ar skeudenn. Klikañ war an afelloù 'Treuzfollenn nevez' pe 'Eoriañ an dreuzfollenn' e boestad emziviz an treuzfollennoù, pe arverañ al lañser evit ober heñvel."
 
 #: ../data/tips/gimp-tips.xml.in.h:14
-msgid "GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image will be saved compressed. Of course loading compressed images works too."
+msgid "Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image will be saved compressed. Of course loading compressed images works too."
 msgstr "Skoret eo ar c'hoazhañ gzip diwar nij. Ouzhpennañ an askouezhadenn <tt>.gz</tt> (pe <tt>.bz2</tt> mard eo bet staliet bzip2) da anv ho restr ha koazhet ha gweredet e vo ho skeudenn. Evel just, kargañ skeudennoù koazhet a ya mat kaer en-dro ivez."
 
 #: ../data/tips/gimp-tips.xml.in.h:15
@@ -102,8 +102,8 @@ msgid "You can save a selection to a channel (Select→Save to Channel) and then
 msgstr "Enrollet e vez un diuzad etrezek ur sanell (Diuzañ>Enrollañ en ur sanell) ha daskemmet e vez ar sanell-mañ gant ne vern pe venveg pentañ. Dre arverañ an afelloù e boestad emziviz ar sanelloù e vez (diw)gweredekaet hewelusted an sanell nevez-mañ pe hec'h amdreiñ da ziuzad."
 
 #: ../data/tips/gimp-tips.xml.in.h:21
-msgid "After you enabled &quot;Dynamic Keyboard Shortcuts&quot; in the Preferences dialog, you can reassign shortcut keys. Do so by bringing up the menu, selecting a menu item, and pressing the desired key combination. If &quot;Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when you exit GIMP. You should probably disable &quot;Dynamic Keyboard Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning shortcuts."
-msgstr "Ur wech bezañ gweredekaet ar 'Berradennoù klavier dialuskel' e boestad emziviz ar gwellvezioù, e c'hall ar berradennoù bezañ deverket en-dro : skrammit al lañser, diuzit un ergorenn diwar al lañser ha pouezit ar strollad stokelloù a fell deoc'h. Mar bez gweredekaet 'Enrollañ ar Berradennoù klavier dialuskel' e vint enrollet pa vo kuitaet GIMP. Moarvat e vo diweredekaet 'Berradennoù klavier dialuskel' war-lerc'h a-benn mirout ouzh deverkañ/dizeverkañ ar berradennoù dre wallzarvoud."
+msgid "After you enabled &quot;Dynamic Keyboard Shortcuts&quot; in the Preferences dialog, you can reassign shortcut keys. Do so by bringing up the menu, selecting a menu item, and pressing the desired key combination. If &quot;Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when you exit Clay. You should probably disable &quot;Dynamic Keyboard Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning shortcuts."
+msgstr "Ur wech bezañ gweredekaet ar 'Berradennoù klavier dialuskel' e boestad emziviz ar gwellvezioù, e c'hall ar berradennoù bezañ deverket en-dro : skrammit al lañser, diuzit un ergorenn diwar al lañser ha pouezit ar strollad stokelloù a fell deoc'h. Mar bez gweredekaet 'Enrollañ ar Berradennoù klavier dialuskel' e vint enrollet pa vo kuitaet Clay. Moarvat e vo diweredekaet 'Berradennoù klavier dialuskel' war-lerc'h a-benn mirout ouzh deverkañ/dizeverkañ ar berradennoù dre wallzarvoud."
 
 #: ../data/tips/gimp-tips.xml.in.h:22
 msgid "If your screen is too cluttered, you can press <tt>Tab</tt> in an image window to toggle the visibility of the toolbox and other dialogs."

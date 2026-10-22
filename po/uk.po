@@ -29704,8 +29704,8 @@ msgstr ""
 "час запису пікселя: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "Діагностика аварій GIMP"
+msgid "Clay Crash Debug"
+msgstr "Діагностика аварій Clay"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

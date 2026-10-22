@@ -7,7 +7,7 @@
 # And Rajya Marathi Vikas Sanstha Mumbai, MS, India
 msgid ""
 msgstr ""
-"Project-Id-Version: GIMP\n"
+"Project-Id-Version: Clay\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gimp/issues\n"
 "POT-Creation-Date: 2018-07-07 09:46+0000\n"
 "PO-Revision-Date: 2018-07-07 14:57+0000\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:1
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
 "आपण कोणत्याही वेळी F1 हे बटण दाबून गिम्पच्या जास्तीत जास्त संदर्भ-संवेदनशील वैशिष्ट्यांची "
@@ -29,7 +29,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:2
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
@@ -46,7 +46,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:4
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension <tt>."
+"Saving an image uses XCF, Clay's native file format (file extension <tt>."
 "xcf</tt>). This preserves the layers and many aspects of your work-in-"
 "progress, allowing to work on it again later. Once a project is completed, "
 "you can export it as JPEG, PNG, GIF, etc."
@@ -100,7 +100,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:9
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
@@ -146,7 +146,7 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:14
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
 msgstr ""
@@ -222,7 +222,7 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP. You should probably disable &quot;Dynamic Keyboard "
+"you exit Clay. You should probably disable &quot;Dynamic Keyboard "
 "Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning "
 "shortcuts."
 msgstr ""
