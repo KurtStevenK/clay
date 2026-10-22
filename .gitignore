@@ -24,3 +24,4 @@ website/.firebase/
 credentials.json
 serviceAccount*.json
 **/secrets.json
+.cursor/plans/
