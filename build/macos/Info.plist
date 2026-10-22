@@ -32,11 +32,11 @@
     <key>CFBundleShortVersionString</key>
     <string>%GIMP_VERSION%</string>
     <key>CFBundleSignature</key>
-    <string>GIMP</string>
+    <string>CLAY</string>
     <key>CFBundleVersion</key>
     <string>%GIMP_VERSION%</string>
     <key>NSHumanReadableCopyright</key>
-    <string>© The GIMP Team</string>
+    <string>© 2026 ClayDesign Contributors. Based on GIMP © The GIMP Team.</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.photography</string>
     <!--keep LSMinimumSystemVersion consistent with devel-docs/os-support.txt-->
