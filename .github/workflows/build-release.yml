@@ -125,7 +125,7 @@ jobs:
           SKIP_NOTARIZE: ${{ !(startsWith(github.ref, 'refs/tags/v') || inputs.notarize) && '1' || '' }}
         run: build/macos/dmg/clay-dist-local.sh "$BUILD_DIR"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: clay-macos-dmg
           path: ${{ env.DIST_DIR }}/*.dmg
