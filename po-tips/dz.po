@@ -43,7 +43,7 @@ msgid "A floating selection must be anchored to a new layer or to the last activ
 msgstr "འཕུར་ལྡིང་འབད་ཡོད་པའི་སེལ་འཐུ་དེ་ བང་རིམ་གསརཔ་ལུ་དང་  ཡང་ན་ གཟུགས་བརྙན་གུ་ལུ་བཀོལ་སྤྱོད་མ་འབད་བའི་ཧེ་མ་ མཇུག་མམ་གྱི་ཤུགས་ལྡན་བང་རིམ་ལུ་ ཨེན་ཀོར་འབད་དགོ &quot;གུར་ཨེབ་གཏང་འབད། བང་རིམ་གསརཔ་&quot; ཡང་ན་ &quot;དེ། ཨེན་ཀོར་འབད་ནི་བང་རིམ་&quot; བང་རིམ་ཚུ་གུ་ཌའི་ལོག་ནང་གི་ཨེབ་རྟ་ ཡང་ན་ ཅོག་གཅིགཔ་སྦེ་འབད་ནི་དོན་ལུ་ དཀར་ཆག་ལག་ལེན་འཐབ།"
 
 #: ../data/tips/gimp-tips.xml.in.h:7
-msgid "After you enabled &quot;Dynamic Keyboard Shortcuts&quot; in the Preferences dialog, you can reassign shortcut keys. Do so by bringing up the menu, selecting a menu item, and pressing the desired key combination. If &quot;Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when you exit GIMP. You should probably disable &quot;Dynamic Keyboard Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning shortcuts."
+msgid "After you enabled &quot;Dynamic Keyboard Shortcuts&quot; in the Preferences dialog, you can reassign shortcut keys. Do so by bringing up the menu, selecting a menu item, and pressing the desired key combination. If &quot;Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when you exit Clay. You should probably disable &quot;Dynamic Keyboard Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning shortcuts."
 msgstr "དགའ་གདམ་ཌའི་ལོག་ནང་  ཁྱོད་ཀྱིས་&quot;ནུས་ཅན་ལྡེ་སྒྲོམ་མགྱོགས་ཐབས་&quot; དེ་ ཤུགས་ཅན་བཟོ་ཚར་བའི་ཤུལ་ལས་  ཁྱོད་ཀྱིས་མགྱོགས་ཐབས་ལྡེ་མིག་ཚུ་འགན་སྤྲོད་འབད་ཚུགས།  དེ་ཡང་ དཀར་ཆག་ཡར་འབག་འོང་སྟེ་འབད་ནི་དང་ དཀར་ཆག་གི་རྣམ་གྲངས་སེལ་འཐུ་འབད་བའི་ཐོག་ལས་དང་ རེ་འདུན་ཅན་གྱི་མཉམ་མཐུད་ལྡེ་སྒྲོམ་ཨེབ་པའི་ཐོག་ལས་འབད་དགོཔ་ཨིན།  &quot;ལྡེ་སྒྲོམ་མགྱོགས་ཐབས་སྲུང་བཞག་འབད་ནི་&quot;དེ་ལྕོགས་ཅན་བཟོ་ཚར་བ་ཅིན་  ཁྱོད་ཀྱིས་ཇི་ཨའི་ཨེམ་པི་དེ་ཕྱིར་ཐོན་འབད་བའི་སྐབས་ལུ་  ཀི་བཱའིན་ཌིང་ཚུ་ སྲུང་བཞག་འབདཝ་ཨིན།  ཁྱོད་ཀྱིས་ ཤུལ་ལས་&quot; ནུས་ཅན་ལྡེ་སྒྲོམ་མགྱོགས་ཐབས་&quot; འདི་ལྕོགས་མེད་བཟོ་དགོ་  དེ་ཡང་  གློ་བུར་དུ་འགན་སྤྲོད་འབད་ནི་/ལོག་འགན་སྤྲོད་འབད་བའི་མགྱོགས་ཐབས་ཚུ་སྔོན་བཀག་འབད་ནི་ལུ་ཨིན།"
 
 #: ../data/tips/gimp-tips.xml.in.h:8
@@ -51,15 +51,15 @@ msgid "Click and drag on a ruler to place a guide on an image. All dragged selec
 msgstr "ལམ་སྟོན་པ་དེ་ གཟུགས་བརྙན་གུར་བཞག་ནིའི་དོན་ལུ་ ཐིག་ཤིང་གུར་ཨེབ་གཏང་འབད་དེ་འདྲུད། འདྲུད་མི་སེལ་འཐུ་ཆ་མཉམ་གྱི་ ལམ་སྟོན་པ་ལུ་པར་བཏབ་ཨིན། ཁྱོད་ཀྱིས་ ལམ་སྟོན་པ་ཚུ་ གཟུགས་བརྙན་གུ་ལས་སྤོ་བཤུད་ལག་ཆས་གཅིག་ཁར་ ཕྱི་ཁར་ལུ་ འདྲུད་པའི་ཐོག་ལས་ རྩ་བསྐྲད་གཏང་ཚུགས། "
 
 #: ../data/tips/gimp-tips.xml.in.h:9
-msgid "GIMP allows you to undo most changes to the image, so feel free to experiment."
+msgid "Clay allows you to undo most changes to the image, so feel free to experiment."
 msgstr "ཇི་ཨའི་ཨེམ་པི་གིས་ བསྒྱུར་བཅོས་མང་ཤོས་རང་གཟུགས་བརྙན་ལུ་འབད་བཤོལ་བཞག་བཅུགཔ་ཨིན་ དེ་འབདཝ་ལས་ ཐེ་ཚོམ་ག་ནི་ཡང་མེད་པར་ བརྟག་དཔྱད་འབད།"
 
 #: ../data/tips/gimp-tips.xml.in.h:10
-msgid "GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image will be saved compressed. Of course loading compressed images works too."
+msgid "Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image will be saved compressed. Of course loading compressed images works too."
 msgstr "ཇི་ཨའི་ཨེམ་པི་གིས་ ཇི་ཛིབ་ཨེབ་བཙུགས་དེ་ ཕ་ལའི་གུར་རྒྱབ་སྐྱོར་འབདཝ་ཨིན།<tt>.gz</tt>(ཡང་ན་ ཁྱོད་ཀྱིས་ བི་ཛིབ་༢་དེ་གཞི་བཙུགས་འབད་དེ་ཡོད་པ་ཅིན་ཡང་ན་  <tt>.gz</tt>)དེ་ ཡིག་སྣོད་མིང་ལུ་ཁ་སྐོང་རྐྱབས་དང་ ཁྱོད་ཀྱི་གཟུགས་བརྙན་དེ་ཨེབ་བཙུགས་སྦེ་སྲུང་བཞག་འབད་བཞག་འོང་། དེ་མ་ཚད་ཨེབ་བཙུགས་འབད་ཡོད་པའི་གཟུགས་བརྙན་ལཱ་གཡོག་ཚུ་ མངོན་གསལ་འབད་ནི་ཡང་ ངེས་བདེན་སྲུང་བཞག་འབད་ཚུགས།"
 
 #: ../data/tips/gimp-tips.xml.in.h:11
-msgid "GIMP uses layers to let you organize your image. Think of them as a stack of slides or filters, such that looking through them you see a composite of their contents."
+msgid "Clay uses layers to let you organize your image. Think of them as a stack of slides or filters, such that looking through them you see a composite of their contents."
 msgstr "ཇི་ཨའི་ཨེམ་པི་གིས་ ཁྱོད་ཀྱིས་ཁྱོད་རའི་གཟུགས་བརྙན་འགོ་འདྲེན་འཐབ་བཅུག་ནིའི་དོན་ལུ་ བང་རིམ་ཚུ་ལག་ལེན་འཐབ་ཨིན། ཁྱོད་ཀྱིས་དེ་ཚུ་ བཤུད་བརྙན་གྱི་བརྩེགས་ཕུང་དང་ཡང་ན་ ཚགས་མ་སྦེ་མནོ་་མནོ་བསམ་བཏངདེ་ཚེ་བརྒྱུད་དེ་བལྟ་མི་དེ་གིས་ དེ་ཚུའི་ནང་དོན་གྱི་སྣ་སྡུད་ཅིག་མཐོང་ཚུགས།་ཏེ་ "
 
 #: ../data/tips/gimp-tips.xml.in.h:12
@@ -95,7 +95,7 @@ msgid "To create a circle-shaped selection, hold <tt>Shift</tt> while doing an e
 msgstr "དབྱིབས་སྒོར་ཐིག་ཅན་དབྱིབས་སེལ་འཐུ་དེ་གསར་བསྐྲུན་འབད་ནི་དོན་ལུ་ སྒོང་དབྱིབས་སེལ་འཐུ་འབད་བའི་སྐབས་ལུ་ <tt>དེ་འཆང་</tt>སོར་གནང་། སྒོར་ཐིག་ཀྲིག་ཀྲིག་འབད་བཀལ་ནིའི་དོན་ལུ་ ཁྱོད་ཀྱིས་སེལ་འཐུ་སེལ་འཐུ་འབད་དགོ་མནོ་མི་སྒོར་ཐིག་དེ་ལུ་ ཐད་སྙོམས་དང་ཀེར་ཕྲེང་སྦེ་ཡོད་མི་ ལམ་སྟོན་ཊེན་ཇེནཊི་དོ་འདྲུད། ཁྱོད་ཀྱི་འོད་རྟགས་དེ་ལམ་སྟོན་པའི་འཛོམས་ས་ལུ་བཞག་ནི་དང་ འདི་ནང་ལས་གྲུབ་འབྲས་བྱིང་མི་སེལ་འཐུ་དེ་གིས་ ལམ་སྟོན་པ་ལུ་རེགཔ་ཨིན།"
 
 #: ../data/tips/gimp-tips.xml.in.h:20
-msgid "When you save an image to work on it again later, try using XCF, GIMP's native file format (use the file extension <tt>.xcf</tt>). This preserves the layers and every aspect of your work-in-progress. Once a project is completed, you can save it as JPEG, PNG, GIF, ..."
+msgid "When you save an image to work on it again later, try using XCF, Clay's native file format (use the file extension <tt>.xcf</tt>). This preserves the layers and every aspect of your work-in-progress. Once a project is completed, you can save it as JPEG, PNG, GIF, ..."
 msgstr "ཁྱོད་ཀྱིས་གཟུགས་བརྙན་དེ་ཤུལ་ལས་ཁོ་ར་ལུ་ལོག་ལཱ་འབད་བཏུབ་མི་སྲུང་བཞག་འབདཝ་སྐབས་ལུ་ ཨེགསི་སི་ཨེཕ་དང་ ཇི་ཨའི་ཨེམ་པི་གི་ནེ་ཊིབ་ཡིག་སྣོད་རྩ་སྒྲིག་དེ་ལག་ེན་འཐབ་པའི་ཐོག་ལས་འབད་རྩོལ་བསྐྱེད་(ཡིག་སྣོད་རྒྱ་བསྐྱེད་ལག་ལེན་འཐབ་<tt>.xcf</tt>).འདི་གིས་ཁྱོད་ཀྱི་བང་རིམ་དང་ ལཱ་གི་རྣམ་པ་ཡར་འཕེལ་བཏང་སྟེ་བཞག་ནི་ཚུ་ཉམས་སྲུང་འབདཝ་ཨིན། ལས་འགུལ་དེ་ཚར་ཅིག་མཇུག་བསྡུ་ཞིནམ་ལས་ ཁྱོད་ཀྱིས་དེ་ ཇེ་པི་ཨི་ཇི་ པི་ཨེན་ཀེ་ ཇི་ཨའི་ཨེཕ་སྦེ་སྲུང་བཞག་འབད་ཚུགས།"
 
 #: ../data/tips/gimp-tips.xml.in.h:21
@@ -111,7 +111,7 @@ msgid "You can drag a layer from the Layers dialog and drop it onto the toolbox.
 msgstr "ཁྱོད་ཀྱིས་བང་རིམ་དེ་ བང་རིམ་ཚུ་གི་དའི་ལོག་དེ་ནང་ལས་འདྲུད་དེ་ འ་ནི་དེ་ལག་ཆས་སྒྲོམ་ནང་ལུ་སར་འཇོག་འབད་ཚུགས། འདི་གིས་འ་ཕི་བང་རིམ་རྐྱངམ་ཅིག་ཡོད་མི་གཟུགས་བརྙན་གསརཔ་ཅིག་གསར་བསྐྲུན་འབད་འོང་།"
 
 #: ../data/tips/gimp-tips.xml.in.h:24
-msgid "You can drag and drop many things in GIMP. For example, dragging a color from the toolbox or from a color palette and dropping it into an image will fill the current selection with that color."
+msgid "You can drag and drop many things in Clay. For example, dragging a color from the toolbox or from a color palette and dropping it into an image will fill the current selection with that color."
 msgstr "ཁྱོད་ཀྱིས་ ཇི་ཨའི་ཨེམ་པི་ནང་ལུ་ ལེ་ཤ་ཅིག་རང་འདྲུད་དེ་ སར་འཇོག་འབད་ཚུགས། དཔེ་འབད་བ་ཅིན་ ཚོས་གཞི་ཅིག་ ལག་ཆས་སྒྲོམ་ནང་ལས་དང་ ཡང་ན་ ཚོས་གཞི་པེ་ལིཊི་ནང་ལས་ འདྲུད་དེ་ གཟུགས་བརྙན་ནང་ལུ་སར་འཇོག་འབད་མི་དེ་གིས་ ད་ལྟོའི་གཟུགས་བརྙན་ ཡང་ན་ སེལ་འཐུ་དེ་ཚོས་གཞི་དང་གཅིག་ཁར་བཀང་འོང་།"
 
 #: ../data/tips/gimp-tips.xml.in.h:25
@@ -119,7 +119,7 @@ msgid "You can draw simple squares or circles using Edit→Stroke Selection. It 
 msgstr "ཁྱོད་ཀྱིས་གྲུ་བཞི་ཡང་ན་ སྒོར་ཐིག་འཇམ་སམ་ཚུ་ ཞུན་དག་→སི་ཊོག་ སེལ་འཐུ་ དེ་ལག་ལེན་འཐབ་པའི་ཐོག་ལས་འབྲི་ཚུགས། གོ་བཀའ་བའི་དབྱིབས་ཧེང་བཀལ་ འགྲུལ་ལམ་ལག་ཆས་ ཡང་ན་  ཚགས་མ་→ལྷག་སྟོན་འབད་ནི་→ཇི་ཕིག་དེ་གི་ཐོག་ལསའབྲི་ཚུགས།"
 
 #: ../data/tips/gimp-tips.xml.in.h:26
-msgid "You can get context-sensitive help for most of GIMP's features by pressing the F1 key at any time. This also works inside the menus."
+msgid "You can get context-sensitive help for most of Clay's features by pressing the F1 key at any time. This also works inside the menus."
 msgstr "ཁྱོད་ཀྱིས་སྐབས་དོན་- ཚོར་ཅན་གྲོགས་རམ་འདི་ དུས་ཚོད་ནམ་རང་འབད་རུང་ ཨེཕ་༡་ལྡེ་མིག་དེ་ཨེབ་པའི་ཐོག་ལས་ ཇི་ཨའི་ཨེམ་པི་གི་ཁྱད་རྣམ་ཚུ་མང་ཤོས་ཀྱི་དོན་ལུ་ འཐོབ་ཚུགས། འདི་གིས་དཀར་ཆག་ནང་ལུ་ཡང་ལཱ་འབད་བཏུབ་ཨིན།"
 
 #: ../data/tips/gimp-tips.xml.in.h:27

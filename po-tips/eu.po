@@ -22,16 +22,16 @@ msgstr "Project-Id-Version: gimp-tips master\n"
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
-msgstr "GIMPeko eginbide gehienentzako testuinguruko laguntza F1 tekla edozein  unetan sakatuta lor dezakezu. Horrek menuetan ere balio du."
+msgstr "Clayeko eginbide gehienentzako testuinguruko laguntza F1 tekla edozein  unetan sakatuta lor dezakezu. Horrek menuetan ere balio du."
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
-msgstr "GIMPek geruzak erabiltzen ditu irudia antolatzen laguntzeko. Imajinatu diapositiba- edo iragazki-multzoak direla eta haietan barrena begiratuta haien edukia ikusten duzula."
+msgstr "Clayek geruzak erabiltzen ditu irudia antolatzen laguntzeko. Imajinatu diapositiba- edo iragazki-multzoak direla eta haietan barrena begiratuta haien edukia ikusten duzula."
 
 #: data/tips/gimp-tips.xml.in:31
 msgid ""
@@ -41,11 +41,11 @@ msgstr "Geruza-eragiketa ugari egin ditzakezu 'Geruzak' elkarrizketa-koadroan ge
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension <tt>."
+"Saving an image uses XCF, Clay's native file format (file extension <tt>."
 "xcf</tt>). This preserves the layers and many aspects of your work-in-"
 "progress, allowing to work on it again later. Once a project is completed, "
 "you can export it as JPEG, PNG, GIF, etc."
-msgstr "Irudi bat gordetzen denean, GIMPen jatorrizko XCF fitxategi-formatua erabiltzen da (fitxategi-luzapena: <tt>.xcf</tt>). Hala, irudiaren geruzak eta lantzen ari zaren arlo asko mantenduko dira. Proiektua bukatutakoan, ordea, formatu hauetan gorde behar duzu: JPEG, PNG, GIF, ..."
+msgstr "Irudi bat gordetzen denean, Clayen jatorrizko XCF fitxategi-formatua erabiltzen da (fitxategi-luzapena: <tt>.xcf</tt>). Hala, irudiaren geruzak eta lantzen ari zaren arlo asko mantenduko dira. Proiektua bukatutakoan, ordea, formatu hauetan gorde behar duzu: JPEG, PNG, GIF, ..."
 
 #: data/tips/gimp-tips.xml.in:45
 msgid ""
@@ -79,10 +79,10 @@ msgstr "Hautapen bat doitzeko edo lekuz aldatzeko, erabili <tt>Alt</tt>-arrastat
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
-msgstr "GIMPen hainbat gauza arrastatu eta jaregin ditzakezu. Adibidez, tresna-laukitik edo kolore-paleta batetik kolore bat arrastatu eta irudi batean jaregiten baduzu, uneko irudia edo hautapena kolore horrez beteko da."
+msgstr "Clayen hainbat gauza arrastatu eta jaregin ditzakezu. Adibidez, tresna-laukitik edo kolore-paleta batetik kolore bat arrastatu eta irudi batean jaregiten baduzu, uneko irudia edo hautapena kolore horrez beteko da."
 
 #: data/tips/gimp-tips.xml.in:89
 msgid ""
@@ -113,10 +113,10 @@ msgstr "Hautapen mugikorra geruza berri batean edo azken geruza aktiboan aingura
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
-msgstr "GIMPek gzip konprimatzea unean onartzen du. Fitxategi-izenari <tt>.gz</tt> gehitu besterik ez duzu egin behar (edo <tt>.bz2</tt>, bzip2 instalatuta baduzu) eta irudia konprimatuta gordeko da. Noski, konprimatutako irudiak ere karga daitezke."
+msgstr "Clayek gzip konprimatzea unean onartzen du. Fitxategi-izenari <tt>.gz</tt> gehitu besterik ez duzu egin behar (edo <tt>.bz2</tt>, bzip2 instalatuta baduzu) eta irudia konprimatuta gordeko da. Noski, konprimatutako irudiak ere karga daitezke."
 
 #: data/tips/gimp-tips.xml.in:124
 msgid ""
@@ -167,10 +167,10 @@ msgid ""
 "After you enabled \"Dynamic Keyboard Shortcuts\" in the Preferences dialog, "
 "you can reassign shortcut keys. Do so by bringing up the menu, selecting a "
 "menu item, and pressing the desired key combination. If \"Save Keyboard "
-"Shortcuts\" is enabled, the key bindings are saved when you exit GIMP. You "
+"Shortcuts\" is enabled, the key bindings are saved when you exit Clay. You "
 "should probably disable \"Dynamic Keyboard Shortcuts\" afterwards, to "
 "prevent accidentally assigning/reassigning shortcuts."
-msgstr "Hobespenen elkarrizketa-koadroan \"Laster-tekla dinamikoak\" gaitu ondoren laster-teklak berriro ezar ditzakezu. Menuetako laster-teklak esleitzeko, ireki menua, hautatu menu-elementua eta sakatu laster-teklen konbinazio berria. \"Gorde laster-teklak\" gaitzen bada, GIMPetik irtendakoan gordetzen dira. Baliteke \"Laster-tekla dinamikoak\" desgaitu nahi izatea, laster-teklak nahi gabe ezartzea edo kentzea saihesteko."
+msgstr "Hobespenen elkarrizketa-koadroan \"Laster-tekla dinamikoak\" gaitu ondoren laster-teklak berriro ezar ditzakezu. Menuetako laster-teklak esleitzeko, ireki menua, hautatu menu-elementua eta sakatu laster-teklen konbinazio berria. \"Gorde laster-teklak\" gaitzen bada, Clayetik irtendakoan gordetzen dira. Baliteke \"Laster-tekla dinamikoak\" desgaitu nahi izatea, laster-teklak nahi gabe ezartzea edo kentzea saihesteko."
 
 #: data/tips/gimp-tips.xml.in:186
 msgid ""

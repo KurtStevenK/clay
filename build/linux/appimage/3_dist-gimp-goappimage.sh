@@ -349,8 +349,8 @@ bund_usr "$GIMP_PREFIX" "lib/babl-*/*.so"
 bund_usr "$GIMP_PREFIX" "lib/libgegl*"
 bund_usr "$GIMP_PREFIX" "lib/gegl-*/*"
 bund_usr "$GIMP_PREFIX" "lib/libgimp*"
-bund_usr "$GIMP_PREFIX" "lib/gimp"
-bund_usr "$GIMP_PREFIX" "share/gimp"
+bund_usr "$GIMP_PREFIX" "lib/clay"
+bund_usr "$GIMP_PREFIX" "share/clay"
 lang_list=$(echo $(ls po/*.po | sed -e 's|po/||g' -e 's|.po||g' | sort) | tr '\n\r' ' ')
 for lang in $lang_list; do
   bund_usr "$GIMP_PREFIX" share/locale/$lang/LC_MESSAGES
@@ -363,7 +363,7 @@ for lang in $lang_list; do
     bund_usr "$UNIX_PREFIX" share/locale/$lang/LC_MESSAGES/iso_639*3.mo
   fi
 done
-bund_usr "$GIMP_PREFIX" "etc/gimp"
+bund_usr "$GIMP_PREFIX" "etc/clay"
 
 ## Other features and plug-ins
 ### mypaint brushes
@@ -623,9 +623,9 @@ done
 cd $GIMP_DIR
 
 ## Revision (this does the same as '-Drevision' build option)
-before=$(cat "$(echo $USR_DIR/share/gimp/*/gimp-release)" | grep 'revision')
+before=$(cat "$(echo $USR_DIR/share/clay/*/gimp-release)" | grep 'revision')
 after="revision=$REVISION"
-sed -i "s|$before|$after|" "$(echo $USR_DIR/share/gimp/*/gimp-release)"
+sed -i "s|$before|$after|" "$(echo $USR_DIR/share/clay/*/gimp-release)"
 printf "\e[0Ksection_end:`date +%s`:apmg_files\r\e[0K\n"
 fi
 if [ "$MODE" = '--bundle-only' ]; then

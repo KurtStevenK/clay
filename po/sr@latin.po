@@ -29049,7 +29049,7 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Greška prilikom upisa u XCF: nepodržan BPC prilikom upisa piksela: %d"
 
 #: app-tools/gimp-debug-tool.c:87
-msgid "GIMP Crash Debug"
+msgid "Clay Crash Debug"
 msgstr "Gimpov alat za uklanjanje grešaka pri padu"
 
 #: menus/brush-editor-menu.ui:6

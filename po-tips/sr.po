@@ -25,7 +25,7 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
 "У сваком тренутку можете добити тренутну помоћ за већину ствари у Гимпу ако "
@@ -33,7 +33,7 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
@@ -51,7 +51,7 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension "
+"Saving an image uses XCF, Clay's native file format (file extension "
 "<tt>.xcf</tt>). This preserves the layers and many aspects of your work-in-"
 "progress, allowing to work on it again later. Once a project is completed, "
 "you can export it as JPEG, PNG, GIF, etc."
@@ -109,7 +109,7 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
@@ -152,7 +152,7 @@ msgstr "Плутајући избор мора бити усидрен за но
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or "
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or "
 "<tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image "
 "will be saved compressed. Of course loading compressed images works too."
 msgstr ""

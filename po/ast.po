@@ -26452,8 +26452,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Fallu al escribir el XCF: BPC non soportáu al escribir el píxel: %d"
 
 #: ../app-tools/gimp-debug-tool.c:87
-msgid "GIMP Crash Debug"
-msgstr "Depurar fallu grave de GIMP"
+msgid "Clay Crash Debug"
+msgstr "Depurar fallu grave de Clay"
 
 #: ../data/tags/gimp-tags-default.xml.in.h:1
 msgid "round"

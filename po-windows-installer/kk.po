@@ -22,16 +22,16 @@ msgid "License Agreement"
 msgstr "Лицензиялық келісім"
 
 #: build/windows/installer/lang/setup.isl.xml.in:10
-msgid "Setup built by GIMP team, gimp.org"
-msgstr "Орнатуды GIMP командасы дайындаған, gimp.org"
+msgid "Setup built by Clay team, claydesign.web.app"
+msgstr "Орнатуды Clay командасы дайындаған, claydesign.web.app"
 
 #: build/windows/installer/lang/setup.isl.xml.in:17
 msgid ""
-"You are trying to directly downgrade from GIMP %1 to %2.%n%nPlease remove GIMP "
+"You are trying to directly downgrade from Clay %1 to %2.%n%nPlease remove Clay "
 "yourself before installing this version."
 msgstr ""
-"Сіз GIMP-ті %1 нұсқасынан %2 нұсқасына тікелей төмендетпекшісіз.%n%nОсы "
-"нұсқаны орнатпас бұрын GIMP-ті өзіңіз өшіріңіз."
+"Сіз Clay-ті %1 нұсқасынан %2 нұсқасына тікелей төмендетпекшісіз.%n%nОсы "
+"нұсқаны орнатпас бұрын Clay-ті өзіңіз өшіріңіз."
 
 #: build/windows/installer/lang/setup.isl.xml.in:22
 msgid "Development version"
@@ -39,19 +39,19 @@ msgstr "Әзірлеу нұсқасы"
 
 #: build/windows/installer/lang/setup.isl.xml.in:27
 msgid ""
-"This is a development version of GIMP where some features may not be finished, "
-"or it may be unstable.%nThis version of GIMP is not intended for day-to-day "
+"This is a development version of Clay where some features may not be finished, "
+"or it may be unstable.%nThis version of Clay is not intended for day-to-day "
 "work as it may be unstable, and you could lose your work.%nIf you encounter "
 "any problems, first verify that they haven't already been fixed in GIT before "
-"you contact the developers or report it in GIMP gitlab:%n_https://www.gimp.org/"
+"you contact the developers or report it on GitHub:%n_https://claydesign.web.app/"
 "bugs%n%nDo you wish to continue with installation anyway?"
 msgstr ""
-"Бұл — кейбір мүмкіндіктері аяқталмаған немесе тұрақсыз болуы мүмкін GIMP "
-"әзірлеу нұсқасы.%nGIMP-тің бұл нұсқасы күнделікті жұмысқа арналмаған, өйткені "
+"Бұл — кейбір мүмкіндіктері аяқталмаған немесе тұрақсыз болуы мүмкін Clay "
+"әзірлеу нұсқасы.%nClay-тің бұл нұсқасы күнделікті жұмысқа арналмаған, өйткені "
 "ол тұрақсыз болуы және жасаған жұмысыңызды жоғалтып алуыңыз мүмкін.%nҚандай да "
-"бір мәселелерге тап болсаңыз, әзірлеушілерге хабарласу немесе бұл туралы GIMP "
+"бір мәселелерге тап болсаңыз, әзірлеушілерге хабарласу немесе бұл туралы Clay "
 "gitlab-та хабарлау алдында олардың GIT-те әлдеқашан түзетілмегенін алдымен "
-"тексеріңіз:%n_https://www.gimp.org/bugs%n%nСонда да орнатуды жалғастыру керек "
+"тексеріңіз:%n_https://github.com/KurtStevenK/clay/issues%n%nСонда да орнатуды жалғастыру керек "
 "пе?"
 
 #: build/windows/installer/lang/setup.isl.xml.in:30
@@ -70,11 +70,11 @@ msgstr "Экран баптауларының мәселесі"
 #: build/windows/installer/lang/setup.isl.xml.in:40
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before continuing."
 msgstr ""
 "Орнату бағдарламасы Windows жүйесінің 32 бит/пиксельдік режимде жұмыс істемей "
-"тұрғанын анықтады. Бұл GIMP жұмысында тұрақтылық мәселелерін тудыратыны "
+"тұрғанын анықтады. Бұл Clay жұмысында тұрақтылық мәселелерін тудыратыны "
 "белгілі, сондықтан жалғастырмас бұрын экран түстерінің тереңдігін 32BPP-ке "
 "ауыстыру ұсынылады."
 
@@ -119,21 +119,21 @@ msgid "Description"
 msgstr "Сипаттамасы"
 
 #: build/windows/installer/lang/setup.isl.xml.in:84
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:88
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP және барлық бастапқы плагиндер"
+msgid "Clay and all default plug-ins"
+msgstr "Clay және барлық бастапқы плагиндер"
 
 #: build/windows/installer/lang/setup.isl.xml.in:92
 msgid "Run-time libraries"
 msgstr "Орындалу уақытының кітапханалары"
 
 #: build/windows/installer/lang/setup.isl.xml.in:96
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
 msgstr ""
-"GIMP қолданатын орындалу уақытының кітапханалары, соның ішінде GTK орындалу "
+"Clay қолданатын орындалу уақытының кітапханалары, соның ішінде GTK орындалу "
 "ортасы"
 
 #: build/windows/installer/lang/setup.isl.xml.in:100
@@ -141,8 +141,8 @@ msgid "Debug symbols"
 msgstr "Жөндеу таңбалары"
 
 #: build/windows/installer/lang/setup.isl.xml.in:104
-msgid "Include information to help with debugging GIMP"
-msgstr "GIMP жөндеуге көмектесетін ақпаратты қосу"
+msgid "Include information to help with debugging Clay"
+msgstr "Clay жөндеуге көмектесетін ақпаратты қосу"
 
 #: build/windows/installer/lang/setup.isl.xml.in:108
 msgid "Resource development files"
@@ -150,10 +150,10 @@ msgstr "Ресурстарды әзірлеу файлдары"
 
 #: build/windows/installer/lang/setup.isl.xml.in:112
 msgid ""
-"Include some files to help with building GEGL filters and GIMP plug-ins in "
+"Include some files to help with building GEGL filters and Clay plug-ins in "
 "MSYS2"
 msgstr ""
-"MSYS2 ішінде GEGL сүзгілері мен GIMP плагиндерін құрастыруға көмектесетін "
+"MSYS2 ішінде GEGL сүзгілері мен Clay плагиндерін құрастыруға көмектесетін "
 "кейбір файлдарды қосу"
 
 #: build/windows/installer/lang/setup.isl.xml.in:116
@@ -166,17 +166,17 @@ msgid "Python scripting"
 msgstr "Python скриптері"
 
 #: build/windows/installer/lang/setup.isl.xml.in:128
-msgid "Allows you to use GIMP plugins written in Python scripting language."
+msgid "Allows you to use Clay plugins written in Python scripting language."
 msgstr ""
-"Python скрипт тілінде жазылған GIMP плагиндерін қолдануға мүмкіндік береді."
+"Python скрипт тілінде жазылған Clay плагиндерін қолдануға мүмкіндік береді."
 
 #: build/windows/installer/lang/setup.isl.xml.in:132
 msgid "Lua scripting"
 msgstr "Lua скриптері"
 
 #: build/windows/installer/lang/setup.isl.xml.in:136
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
-msgstr "Lua скрипт тілінде жазылған GIMP плагиндерін қолдануға мүмкіндік береді."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
+msgstr "Lua скрипт тілінде жазылған Clay плагиндерін қолдануға мүмкіндік береді."
 
 #: build/windows/installer/lang/setup.isl.xml.in:140
 msgid "MyPaint brushes"
@@ -191,8 +191,8 @@ msgid "PostScript support"
 msgstr "PostScript қолдауы"
 
 #: build/windows/installer/lang/setup.isl.xml.in:152
-msgid "Allow GIMP to load PostScript files"
-msgstr "GIMP-ке PostScript файлдарын жүктеуге рұқсат беру"
+msgid "Allow Clay to load PostScript files"
+msgstr "Clay-ке PostScript файлдарын жүктеуге рұқсат беру"
 
 #: build/windows/installer/lang/setup.isl.xml.in:157
 msgid "Additional icons:"
@@ -204,11 +204,11 @@ msgstr "&Жұмыс үстелі таңбашасын жасау"
 
 #: build/windows/installer/lang/setup.isl.xml.in:166
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"%1 ішіндегі GIMP ортасын жаңарту кезінде мәселе туындады. Егер плагиндерді "
-"жүктеу кезінде қателер шықса, GIMP-ті өшіріп, қайта орнатып көріңіз."
+"%1 ішіндегі Clay ортасын жаңарту кезінде мәселе туындады. Егер плагиндерді "
+"жүктеу кезінде қателер шықса, Clay-ті өшіріп, қайта орнатып көріңіз."
 
 #: build/windows/installer/lang/setup.isl.xml.in:170
 msgid "Error extracting temporary data."
@@ -227,25 +227,25 @@ msgid "Cleaning up old files..."
 msgstr "Ескі файлдарды тазалау..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:187
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
 msgstr ""
-"Есіңізде болсын: GIMP — еркін бағдарламалық қамтама.%n%nКелесі сайтты шолыңыз:"
+"Есіңізде болсын: Clay — еркін бағдарламалық қамтама.%n%nКелесі сайтты шолыңыз:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:191
 msgid "for free updates."
 msgstr "тегін жаңартулар алу үшін."
 
 #: build/windows/installer/lang/setup.isl.xml.in:195
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "GIMP Python кеңейтуі үшін ортаны баптау..."
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Clay Python кеңейтуі үшін ортаны баптау..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:198
-msgid "Setting up GIMP environment..."
-msgstr "GIMP ортасын баптау..."
+msgid "Setting up Clay environment..."
+msgstr "Clay ортасын баптау..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:203
-msgid "Launch GIMP"
-msgstr "GIMP-ті іске қосу"
+msgid "Launch Clay"
+msgstr "Clay-ті іске қосу"
 
 #: build/windows/installer/lang/setup.isl.xml.in:208
 msgid "Removing add-on"
@@ -253,10 +253,10 @@ msgstr "Қосымшаны өшіру"
 
 #: build/windows/installer/lang/setup.isl.xml.in:213
 msgid ""
-"Do you want to delete your personal GIMP files (e.g. settings, tool presets, "
+"Do you want to delete your personal Clay files (e.g. settings, tool presets, "
 "custom brushes)?%n%nA copy will be made on Desktop."
 msgstr ""
-"Жеке GIMP файлдарын (мысалы, баптаулар, сайман пресеттері, таңдамалы "
+"Жеке Clay файлдарын (мысалы, баптаулар, сайман пресеттері, таңдамалы "
 "қылқаламдар) өшіруді қалайсыз ба?%n%nКөшірмесі Жұмыс үстелінде жасалады."
 
 #: build/windows/installer/lang/setup.isl.xml.in:217

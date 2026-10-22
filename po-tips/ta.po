@@ -58,7 +58,7 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP. You should probably disable &quot;Dynamic Keyboard "
+"you exit Clay. You should probably disable &quot;Dynamic Keyboard "
 "Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning "
 "shortcuts."
 msgstr "விருப்பங்கள் உரையாடலில்  &quot; இயங்குநிலை விசைப்பலகை குறுக்கு விசைகள்&quot; ஐ செயலாக்கிய பின் குறுக்கு விசைகளை மறு ஒதுக்கம் செய்யலாம். இதற்கு மெனு பட்டியை திறந்து மெனு உருப்படி ஒன்றை தேர்ந்தெடுத்து விருப்பமான விசை கூட்டை அழுத்தவும். &quot; விசைப்பலகை குறுக்கு விசைகளை சேமி  &quot; ஐ செயலாக்கி இருந்தால்  கிம்ப் ஐ விட்டு வெளியேறினால் இந்த விசை பிணைப்புகள் சேமிக்கப்படும். அப்படியானால் &quot; இயங்குநிலை விசைப்பலகை குறுக்கு விசைகள் &quot; ஐ நீங்கள் செயல் நீக்க வேண்டும். அப்போதுதான் தவறுதலாக அவை மறு ஒதுக்கம் செய்யப்படா."
@@ -72,14 +72,14 @@ msgstr "ஒரு பிம்பத்தில் ஒரு வழி கா�
 
 #: ../data/tips/gimp-tips.xml.in.h:8
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
 msgstr "கிம்ப் இயங்கு நிலையில் ஜிசுருக்கத்தை ஆதரிக்கிறது. இதற்கு பிஜிப்2 (bzip2) ஐ நிறுவி இருந்தால் <tt>.gz</tt> (அல்லது <tt>.bz2</tt>) ஐ கோப்புப் பெயருக்கு சேர்க்கவும்.  படம் குறுக்கப்பட்டு சேமிக்கப்படும். அப்புறம் ஆமாம், குறுக்கிய பிம்பங்களை ஏற்றுவதும் இயலும்."
 
 #: ../data/tips/gimp-tips.xml.in.h:9
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr "கிம்ப் உங்கள் பிம்பங்களை சீரமைக்க அடுக்குகளை பயன்படுத்துகிறது. அவற்றை ஒரு சீட்டுக்கட்டு போல வைத்த வடிப்பி அல்லது சிலைடுகள் போல நினைத்துக்கொள்ளுங்கள். அதனால் பார்க்கும்போது அவற்றின் வழியாக பல சிலைடுகளின் பாகங்களும் சேர்ந்த ஒரு கூட்டுப்படத்தை பார்க்கலாம்."
@@ -136,7 +136,7 @@ msgstr "ஒரு தேர்வை செய்யு முன் <tt> Shift<
 
 #: ../data/tips/gimp-tips.xml.in.h:17
 msgid ""
-"When you save an image to work on it again later, try using XCF, GIMP's "
+"When you save an image to work on it again later, try using XCF, Clay's "
 "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 "the layers and every aspect of your work-in-progress. Once a project is "
 "completed, you can save it as JPEG, PNG, GIF, ..."
@@ -165,7 +165,7 @@ msgstr "நீங்கள் அடுக்குகள் உரையாட�
 
 #: ../data/tips/gimp-tips.xml.in.h:21
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr "நீங்கள் பல விஷயங்களை கிம்பில் இழுத்து விடலாம். உதாரணமாக் கருவி பெட்டி அல்லது வண்ணத்தட்டு இலிருுந்து ஒரு வண்ணத்தை இழுத்து ஒரு பிம்பத்தின் மீது விடுதல் நடப்பு தேர்வை அந்த வண்ணத்தால் நிறப்பும்.ிறம்."
@@ -179,7 +179,7 @@ msgstr "நீங்கள் சாதாரண வட்டங்கள், �
 
 #: ../data/tips/gimp-tips.xml.in.h:23
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr "நீங்கள் கிம்பின் பல செயல்களுக்கு தகுந்த உதவி குறிப்புகளை எபோது வேண்டுமானாலும் எஃப் 1 விசையை அழுத்துவதன் மூலம் பெறலாம். இது மெனு பட்டிகள் உள்ளேயும் செயலாகும்."
 

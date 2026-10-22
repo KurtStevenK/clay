@@ -31113,8 +31113,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Chyba zápisu XCF: nepodporované BPC pri zápise pixela: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "Ladenie havárie GIMPu"
+msgid "Clay Crash Debug"
+msgstr "Ladenie havárie Clayu"
 
 # názov ponuky
 # resp Ponuka nástroja Editor štetcov - ale to by bolo dlhé

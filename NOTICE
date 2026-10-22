@@ -1,0 +1,20 @@
+Clay - Clay Image Beautification Program
+Copyright © 2026 ClayDesign Contributors
+
+Clay is a modified fork of GIMP, the GNU Image Manipulation Program
+(https://www.gimp.org/). It is not affiliated with or endorsed by the
+GIMP project. "GIMP" and the Wilber mascot are names of the upstream project.
+
+GIMP is copyright © 1995-2026 Spencer Kimball, Peter Mattis and the GIMP
+Development Team. The upstream copyright notices in the source files are
+kept unchanged.
+
+Clay is distributed under the GNU General Public License, version 3 or
+later (see COPYING). The libraries under libgimp* are distributed under the
+GNU Lesser General Public License, version 3 or later. Some icons and
+artwork carry their own notices.
+
+Clay keeps GIMP's plug-in interface (libgimp, the PDB, the Gimp-3.0
+introspection namespace and the gimp-3.0 pkg-config files) so that GIMP
+plug-ins and scripts keep working. Those internal names are therefore
+not renamed.

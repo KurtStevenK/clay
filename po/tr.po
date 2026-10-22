@@ -29344,8 +29344,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "XCF yazılırken hata: piksel yazılırken desteklenmeyen BPC: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP Çökme Hata Ayıklaması"
+msgid "Clay Crash Debug"
+msgstr "Clay Çökme Hata Ayıklaması"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

@@ -30,9 +30,9 @@ msgstr "Program de instalare creat de Jernej Simonèiè, jernej-gimp@ena.si"
 #: build/windows/installer/lang/setup.isl.xml.in:13
 #: build/windows/installer/lang/setup.isl.xml.in:16
 msgid ""
-"This version of GIMP requires Windows 10, or a newer version of Windows."
+"This version of Clay requires Windows 10, or a newer version of Windows."
 msgstr ""
-"Această versiune GIMP necesită Windows 10, sau o versiune Windows mai nouă."
+"Această versiune Clay necesită Windows 10, sau o versiune Windows mai nouă."
 
 #: build/windows/installer/lang/setup.isl.xml.in:23
 msgid "Development version"
@@ -40,20 +40,20 @@ msgstr "Versiune de dezvoltare"
 
 #: build/windows/installer/lang/setup.isl.xml.in:28
 msgid ""
-"This is a development version of GIMP where some features may not be "
-"finished, or it may be unstable.%nThis version of GIMP is not intended for "
+"This is a development version of Clay where some features may not be "
+"finished, or it may be unstable.%nThis version of Clay is not intended for "
 "day-to-day work as it may be unstable, and you could lose your work.%nIf you "
 "encounter any problems, first verify that they haven't already been fixed in "
-"GIT before you contact the developers or report it in GIMP gitlab:%n_https://"
+"GIT before you contact the developers or report it on GitHub:%n_https://"
 "gitlab.gnome.org/GNOME/gimp/issues%n%nDo you wish to continue with "
 "installation anyway?"
 msgstr ""
-"Aceasta este o versiune GIMP de dezvoltare, în care unele caracteristici s-"
-"ar putea să fie incomplete sau să fie instabile.%nAceastă versiune GIMP nu "
+"Aceasta este o versiune Clay de dezvoltare, în care unele caracteristici s-"
+"ar putea să fie incomplete sau să fie instabile.%nAceastă versiune Clay nu "
 "este destinată lucrului de zi cu zi, deoarece ar putea fi instabilă și s-ar "
 "putea să vă pierdeți munca.%nDacă întâmpinați probleme, înainte de a "
 "contacta dezvoltatorii, verificați dacă acestea nu au fost cumva deja "
-"rezolvate în GIT, sau raportați problema în GIMP gitlab:%n_https://"
+"rezolvate în GIT, sau raportați problema în Clay gitlab:%n_https://"
 "gitlab.gnome.org/GNOME/gimp/issues%n%nDoriți să continuați instalarea oricum?"
 
 #: build/windows/installer/lang/setup.isl.xml.in:31
@@ -67,9 +67,9 @@ msgstr "Ieșire"
 
 #: build/windows/installer/lang/setup.isl.xml.in:44
 msgid ""
-"This version of GIMP requires a processor that supports SSE instructions."
+"This version of Clay requires a processor that supports SSE instructions."
 msgstr ""
-"Această versiune GIMP necesită un procesor care suportă instrucțiuni SSE."
+"Această versiune Clay necesită un procesor care suportă instrucțiuni SSE."
 
 #: build/windows/installer/lang/setup.isl.xml.in:48
 msgid "Display settings problem"
@@ -78,13 +78,13 @@ msgstr "Problemă de configurare afișor"
 #: build/windows/installer/lang/setup.isl.xml.in:51
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before "
 "continuing."
 msgstr ""
 "Programul de instalare a detectat că Windows nu rulează în modul de afișare "
 "de 32 de biți per pixel. Este cunoscut faptul că acest lucru poate genera "
-"probleme de stabilitate în cadrul GIMP, de aceea se recomandă schimbarea "
+"probleme de stabilitate în cadrul Clay, de aceea se recomandă schimbarea "
 "adâncimii de culoare a afișării la 32BPP înainte de a continua."
 
 #: build/windows/installer/lang/setup.isl.xml.in:57
@@ -93,11 +93,11 @@ msgstr "&Ieșire"
 
 #: build/windows/installer/lang/setup.isl.xml.in:61
 msgid ""
-"GIMP is now ready to be installed. Click the Install now button to install "
+"Clay is now ready to be installed. Click the Install now button to install "
 "using the default settings, or click the Customize button if you'd like to "
 "have more control over what gets installed."
 msgstr ""
-"GIMP este acum gata pentru a fi instalat. Dați clic pe butonul 'Instalează' "
+"Clay este acum gata pentru a fi instalat. Dați clic pe butonul 'Instalează' "
 "pentru a instala utilizând configurările implicite, sau dați clic pe butonul "
 "'Personalizează' dacă doriți să aveți mai mult control asupra celor ce "
 "urmează a fi instalate."
@@ -127,28 +127,28 @@ msgid "Description"
 msgstr "Descriere"
 
 #: build/windows/installer/lang/setup.isl.xml.in:89
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:93
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP și toate plug-urile implicite"
+msgid "Clay and all default plug-ins"
+msgstr "Clay și toate plug-urile implicite"
 
 #: build/windows/installer/lang/setup.isl.xml.in:97
 msgid "Run-time libraries"
 msgstr "Biblioteci run-time"
 
 #: build/windows/installer/lang/setup.isl.xml.in:101
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
-msgstr "Biblioteci run-time utilizate de GIMP, inclusiv mediul run-time GTK"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
+msgstr "Biblioteci run-time utilizate de Clay, inclusiv mediul run-time GTK"
 
 #: build/windows/installer/lang/setup.isl.xml.in:105
 msgid "Debug symbols"
 msgstr "Simboluri de depanare"
 
 #: build/windows/installer/lang/setup.isl.xml.in:109
-msgid "Include information to help with debugging GIMP"
-msgstr "Include informații care să ajute la depanarea GIMP"
+msgid "Include information to help with debugging Clay"
+msgstr "Include informații care să ajute la depanarea Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:113
 #: build/windows/installer/lang/setup.isl.xml.in:117
@@ -160,18 +160,18 @@ msgid "Python scripting"
 msgstr "Scripturi Python"
 
 #: build/windows/installer/lang/setup.isl.xml.in:125
-msgid "Allows you to use GIMP plugins written in Python scripting language."
+msgid "Allows you to use Clay plugins written in Python scripting language."
 msgstr ""
-"Permite utilizarea de plugin-uri GIMP scrise în limbajul de script Python."
+"Permite utilizarea de plugin-uri Clay scrise în limbajul de script Python."
 
 #: build/windows/installer/lang/setup.isl.xml.in:129
 msgid "Lua scripting"
 msgstr "Scripturi Lua"
 
 #: build/windows/installer/lang/setup.isl.xml.in:133
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
 msgstr ""
-"Permite utilizarea de plugin-uri GIMP scrise în limbajul de script Lua."
+"Permite utilizarea de plugin-uri Clay scrise în limbajul de script Lua."
 
 #: build/windows/installer/lang/setup.isl.xml.in:137
 msgid "MyPaint brushes"
@@ -186,8 +186,8 @@ msgid "PostScript support"
 msgstr "Suport PostScript"
 
 #: build/windows/installer/lang/setup.isl.xml.in:149
-msgid "Allow GIMP to load PostScript files"
-msgstr "Permite GIMP să încarce fișiere PostScript"
+msgid "Allow Clay to load PostScript files"
+msgstr "Permite Clay să încarce fișiere PostScript"
 
 #: build/windows/installer/lang/setup.isl.xml.in:153
 msgid "Support for 32-bit plug-ins"
@@ -214,17 +214,17 @@ msgid "Create a &Quick Launch icon"
 msgstr "Creează o pictogramă pe bara &Quick Launch"
 
 #: build/windows/installer/lang/setup.isl.xml.in:174
-msgid "Remove previous GIMP version"
-msgstr "Elimină versiunea GIMP precedentă"
+msgid "Remove previous Clay version"
+msgstr "Elimină versiunea Clay precedentă"
 
 #: build/windows/installer/lang/setup.isl.xml.in:179
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"A apărut o problemă la actualizarea mediului GIMP în %1. Dacă întâmpinați "
+"A apărut o problemă la actualizarea mediului Clay în %1. Dacă întâmpinați "
 "erori la încărcarea plugin-urilor, încercați să dezinstalați și să "
-"reinstalați GIMP."
+"reinstalați Clay."
 
 #: build/windows/installer/lang/setup.isl.xml.in:183
 msgid "Error extracting temporary data."
@@ -243,12 +243,12 @@ msgid "There was an error updating %1."
 msgstr "A apărut o eroare la actualizarea %1."
 
 #: build/windows/installer/lang/setup.isl.xml.in:199
-msgid "There was an error updating GIMP's configuration file %1."
-msgstr "A apărut o eroare la actualizarea fișierului %1 de configurare GIMP."
+msgid "There was an error updating Clay's configuration file %1."
+msgstr "A apărut o eroare la actualizarea fișierului %1 de configurare Clay."
 
 #: build/windows/installer/lang/setup.isl.xml.in:204
-msgid "Edit with GIMP"
-msgstr "Editare cu GIMP"
+msgid "Edit with Clay"
+msgstr "Editare cu Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:209
 msgid "Select file associations"
@@ -259,15 +259,15 @@ msgid "Extensions:"
 msgstr "Extensii:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:217
-msgid "Select the file types you wish to associate with GIMP"
-msgstr "Selectați tipurile de fișier care doriți să fie asociate cu GIMP"
+msgid "Select the file types you wish to associate with Clay"
+msgstr "Selectați tipurile de fișier care doriți să fie asociate cu Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:221
 msgid ""
-"This will make selected files open in GIMP when you double-click them in "
+"This will make selected files open in Clay when you double-click them in "
 "Explorer."
 msgstr ""
-"Acest lucru va face ca fișierele selectate să fie deschise în GIMP atunci "
+"Acest lucru va face ca fișierele selectate să fie deschise în Clay atunci "
 "când se dă dublu clic pe ele în Explorer."
 
 #: build/windows/installer/lang/setup.isl.xml.in:225
@@ -283,49 +283,49 @@ msgid "Select &Unused"
 msgstr "Selectează cele &nefolosite"
 
 #: build/windows/installer/lang/setup.isl.xml.in:238
-msgid "File types to associate with GIMP:"
-msgstr "Tipuri de fișiere asociate cu GIMP:"
+msgid "File types to associate with Clay:"
+msgstr "Tipuri de fișiere asociate cu Clay:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:242
-msgid "Removing previous version of GIMP:"
-msgstr "Eliminare versiune GIMP precedentă:"
+msgid "Removing previous version of Clay:"
+msgstr "Eliminare versiune Clay precedentă:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:246
 msgid ""
-"GIMP %1 cannot be installed over your currently installed GIMP version, and "
+"Clay %1 cannot be installed over your currently installed Clay version, and "
 "the automatic uninstall of old version has failed.%n%nPlease remove the "
-"previous version of GIMP yourself before installing this version in %2, or "
+"previous version of Clay yourself before installing this version in %2, or "
 "choose a Custom install, and select a different installation folder.%n%nThe "
 "Setup will now exit."
 msgstr ""
-"GIMP %1 nu poate fi instalat peste versiunea GIMP instalată în prezent, iar "
+"Clay %1 nu poate fi instalat peste versiunea Clay instalată în prezent, iar "
 "dezinstalarea automată a versiunii vechi a eșuat.%n%nEliminați manual "
-"versiunea GIMP precedentă înainte de a instala această versiune în %2, sau "
+"versiunea Clay precedentă înainte de a instala această versiune în %2, sau "
 "alegeți o instalare personalizată și selectați un dosar de instalare diferit."
 "%n%nAcum programul de instalare se va închide."
 
 #: build/windows/installer/lang/setup.isl.xml.in:250
 msgid ""
-"GIMP %1 cannot be installed over your currently installed GIMP version, and "
+"Clay %1 cannot be installed over your currently installed Clay version, and "
 "Setup couldn't determine how to remove the old version automatically."
-"%n%nPlease remove the previous version of GIMP and any add-ons yourself "
+"%n%nPlease remove the previous version of Clay and any add-ons yourself "
 "before installing this version in %2, or choose a Custom install, and select "
 "a different installation folder.%n%nThe Setup will now exit."
 msgstr ""
-"GIMP %1 nu poate fi instalat peste versiunea GIMP instalată în prezent, iar "
+"Clay %1 nu poate fi instalat peste versiunea Clay instalată în prezent, iar "
 "programul de dezinstalare nu a putut determina cum să elimine versiunea "
-"veche în mod automat.%n%nEliminați manual versiunea GIMP precedentă și orice "
+"veche în mod automat.%n%nEliminați manual versiunea Clay precedentă și orice "
 "supliment asociat înainte de a instala această versiune în %2, sau alegeți o "
 "instalare personalizată și selectați un dosar de instalare diferit.%n%nAcum "
 "programul de instalare se va închide."
 
 #: build/windows/installer/lang/setup.isl.xml.in:254
 msgid ""
-"Previous GIMP version was removed successfully, but Windows has to be "
+"Previous Clay version was removed successfully, but Windows has to be "
 "restarted before the Setup can continue.%n%nAfter restarting your computer, "
 "Setup will continue next time an administrator logs in."
 msgstr ""
-"Versiunea GIMP precedentă a fost eliminată cu succes, dar Windows trebuie să "
+"Versiunea Clay precedentă a fost eliminată cu succes, dar Windows trebuie să "
 "fie repornit înainte ca instalarea să poată continua.%n%nDupă repornirea "
 "calculatorului, programul de instalare va continua la prima conectare a unui "
 "administrator."
@@ -339,8 +339,8 @@ msgid "Cleaning up old files..."
 msgstr "Se curăță fișierele vechi..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:268
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
-msgstr "Țineți minte: GIMP este software liber.%n%nVizitați"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
+msgstr "Țineți minte: Clay este software liber.%n%nVizitați"
 
 #: build/windows/installer/lang/setup.isl.xml.in:272
 msgid "for free updates."
@@ -351,24 +351,24 @@ msgid "Setting up file associations..."
 msgstr "Se configurează asocierile de fișiere..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:279
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "Se configurează mediul pentru extensiile Python GIMP..."
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Se configurează mediul pentru extensiile Python Clay..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:282
 msgid "Setting up MyPaint brushes..."
 msgstr "Se configurează penelurile MyBrushes..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:285
-msgid "Setting up GIMP environment..."
-msgstr "Se configurează mediul GIMP..."
+msgid "Setting up Clay environment..."
+msgstr "Se configurează mediul Clay..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:288
-msgid "Setting up GIMP configuration for 32-bit plug-in support..."
-msgstr "Se configurează GIMP pentru suportul plugin-urilor pe 32 de biți..."
+msgid "Setting up Clay configuration for 32-bit plug-in support..."
+msgstr "Se configurează Clay pentru suportul plugin-urilor pe 32 de biți..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:293
-msgid "Launch GIMP"
-msgstr "Pornește GIMP"
+msgid "Launch Clay"
+msgstr "Pornește Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:298
 msgid "Removing add-on"
@@ -380,7 +380,7 @@ msgstr "Eroare internă (%1)."
 
 #: build/windows/installer/lang/setup.isl.xml.in:307
 msgid ""
-"GIMP does not appear to be installed in the selected directory. Continue "
+"Clay does not appear to be installed in the selected directory. Continue "
 "anyway?"
 msgstr ""
-"GIMP nu pare să fie instalat în directorul selectat. Continuați oricum?"
+"Clay nu pare să fie instalat în directorul selectat. Continuați oricum?"

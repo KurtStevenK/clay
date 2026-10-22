@@ -27922,8 +27922,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "XCF жазу қатесі: пиксельді жазу кезіндегі қолдау көрсетілмейтін BPC: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "GIMP құлауын жөндеу"
+msgid "Clay Crash Debug"
+msgstr "Clay құлауын жөндеу"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

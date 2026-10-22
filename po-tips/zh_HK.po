@@ -57,10 +57,10 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP. You should probably disable &quot;Dynamic Keyboard "
+"you exit Clay. You should probably disable &quot;Dynamic Keyboard "
 "Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning "
 "shortcuts."
-msgstr "在偏好設定對話方塊中啟用 &quot;動態鍵盤捷徑鍵&quot; 後，你可以重新安排選單上的捷徑鍵。方法是先用滑鼠選取選單的某個項目，然後按下新的捷徑鍵組合。如果已啟用 &quot;儲存捷徑鍵設定&quot; ，結束 GIMP 時，這些捷徑鍵組合會被儲存下來。你應該在設定完成後停用 &quot;動態鍵盤捷徑鍵&quot; ，以避免意外的重新指定捷徑鍵。"
+msgstr "在偏好設定對話方塊中啟用 &quot;動態鍵盤捷徑鍵&quot; 後，你可以重新安排選單上的捷徑鍵。方法是先用滑鼠選取選單的某個項目，然後按下新的捷徑鍵組合。如果已啟用 &quot;儲存捷徑鍵設定&quot; ，結束 Clay 時，這些捷徑鍵組合會被儲存下來。你應該在設定完成後停用 &quot;動態鍵盤捷徑鍵&quot; ，以避免意外的重新指定捷徑鍵。"
 
 #: ../data/tips/gimp-tips.xml.in.h:7
 msgid ""
@@ -71,17 +71,17 @@ msgstr "在尺規上按下滑鼠左鍵並拖曳至圖片內就可以加入參考
 
 #: ../data/tips/gimp-tips.xml.in.h:8
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
-msgstr "GIMP 支援 gzip 直接壓縮/解壓。只要在檔名加上 <tt>.gz</tt> (或在安裝了 bzip2 的情況下使用 <tt>.bz2</tt>)，圖片會以壓縮狀態儲存。 當然直接打開壓縮圖檔也可以。"
+msgstr "Clay 支援 gzip 直接壓縮/解壓。只要在檔名加上 <tt>.gz</tt> (或在安裝了 bzip2 的情況下使用 <tt>.bz2</tt>)，圖片會以壓縮狀態儲存。 當然直接打開壓縮圖檔也可以。"
 
 #: ../data/tips/gimp-tips.xml.in.h:9
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
-msgstr "GIMP 使用圖層來組織圖片。可將圖層想像成一疊投影片或濾鏡，將它們重疊後可以看到整合後的內容。"
+msgstr "Clay 使用圖層來組織圖片。可將圖層想像成一疊投影片或濾鏡，將它們重疊後可以看到整合後的內容。"
 
 #: ../data/tips/gimp-tips.xml.in.h:10
 msgid ""
@@ -135,11 +135,11 @@ msgstr "在選取區域之前按下 <tt>Shift</tt> 鍵，便會將新選擇的�
 
 #: ../data/tips/gimp-tips.xml.in.h:17
 msgid ""
-"When you save an image to work on it again later, try using XCF, GIMP's "
+"When you save an image to work on it again later, try using XCF, Clay's "
 "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 "the layers and every aspect of your work-in-progress. Once a project is "
 "completed, you can save it as JPEG, PNG, GIF, ..."
-msgstr "如果儲存一幅將來可能會再修改的圖片，可試試使用 XCF，即 GIMP 內定使用的圖片格式 (延伸檔名為 <tt>.xcf</tt>)。這樣會保留所有圖層及任何正在處理中的圖片細節。在圖片完成後，可以將它另存為 JPEG、PNG、GIF 等等..."
+msgstr "如果儲存一幅將來可能會再修改的圖片，可試試使用 XCF，即 Clay 內定使用的圖片格式 (延伸檔名為 <tt>.xcf</tt>)。這樣會保留所有圖層及任何正在處理中的圖片細節。在圖片完成後，可以將它另存為 JPEG、PNG、GIF 等等..."
 
 #: ../data/tips/gimp-tips.xml.in.h:18
 msgid ""
@@ -164,10 +164,10 @@ msgstr "你可以在「圖層」對話方塊中拖曳一個圖層並將之放進
 
 #: ../data/tips/gimp-tips.xml.in.h:21
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
-msgstr "GIMP 裏面很多東西都是可以拖曳的。舉個例子，從工具箱或色盤裏拖曳一種顏色出來並放到圖片上，會將目前的圖片或選擇區域填滿該種顏色。"
+msgstr "Clay 裏面很多東西都是可以拖曳的。舉個例子，從工具箱或色盤裏拖曳一種顏色出來並放到圖片上，會將目前的圖片或選擇區域填滿該種顏色。"
 
 #: ../data/tips/gimp-tips.xml.in.h:22
 msgid ""
@@ -178,9 +178,9 @@ msgstr "你可以用「編輯→根據選擇區域描邊」來繪畫簡單的矩
 
 #: ../data/tips/gimp-tips.xml.in.h:23
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
-msgstr "你可以在任何時候按下 F1 來瀏覽 GIMP 功能的相關說明文件，即使在選單中也同樣適用。"
+msgstr "你可以在任何時候按下 F1 來瀏覽 Clay 功能的相關說明文件，即使在選單中也同樣適用。"
 
 #: ../data/tips/gimp-tips.xml.in.h:24
 msgid ""

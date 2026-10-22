@@ -160,7 +160,7 @@ gimp_widgets_init (GimpHelpFunc           standard_help_func,
    * then the application icon is dependant to the theme and for now at
    * least, we want the installed icon.
    */
-  path   = g_build_filename (base_dir, "16x16", cat_dir, "gimp.png", NULL);
+  path   = g_build_filename (base_dir, "16x16", cat_dir, GIMP_DESKTOP_NAME ".png", NULL);
   pixbuf = gdk_pixbuf_new_from_file (path, &error);
   if (pixbuf)
     icons = g_list_prepend (icons, pixbuf);
@@ -169,7 +169,7 @@ gimp_widgets_init (GimpHelpFunc           standard_help_func,
   g_clear_error (&error);
   g_free (path);
 
-  path   = g_build_filename (base_dir, "32x32", cat_dir, "gimp.png", NULL);
+  path   = g_build_filename (base_dir, "32x32", cat_dir, GIMP_DESKTOP_NAME ".png", NULL);
   pixbuf = gdk_pixbuf_new_from_file (path, &error);
   if (pixbuf)
     icons = g_list_prepend (icons, pixbuf);
@@ -178,7 +178,7 @@ gimp_widgets_init (GimpHelpFunc           standard_help_func,
   g_clear_error (&error);
   g_free (path);
 
-  path   = g_build_filename (base_dir, "48x48", cat_dir, "gimp.png", NULL);
+  path   = g_build_filename (base_dir, "48x48", cat_dir, GIMP_DESKTOP_NAME ".png", NULL);
   pixbuf = gdk_pixbuf_new_from_file (path, &error);
   if (pixbuf)
     icons = g_list_prepend (icons, pixbuf);
@@ -187,7 +187,7 @@ gimp_widgets_init (GimpHelpFunc           standard_help_func,
   g_clear_error (&error);
   g_free (path);
 
-  path   = g_build_filename (base_dir, "64x64", cat_dir, "gimp.png", NULL);
+  path   = g_build_filename (base_dir, "64x64", cat_dir, GIMP_DESKTOP_NAME ".png", NULL);
   pixbuf = gdk_pixbuf_new_from_file (path, &error);
   if (pixbuf)
     icons = g_list_prepend (icons, pixbuf);
@@ -196,7 +196,7 @@ gimp_widgets_init (GimpHelpFunc           standard_help_func,
   g_clear_error (&error);
   g_free (path);
 
-  path   = g_build_filename (base_dir, "scalable", cat_dir, "gimp.svg", NULL);
+  path   = g_build_filename (base_dir, "scalable", cat_dir, GIMP_DESKTOP_NAME ".svg", NULL);
   pixbuf = gdk_pixbuf_new_from_file_at_size (path, 128, 128, &error);
   if (pixbuf)
     {
@@ -229,7 +229,7 @@ gimp_widgets_init (GimpHelpFunc           standard_help_func,
     }
   g_free (path);
 
-  path   = g_build_filename (base_dir, "256x256", cat_dir, "gimp.png", NULL);
+  path   = g_build_filename (base_dir, "256x256", cat_dir, GIMP_DESKTOP_NAME ".png", NULL);
   pixbuf = gdk_pixbuf_new_from_file (path, &error);
   if (pixbuf)
     icons = g_list_prepend (icons, pixbuf);

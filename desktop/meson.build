@@ -23,7 +23,7 @@ desktopfile = i18n.merge_file(
   install_dir: get_option('datadir') / 'applications',
 )
 
-appdatafilename = 'xyz.kainzmayer.ClayDesign.appdata.xml'
+appdatafilename = gimp_desktop_name + '.appdata.xml'
 appdatafilein = configure_file(
   input : 'org.gimp.GIMP.appdata.xml.in.in',
   output: appdatafilename+'.in',

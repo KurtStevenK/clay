@@ -337,13 +337,13 @@ foreach ($bundle in $supported_archs)
     ### Set revision on about dialog (this does the same as '-Drevision' build option)
     if (-not $GIMP_RC_VERSION)
       {
-        (Get-Content "$vfs\share\gimp\*\gimp-release") | Foreach-Object {$_ -replace "revision=0","revision=$revision"} |
-        Set-Content "$vfs\share\gimp\*\gimp-release"
+        (Get-Content "$vfs\share\clay\*\gimp-release") | Foreach-Object {$_ -replace "revision=0","revision=$revision"} |
+        Set-Content "$vfs\share\clay\*\gimp-release"
       }
     ### Disable Update check (ONLY FOR RELEASES)
     if ($GIMP_RELEASE -and -not $GIMP_IS_RC_GIT)
       {
-        Add-Content "$vfs\share\gimp\*\gimp-release" 'check-update=false'
+        Add-Content "$vfs\share\clay\*\gimp-release" 'check-update=false'
       }
 
     ## Parity adjustments (to make the .msix IDENTICAL TO THE .EXE INSTALLER, except for the adjustments above)

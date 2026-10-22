@@ -29732,8 +29732,8 @@ msgstr ""
 "yhteydessä: %d"
 
 #: app-tools/gimp-debug-tool.c:108
-msgid "GIMP Crash Debug"
-msgstr "GIMP kaatumisen vianetsintä"
+msgid "Clay Crash Debug"
+msgstr "Clay kaatumisen vianetsintä"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

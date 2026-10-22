@@ -29430,8 +29430,8 @@ msgstr ""
 "Feil ved skriving til XCF: Ikkje støtte for BBPC ved skiving av piksel: %d"
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
-msgstr "Feilfinning for GIMP-krasj"
+msgid "Clay Crash Debug"
+msgstr "Feilfinning for Clay-krasj"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

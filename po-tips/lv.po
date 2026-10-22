@@ -20,19 +20,19 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
-"Vajadzīga palīdzība? Nospiežot F1 taustiņu jebkurā GIMP dialogā vai izvēlnē, "
+"Vajadzīga palīdzība? Nospiežot F1 taustiņu jebkurā Clay dialogā vai izvēlnē, "
 "tiks atvērta atbilstošā rokasgrāmatas sadaļa."
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
-"GIMP atbalsta slāņus, kas palīdz attēla kompozīcijas veidošanā. Slāņi ir kā "
+"Clay atbalsta slāņus, kas palīdz attēla kompozīcijas veidošanā. Slāņi ir kā "
 "viens uz otra salikti filtri vai kodoskopa plēves, kas veido vienu kombinētu "
 "attēlu."
 
@@ -46,12 +46,12 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension <tt>."
+"Saving an image uses XCF, Clay's native file format (file extension <tt>."
 "xcf</tt>). This preserves the layers and many aspects of your work-in-"
 "progress, allowing to work on it again later. Once a project is completed, "
 "you can export it as JPEG, PNG, GIF, etc."
 msgstr ""
-"Attēla saglabāšana izmanto XCF — GIMP formātā ar paplašinājumu <tt>.xcf</"
+"Attēla saglabāšana izmanto XCF — Clay formātā ar paplašinājumu <tt>.xcf</"
 "tt>. Tas nodrošina slāņu un citu rediģēšanas aspektu saglabāšanu, kas ļauj "
 "darbu pie tā turpināt vēlāk. Kad darbs ir pabeigts, to var eksportēt JPG, "
 "PNG, GIF un citos formātos."
@@ -101,11 +101,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
-"Daudzas darbības GIMP var veikt ar vilkšanas un nomešanas paņēmienu. "
+"Daudzas darbības Clay var veikt ar vilkšanas un nomešanas paņēmienu. "
 "Piemēram, nometot krāsu no paletes vai rīku kastes uz attēla, ar šo krāsu "
 "tiks aizpildīts aktīvais iezīmējums."
 
@@ -153,13 +153,13 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
 msgstr ""
-"GIMP atbalsta tūlītēju gzip saspiešanu. Vienkārši pievienojiet faila "
+"Clay atbalsta tūlītēju gzip saspiešanu. Vienkārši pievienojiet faila "
 "nosaukumam paplašinājumu <tt>.gz</tt> (vai <tt>.bz2</tt>, ja jums ir bzip2), "
-"un attēls tiks saglabāts kā arhīvs. Protams, GIMP prot arī atvērt šādi "
+"un attēls tiks saglabāts kā arhīvs. Protams, Clay prot arī atvērt šādi "
 "saglabātus attēlus."
 
 #: data/tips/gimp-tips.xml.in:124

@@ -29200,8 +29200,8 @@ msgstr ""
 "Villa við ritun XCF: óstutt svartgildismótvægi (BPC) við ritun mynddíls: %d"
 
 #: app-tools/gimp-debug-tool.c:108
-msgid "GIMP Crash Debug"
-msgstr "Villukembing úr hruni GIMP"
+msgid "Clay Crash Debug"
+msgstr "Villukembing úr hruni Clay"
 
 #: menus/brush-editor-menu.ui:6
 msgctxt "brush-editor-action"

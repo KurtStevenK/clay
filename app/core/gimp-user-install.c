@@ -514,7 +514,7 @@ user_install_flatpak_gimpdir (gint minor)
      * environment variable.
      */
     gimp_dir = g_build_filename (home_dir,
-                                 ".var/app/org.gimp.Clay/config/Clay/",
+                                 ".var/app/" GIMP_DESKTOP_NAME "/config/Clay/",
                                  version, NULL);
 
   g_free (version);

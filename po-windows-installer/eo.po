@@ -30,9 +30,9 @@ msgstr "Agordado konstruita de Jernej Simonèiè, jernej-gimp@ena.si"
 #: build/windows/installer/lang/setup.isl.xml.in:13
 #: build/windows/installer/lang/setup.isl.xml.in:16
 msgid ""
-"This version of GIMP requires Windows 10, or a newer version of Windows."
+"This version of Clay requires Windows 10, or a newer version of Windows."
 msgstr ""
-"Ĉi tiu versio de GIMP postulas Windows 10 aŭ pli novan version de Windows."
+"Ĉi tiu versio de Clay postulas Windows 10 aŭ pli novan version de Windows."
 
 #: build/windows/installer/lang/setup.isl.xml.in:23
 msgid "Development version"
@@ -40,20 +40,20 @@ msgstr "Evoluiga versio"
 
 #: build/windows/installer/lang/setup.isl.xml.in:28
 msgid ""
-"This is a development version of GIMP where some features may not be "
-"finished, or it may be unstable.%nThis version of GIMP is not intended for "
+"This is a development version of Clay where some features may not be "
+"finished, or it may be unstable.%nThis version of Clay is not intended for "
 "day-to-day work as it may be unstable, and you could lose your work.%nIf you "
 "encounter any problems, first verify that they haven't already been fixed in "
-"GIT before you contact the developers or report it in GIMP gitlab:%n_https://"
+"GIT before you contact the developers or report it on GitHub:%n_https://"
 "gitlab.gnome.org/GNOME/gimp/issues%n%nDo you wish to continue with "
 "installation anyway?"
 msgstr ""
-"Ĉi tiu estas evoluiga versio de GIMP en kiu kelkaj funkcioj eble ne estas "
-"finitaj, aŭ ĝi eble estas malstabila.%nĈi tiu versio de GIMP ne estas "
+"Ĉi tiu estas evoluiga versio de Clay en kiu kelkaj funkcioj eble ne estas "
+"finitaj, aŭ ĝi eble estas malstabila.%nĈi tiu versio de Clay ne estas "
 "destinita por ĉiutaga laboro ĉar ĝi eble estas malstabila, kaj vi povus "
 "maltrafi vian laboron.%nSe vi renkontas problemojn, unue kontrolu ĉu ili ne "
 "estis jam solvitaj en GIT antaŭ ol kontakti la programistojn aŭ raporti en "
-"GIMP gitlab:%n_https://gitlab.gnome.org/GNOME/gimp/issues%n%nĈu vi volas "
+"Clay gitlab:%n_https://gitlab.gnome.org/GNOME/gimp/issues%n%nĈu vi volas "
 "daŭrigi la instaladon tamen?"
 
 #: build/windows/installer/lang/setup.isl.xml.in:31
@@ -67,9 +67,9 @@ msgstr "Eliri"
 
 #: build/windows/installer/lang/setup.isl.xml.in:44
 msgid ""
-"This version of GIMP requires a processor that supports SSE instructions."
+"This version of Clay requires a processor that supports SSE instructions."
 msgstr ""
-"Ĉi tiu versio de GIMP postulas procesoron kiu subtenas SSE-instrukciaĵojn."
+"Ĉi tiu versio de Clay postulas procesoron kiu subtenas SSE-instrukciaĵojn."
 
 #: build/windows/installer/lang/setup.isl.xml.in:48
 msgid "Display settings problem"
@@ -78,12 +78,12 @@ msgstr "Problemo en vidiga agordaro"
 #: build/windows/installer/lang/setup.isl.xml.in:51
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before "
 "continuing."
 msgstr ""
 "La agordado detektis ke via Windows ne funkcias en vidiga reĝimo de 32 bitoj-"
-"por-pikselo. Estas konata ke ĉi tio kaŭzas stabilecproblemojn en GIMP, do "
+"por-pikselo. Estas konata ke ĉi tio kaŭzas stabilecproblemojn en Clay, do "
 "estas rekomendate ŝanĝi la koloran profundon al 32BPP antaŭ ol daŭrigi."
 
 #: build/windows/installer/lang/setup.isl.xml.in:57
@@ -92,11 +92,11 @@ msgstr "E&liri"
 
 #: build/windows/installer/lang/setup.isl.xml.in:61
 msgid ""
-"GIMP is now ready to be installed. Click the Install now button to install "
+"Clay is now ready to be installed. Click the Install now button to install "
 "using the default settings, or click the Customize button if you'd like to "
 "have more control over what gets installed."
 msgstr ""
-"GIMP nun estas preta por instalado. Klaku la butonon Instali nun por instali "
+"Clay nun estas preta por instalado. Klaku la butonon Instali nun por instali "
 "per la defaŭltaj agordoj, aŭ klaku la butonon Personecigi se vi volas havi "
 "pli da kontrolo super tio kio estas instalata."
 
@@ -125,29 +125,29 @@ msgid "Description"
 msgstr "Priskribo"
 
 #: build/windows/installer/lang/setup.isl.xml.in:89
-msgid "GIMP"
-msgstr "GIMPo"
+msgid "Clay"
+msgstr "Clayo"
 
 #: build/windows/installer/lang/setup.isl.xml.in:93
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP kaj ĉiuj defaŭltaj kromprogramoj"
+msgid "Clay and all default plug-ins"
+msgstr "Clay kaj ĉiuj defaŭltaj kromprogramoj"
 
 #: build/windows/installer/lang/setup.isl.xml.in:97
 msgid "Run-time libraries"
 msgstr "Rultempaj bibliotekoj"
 
 #: build/windows/installer/lang/setup.isl.xml.in:101
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
 msgstr ""
-"Rultempaj bibliotekoj uzataj de GIMP, inkluzive de la GTK-rultempomedio"
+"Rultempaj bibliotekoj uzataj de Clay, inkluzive de la GTK-rultempomedio"
 
 #: build/windows/installer/lang/setup.isl.xml.in:105
 msgid "Debug symbols"
 msgstr "Sencimigaj simboloj"
 
 #: build/windows/installer/lang/setup.isl.xml.in:109
-msgid "Include information to help with debugging GIMP"
-msgstr "Inkluzivi informojn por helpi pri sencimigado de GIMP"
+msgid "Include information to help with debugging Clay"
+msgstr "Inkluzivi informojn por helpi pri sencimigado de Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:113
 #: build/windows/installer/lang/setup.isl.xml.in:117
@@ -159,16 +159,16 @@ msgid "Python scripting"
 msgstr "Python-skriptado"
 
 #: build/windows/installer/lang/setup.isl.xml.in:125
-msgid "Allows you to use GIMP plugins written in Python scripting language."
-msgstr "Ebligas uzi GIMP-kromprogramojn skribitajn en la Python-skriptlingvo."
+msgid "Allows you to use Clay plugins written in Python scripting language."
+msgstr "Ebligas uzi Clay-kromprogramojn skribitajn en la Python-skriptlingvo."
 
 #: build/windows/installer/lang/setup.isl.xml.in:129
 msgid "Lua scripting"
 msgstr "Lua-skriptado"
 
 #: build/windows/installer/lang/setup.isl.xml.in:133
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
-msgstr "Ebligas uzi GIMP-kromprogramojn skribitajn en la Lua-skriptlingvo."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
+msgstr "Ebligas uzi Clay-kromprogramojn skribitajn en la Lua-skriptlingvo."
 
 #: build/windows/installer/lang/setup.isl.xml.in:137
 msgid "MyPaint brushes"
@@ -183,8 +183,8 @@ msgid "PostScript support"
 msgstr "PostScript-subteno"
 
 #: build/windows/installer/lang/setup.isl.xml.in:149
-msgid "Allow GIMP to load PostScript files"
-msgstr "Permesi al GIMP ŝargi PostScript-dosierojn"
+msgid "Allow Clay to load PostScript files"
+msgstr "Permesi al Clay ŝargi PostScript-dosierojn"
 
 #: build/windows/installer/lang/setup.isl.xml.in:153
 msgid "Support for 32-bit plug-ins"
@@ -211,16 +211,16 @@ msgid "Create a &Quick Launch icon"
 msgstr "Krei ikoneton en la &Rapida Lanĉo"
 
 #: build/windows/installer/lang/setup.isl.xml.in:174
-msgid "Remove previous GIMP version"
-msgstr "Forigi antaŭan version de GIMP"
+msgid "Remove previous Clay version"
+msgstr "Forigi antaŭan version de Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:179
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"Estis problemo ĝisdatigante la GIMP-medion en %1. Se vi ricevas erarojn "
-"ŝargante la kromprogramojn, provu malinstali kaj reinstali GIMP."
+"Estis problemo ĝisdatigante la Clay-medion en %1. Se vi ricevas erarojn "
+"ŝargante la kromprogramojn, provu malinstali kaj reinstali Clay."
 
 #: build/windows/installer/lang/setup.isl.xml.in:183
 msgid "Error extracting temporary data."
@@ -239,12 +239,12 @@ msgid "There was an error updating %1."
 msgstr "Estis eraro ĝisdatigante %1."
 
 #: build/windows/installer/lang/setup.isl.xml.in:199
-msgid "There was an error updating GIMP's configuration file %1."
-msgstr "Estis eraro ĝisdatigante la agordodosieron de GIMP %1."
+msgid "There was an error updating Clay's configuration file %1."
+msgstr "Estis eraro ĝisdatigante la agordodosieron de Clay %1."
 
 #: build/windows/installer/lang/setup.isl.xml.in:204
-msgid "Edit with GIMP"
-msgstr "Redakti per GIMP"
+msgid "Edit with Clay"
+msgstr "Redakti per Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:209
 msgid "Select file associations"
@@ -255,15 +255,15 @@ msgid "Extensions:"
 msgstr "Etendaĵoj:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:217
-msgid "Select the file types you wish to associate with GIMP"
-msgstr "Elektu la dosiertipojn kiujn vi volas asocii kun GIMP"
+msgid "Select the file types you wish to associate with Clay"
+msgstr "Elektu la dosiertipojn kiujn vi volas asocii kun Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:221
 msgid ""
-"This will make selected files open in GIMP when you double-click them in "
+"This will make selected files open in Clay when you double-click them in "
 "Explorer."
 msgstr ""
-"Ĉi tio igos selektitajn dosierojn malfermiĝi en GIMP kiam vi duoble klakas "
+"Ĉi tio igos selektitajn dosierojn malfermiĝi en Clay kiam vi duoble klakas "
 "ilin en la Esploristaro."
 
 #: build/windows/installer/lang/setup.isl.xml.in:225
@@ -279,48 +279,48 @@ msgid "Select &Unused"
 msgstr "Elekti &Neuzatajn"
 
 #: build/windows/installer/lang/setup.isl.xml.in:238
-msgid "File types to associate with GIMP:"
-msgstr "Dosiertipoj por asocii kun GIMP:"
+msgid "File types to associate with Clay:"
+msgstr "Dosiertipoj por asocii kun Clay:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:242
-msgid "Removing previous version of GIMP:"
-msgstr "Forigante antaŭan version de GIMP:"
+msgid "Removing previous version of Clay:"
+msgstr "Forigante antaŭan version de Clay:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:246
 msgid ""
-"GIMP %1 cannot be installed over your currently installed GIMP version, and "
+"Clay %1 cannot be installed over your currently installed Clay version, and "
 "the automatic uninstall of old version has failed.%n%nPlease remove the "
-"previous version of GIMP yourself before installing this version in %2, or "
+"previous version of Clay yourself before installing this version in %2, or "
 "choose a Custom install, and select a different installation folder.%n%nThe "
 "Setup will now exit."
 msgstr ""
-"GIMP %1 ne povas esti instalita super via nuntempe instalita GIMP-versio, "
+"Clay %1 ne povas esti instalita super via nuntempe instalita Clay-versio, "
 "kaj la aŭtomata malinstalo de la malnova versio malsukcesis.%n%nBonvolu "
-"forigi la antaŭan version de GIMP mem antaŭ ol instali ĉi tiun version en "
+"forigi la antaŭan version de Clay mem antaŭ ol instali ĉi tiun version en "
 "%2, aŭ elektu Persona instalado kaj elektu malsaman instaladon-dosierujon."
 "%n%nLa agordado nun eliros."
 
 #: build/windows/installer/lang/setup.isl.xml.in:250
 msgid ""
-"GIMP %1 cannot be installed over your currently installed GIMP version, and "
+"Clay %1 cannot be installed over your currently installed Clay version, and "
 "Setup couldn't determine how to remove the old version automatically."
-"%n%nPlease remove the previous version of GIMP and any add-ons yourself "
+"%n%nPlease remove the previous version of Clay and any add-ons yourself "
 "before installing this version in %2, or choose a Custom install, and select "
 "a different installation folder.%n%nThe Setup will now exit."
 msgstr ""
-"GIMP %1 ne povas esti instalita super via nuntempe instalita GIMP-versio, "
+"Clay %1 ne povas esti instalita super via nuntempe instalita Clay-versio, "
 "kaj la agordado ne povis determini kiel forigi la malnovan version aŭtomate."
-"%n%nBonvolu forigi la antaŭan version de GIMP kaj ĉiujn aldonaĵojn mem antaŭ "
+"%n%nBonvolu forigi la antaŭan version de Clay kaj ĉiujn aldonaĵojn mem antaŭ "
 "ol instali ĉi tiun version en %2, aŭ elektu Persona instalado kaj elektu "
 "malsaman instaladon-dosierujon.%n%nLa agordado nun eliros."
 
 #: build/windows/installer/lang/setup.isl.xml.in:254
 msgid ""
-"Previous GIMP version was removed successfully, but Windows has to be "
+"Previous Clay version was removed successfully, but Windows has to be "
 "restarted before the Setup can continue.%n%nAfter restarting your computer, "
 "Setup will continue next time an administrator logs in."
 msgstr ""
-"La antaŭa versio de GIMP estis sukcese forigita, sed Windows devas esti "
+"La antaŭa versio de Clay estis sukcese forigita, sed Windows devas esti "
 "rekomencigita antaŭ ol la agordado povas daŭrigi.%n%nPost rekomencigo de via "
 "komputilo, la agordado daŭrigos la venontan fojon kiam administranto "
 "ensalutos."
@@ -334,8 +334,8 @@ msgid "Cleaning up old files..."
 msgstr "Purigataj malnovaj dosieroj..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:268
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
-msgstr "Memoru: GIMP estas Libera Programaro.%n%nBonvolu viziti"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
+msgstr "Memoru: Clay estas Libera Programaro.%n%nBonvolu viziti"
 
 #: build/windows/installer/lang/setup.isl.xml.in:272
 msgid "for free updates."
@@ -346,24 +346,24 @@ msgid "Setting up file associations..."
 msgstr "Agordante dosiertipajn asociojn..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:279
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "Agordante medion por la GIMP Python-etendo..."
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Agordante medion por la Clay Python-etendo..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:282
 msgid "Setting up MyPaint brushes..."
 msgstr "Agordante MyPaint-penselojn..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:285
-msgid "Setting up GIMP environment..."
-msgstr "Agordante GIMP-medion..."
+msgid "Setting up Clay environment..."
+msgstr "Agordante Clay-medion..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:288
-msgid "Setting up GIMP configuration for 32-bit plug-in support..."
-msgstr "Agordante GIMP-konfiguracion por subteno de 32-bitaj kromprogramoj..."
+msgid "Setting up Clay configuration for 32-bit plug-in support..."
+msgstr "Agordante Clay-konfiguracion por subteno de 32-bitaj kromprogramoj..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:293
-msgid "Launch GIMP"
-msgstr "Lanĉi GIMP"
+msgid "Launch Clay"
+msgstr "Lanĉi Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:298
 msgid "Removing add-on"
@@ -375,7 +375,7 @@ msgstr "Interna eraro (%1)."
 
 #: build/windows/installer/lang/setup.isl.xml.in:307
 msgid ""
-"GIMP does not appear to be installed in the selected directory. Continue "
+"Clay does not appear to be installed in the selected directory. Continue "
 "anyway?"
 msgstr ""
-"GIMP ŝajne ne estas instalita en la elektita dosierujo. Ĉu daŭrigi tamen?"
+"Clay ŝajne ne estas instalita en la elektita dosierujo. Ĉu daŭrigi tamen?"

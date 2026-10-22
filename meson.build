@@ -1,4 +1,4 @@
-project('gimp',
+project('clay',
   'c', 'cpp',
   version: '3.36.0',
   meson_version: '>=0.61.0',
@@ -9,8 +9,8 @@ project('gimp',
   ],
 )
 
-project_url = 'https://gitlab.gnome.org/GNOME/gimp'
-project_url_issues = 'https://www.gimp.org/bugs/' #see Infrastructure/gimp-web@d6d0559d
+project_url = 'https://github.com/KurtStevenK/clay'
+project_url_issues = 'https://github.com/KurtStevenK/clay/issues'
 
 conf = configuration_data()
 
@@ -88,7 +88,7 @@ gimpconsole_exe_name = 'clay-console' + exec_ver
 gimpmain_exe_name    = 'clay' + exec_ver
 
 # A specific desktop name to fix window icon under Wayland
-gimp_desktop_name = 'xyz.kainzmayer.ClayDesign'
+gimp_desktop_name = 'xyz.kainzmayer.clay'
 
 gettext_package= 'gimp@0@@1@'.format(api_version_major, api_version_minor)
 conf.set_quoted('GETTEXT_PACKAGE', gettext_package)

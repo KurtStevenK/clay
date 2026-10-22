@@ -66,12 +66,12 @@ msgid ""
 "dialog, you can reassign shortcut keys. Do so by bringing up the menu, "
 "selecting a menu item, and pressing the desired key combination. If &quot;"
 "Save Keyboard Shortcuts&quot; is enabled, the key bindings are saved when "
-"you exit GIMP. You should probably disable &quot;Dynamic Keyboard "
+"you exit Clay. You should probably disable &quot;Dynamic Keyboard "
 "Shortcuts&quot; afterwards, to prevent accidentally assigning/reassigning "
 "shortcuts."
 msgstr ""
 "បន្ទាប់​ពី​អ្ន​កបាន​បើក &quot;ផ្លូវកាត់​ក្ដារចុច​ថាមវន្ត&quot; នៅ​ក្នុង​ប្រអប់​ចំណូល​ចិត្ត អ្នក​អាច​ផ្ដល់​គ្រាប់ចុច​ផ្លូវកាត់​ឡើង​វិញ ។ ធ្វើ​ដូច្នេះ​ដោយ​​មាន​ម៉ឺនុយ​លេច​ឡើង ដោយ​ជ្រើស​ធាតុ​ម៉ឺនុយ ហើយ​ចុច​បន្សំ​គ្រាប់ចុច​ដែល​អ្នក​ចង់​បាន ។ ប្រសិន​បើ​បាន​បើក&quot;"
-"រក្សាទុក​ផ្លូវកាត់​ក្ដារចុច&quot; ការ​ចង​គ្រាប់ចុច​ត្រូវ​បាន​រក្សាទុក នៅ​ពេល​ដែល​អ្នក​ចេញ​ពី GIMP ។ អ្នក​​គួតែរ​បិទ​ &quotផ្លូវកាត់​ក្ដារចុច​ថាមវន្តs&quot;បន្ទាប់​ពី​នោះ,ដើម្បី​ការពារ​ការ​ផ្ដល់/ផ្ដល់​ផ្លូវកាត់​ឡើង​វិញ​ដោយ​ចៃដន្យ ។."
+"រក្សាទុក​ផ្លូវកាត់​ក្ដារចុច&quot; ការ​ចង​គ្រាប់ចុច​ត្រូវ​បាន​រក្សាទុក នៅ​ពេល​ដែល​អ្នក​ចេញ​ពី Clay ។ អ្នក​​គួតែរ​បិទ​ &quotផ្លូវកាត់​ក្ដារចុច​ថាមវន្តs&quot;បន្ទាប់​ពី​នោះ,ដើម្បី​ការពារ​ការ​ផ្ដល់/ផ្ដល់​ផ្លូវកាត់​ឡើង​វិញ​ដោយ​ចៃដន្យ ។."
 
 #: ../data/tips/gimp-tips.xml.in.h:8
 msgid ""
@@ -84,29 +84,29 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:9
 msgid ""
-"GIMP allows you to undo most changes to the image, so feel free to "
+"Clay allows you to undo most changes to the image, so feel free to "
 "experiment."
 msgstr ""
-"GIMP អនុញ្ញាត​ឲ្យ​អ្នក​មិន​ធ្វើ​ឡើងវិញ​នូវ​ការ​ផ្លាស់ប្ដូរ​ជា​ច្រើន​ទៅ​លើ​រូបភាពដូច្នេះ​សូម​ធ្វើ​ការ​ពិសោធន៍​តាម​"
+"Clay អនុញ្ញាត​ឲ្យ​អ្នក​មិន​ធ្វើ​ឡើងវិញ​នូវ​ការ​ផ្លាស់ប្ដូរ​ជា​ច្រើន​ទៅ​លើ​រូបភាពដូច្នេះ​សូម​ធ្វើ​ការ​ពិសោធន៍​តាម​"
 "ចិត្ត ។"
 
 #: ../data/tips/gimp-tips.xml.in.h:10
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>."
 "bz2</tt>, if you have bzip2 installed) to the filename and your image will "
 "be saved compressed. Of course loading compressed images works too."
 msgstr ""
-"GIMP គាំទ្រ​ការ​បង្ហាប់ gzip នៅ​ពេល​បង្ហោះ ។ គ្រាន់​តែ​បន្ថែម <tt>.gz</tt> (ឬ <tt>.bz2</"
+"Clay គាំទ្រ​ការ​បង្ហាប់ gzip នៅ​ពេល​បង្ហោះ ។ គ្រាន់​តែ​បន្ថែម <tt>.gz</tt> (ឬ <tt>.bz2</"
 "tt> ប្រសិន​បើ​អ្នក​បាន​ដំឡើង bzip2) ទៅ​ប្រព័ន្ធ​ឯកសារ និង​រូបភាព​របស់​អ្នក​នឹង​ត្រូវ​បាន​រក្សាទុក​ដោយ​"
 "បង្ហាប់ ។ តាម​ពិត​ការ​ផ្ទុក​រូបភាព​ដែល​បាន​បង្ហាប់​ក៏​ដំណើរការ​ផងដែរ ។"
 
 #: ../data/tips/gimp-tips.xml.in.h:11
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
-"GIMP ប្រើ​ស្រទាប់​ដើម្បី​អនុញ្ញាត​ឲ្យ​អ្នក​រៀបចំ​រូបភាព​របស់​អ្នក ។ គិត​ថា​ពួក​វាជា​ជង់​ស្លាយ ឬ​ជា​តម្រង ដូច្នេះ​"
+"Clay ប្រើ​ស្រទាប់​ដើម្បី​អនុញ្ញាត​ឲ្យ​អ្នក​រៀបចំ​រូបភាព​របស់​អ្នក ។ គិត​ថា​ពួក​វាជា​ជង់​ស្លាយ ឬ​ជា​តម្រង ដូច្នេះ​"
 "ការ​មើល​កាត់​ពួកវា អ្នក​នឹង​ឃើញ​សមាសភាគ​មាតិកា​របស់​ពួកវា ។"
 
 #: ../data/tips/gimp-tips.xml.in.h:12
@@ -182,13 +182,13 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:20
 msgid ""
-"When you save an image to work on it again later, try using XCF, GIMP's "
+"When you save an image to work on it again later, try using XCF, Clay's "
 "native file format (use the file extension <tt>.xcf</tt>). This preserves "
 "the layers and every aspect of your work-in-progress. Once a project is "
 "completed, you can save it as JPEG, PNG, GIF, ..."
 msgstr ""
 "នៅ​ពេល​ដែល​អ្នក​រក្សា​រូបភាព​ទុក​ដើម្បី​ធ្វើ​ការ​ជាមួយ​វា​នៅ​ពេល​ក្រោយ​​ ​ព្យាយាម​ប្រើទ្រង់ទ្រាយ​ឯកសារ​ដើម XCF ​"
-"របស់​ GIMP (​ប្រើ​កន្ទុយ​ឯកសារ <tt>.xcf</tt>​) ។ ការ​បង្ការ​​ស្រទាប់​នេះ​និង​ទិដ្ឋភាពនៃ​ការងារ​ក្នុង​"
+"របស់​ Clay (​ប្រើ​កន្ទុយ​ឯកសារ <tt>.xcf</tt>​) ។ ការ​បង្ការ​​ស្រទាប់​នេះ​និង​ទិដ្ឋភាពនៃ​ការងារ​ក្នុង​"
 "វឌ្ឍនភាព ។ គ្រា​មួយ​គម្រោង​ត្រូវ​បាន​បញ្ចប់​ទាំងស្រុង​ ​អ្នក​អាច​រក្សា​វា​ទុក​ជា JPEG, PNG, GIF, ..."
 
 #: ../data/tips/gimp-tips.xml.in.h:21
@@ -218,10 +218,10 @@ msgstr ""
 
 #: ../data/tips/gimp-tips.xml.in.h:24
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
-msgstr "អ្នក​អាច​អូស និង​ទម្លាក់​វត្ថុ​ជា​ច្រើន​នៅ​ក្នុង GIMP ។ ឧទាហរណ៍ ការ​អូស​ពណ៌​មួយ​ពី​ប្រអប់ឧបករណ៍ ឬ​ពី​ក្ដារលាយ​ពណ៌ ហើយ​ទម្លាក់​វា​ទៅ​ក្នុង​រូបភាព​ នឹង​បំពេញ​ជម្រើស​បច្ចុប្បន្ន​ដោយ​ពណ៌​នោះ ។"
+msgstr "អ្នក​អាច​អូស និង​ទម្លាក់​វត្ថុ​ជា​ច្រើន​នៅ​ក្នុង Clay ។ ឧទាហរណ៍ ការ​អូស​ពណ៌​មួយ​ពី​ប្រអប់ឧបករណ៍ ឬ​ពី​ក្ដារលាយ​ពណ៌ ហើយ​ទម្លាក់​វា​ទៅ​ក្នុង​រូបភាព​ នឹង​បំពេញ​ជម្រើស​បច្ចុប្បន្ន​ដោយ​ពណ៌​នោះ ។"
 
 #: ../data/tips/gimp-tips.xml.in.h:25
 msgid ""
@@ -232,9 +232,9 @@ msgstr "អ្នក​អាច​គូរ​ការ៉េ​ ឬ​រង�
 
 #: ../data/tips/gimp-tips.xml.in.h:26
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
-msgstr "អ្នក​អាច​ទទួល​ជំនួយ​បរិបទ​សម្រាប់​លក្ខណៈ​សម្បត្តិ​ជា​ច្រើន​របស់ GIMP ដោយ​ចុច​គ្រាប់​ចុច F1 នៅ​ពេល​ណា​មួយ ។ វា​ក៏​ដំណើរការ​ខាង​ក្នុង​ម៉ឺនុយ​ផងដែរ ។"
+msgstr "អ្នក​អាច​ទទួល​ជំនួយ​បរិបទ​សម្រាប់​លក្ខណៈ​សម្បត្តិ​ជា​ច្រើន​របស់ Clay ដោយ​ចុច​គ្រាប់​ចុច F1 នៅ​ពេល​ណា​មួយ ។ វា​ក៏​ដំណើរការ​ខាង​ក្នុង​ម៉ឺនុយ​ផងដែរ ។"
 
 #: ../data/tips/gimp-tips.xml.in.h:27
 msgid ""

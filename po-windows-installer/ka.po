@@ -22,16 +22,16 @@ msgid "License Agreement"
 msgstr "სა&ლიცენზიო შეთანხმება"
 
 #: build/windows/installer/lang/setup.isl.xml.in:10
-msgid "Setup built by GIMP team, gimp.org"
-msgstr "მორგება, აგებული GIMP-ის გუნდის მიერ. gimp.org"
+msgid "Setup built by Clay team, claydesign.web.app"
+msgstr "მორგება, აგებული Clay-ის გუნდის მიერ. claydesign.web.app"
 
 #: build/windows/installer/lang/setup.isl.xml.in:17
 msgid ""
-"You are trying to directly downgrade from GIMP %1 to %2.%n%nPlease remove "
-"GIMP yourself before installing this version."
+"You are trying to directly downgrade from Clay %1 to %2.%n%nPlease remove "
+"Clay yourself before installing this version."
 msgstr ""
-"თქვენ ცდილობთ, პირდაპირ ჩამოსწიოთ GIMP-ის ვერსია %1-დან %2.%n%n-მდე. ჯერ "
-"წაშალეთ GIMP და, მხოლოდ, ამის შემდეგ დააყენეთ ეს ვერსია."
+"თქვენ ცდილობთ, პირდაპირ ჩამოსწიოთ Clay-ის ვერსია %1-დან %2.%n%n-მდე. ჯერ "
+"წაშალეთ Clay და, მხოლოდ, ამის შემდეგ დააყენეთ ეს ვერსია."
 
 #: build/windows/installer/lang/setup.isl.xml.in:22
 msgid "Development version"
@@ -39,19 +39,19 @@ msgstr "შემუშავების სტადიაზე მყოფ�
 
 #: build/windows/installer/lang/setup.isl.xml.in:27
 msgid ""
-"This is a development version of GIMP where some features may not be "
-"finished, or it may be unstable.%nThis version of GIMP is not intended for "
+"This is a development version of Clay where some features may not be "
+"finished, or it may be unstable.%nThis version of Clay is not intended for "
 "day-to-day work as it may be unstable, and you could lose your work.%nIf you "
 "encounter any problems, first verify that they haven't already been fixed in "
-"GIT before you contact the developers or report it in GIMP gitlab:%n_https://"
-"www.gimp.org/bugs%n%nDo you wish to continue with installation anyway?"
+"GIT before you contact the developers or report it on GitHub:%n_https://"
+"claydesign.web.app/bugs%n%nDo you wish to continue with installation anyway?"
 msgstr ""
-"ეს GIMP-ის სატესტო ვერსიაა, სადაც ზოგიერთი ფუნქცია შეიძლება დაუსრულებელი ან "
-"არასტაბილური იყოს.%nGIMP-ის ეს ვერსია არ არის განკუთვნილი ყოველდღიური "
+"ეს Clay-ის სატესტო ვერსიაა, სადაც ზოგიერთი ფუნქცია შეიძლება დაუსრულებელი ან "
+"არასტაბილური იყოს.%nClay-ის ეს ვერსია არ არის განკუთვნილი ყოველდღიური "
 "მუშაობისთვის, რადგან ის შეიძლება იყოს არასტაბილური და შეიძლება დაკარგოთ "
 "სამუშაო.%n თუ რაიმე პრობლემა შეგექმნათ, ჯერ გადაამოწმეთ, რომ ისინი ჯერ არ "
 "გამოსწორებულა GIT-ში, სანამ დაუკავშირდებით დეველოპერებს ან შეატყობინეთ ამის "
-"შესახებ GIMP gitlab-ში:%n_https://gitlab.gnome.org/GNOME/gimp/issues%n%nDo "
+"შესახებ Clay gitlab-ში:%n_https://gitlab.gnome.org/GNOME/gimp/issues%n%nDo "
 "მაინც გსურთ დაყენების გაგრძელება?"
 
 #: build/windows/installer/lang/setup.isl.xml.in:30
@@ -70,12 +70,12 @@ msgstr "ეკრანის პარამეტრების პრობ�
 #: build/windows/installer/lang/setup.isl.xml.in:40
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before "
 "continuing."
 msgstr ""
 "დასაყენებელმა პროგრამამ აღმოაჩნია, რომ თქვენი Windows-ი არაა გაშვებული 32 "
-"ბიტიანი ფერების რეჟიმში. ეს GIMP-ის მუშაობაში უკვე ცნობილ ხარვეზებს იწვევს. "
+"ბიტიანი ფერების რეჟიმში. ეს Clay-ის მუშაობაში უკვე ცნობილ ხარვეზებს იწვევს. "
 "რეკომენდებულია, რომ ფერების სიღრმე 32-ბიტზე გადართოთ."
 
 #: build/windows/installer/lang/setup.isl.xml.in:46
@@ -119,28 +119,28 @@ msgid "Description"
 msgstr "აღწერა"
 
 #: build/windows/installer/lang/setup.isl.xml.in:84
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:88
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP-ი და ყველა ნაგულიხმები დამატება"
+msgid "Clay and all default plug-ins"
+msgstr "Clay-ი და ყველა ნაგულიხმები დამატება"
 
 #: build/windows/installer/lang/setup.isl.xml.in:92
 msgid "Run-time libraries"
 msgstr "გაშვების გარემოს ბიბლიოთეკები"
 
 #: build/windows/installer/lang/setup.isl.xml.in:96
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
-msgstr "ბიბლიოთეკები, რომლებიც GIMP-ს სჭირდება. მაგალითად GTK+"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
+msgstr "ბიბლიოთეკები, რომლებიც Clay-ს სჭირდება. მაგალითად GTK+"
 
 #: build/windows/installer/lang/setup.isl.xml.in:100
 msgid "Debug symbols"
 msgstr "გამართვის სიმბოლოები"
 
 #: build/windows/installer/lang/setup.isl.xml.in:104
-msgid "Include information to help with debugging GIMP"
-msgstr "GIMP-ის გამართვის ინფორმაციის ჩართვა"
+msgid "Include information to help with debugging Clay"
+msgstr "Clay-ის გამართვის ინფორმაციის ჩართვა"
 
 #: build/windows/installer/lang/setup.isl.xml.in:108
 msgid "Resource development files"
@@ -148,10 +148,10 @@ msgstr "რესურსის პროგრამისტის ფაი�
 
 #: build/windows/installer/lang/setup.isl.xml.in:112
 msgid ""
-"Include some files to help with building GEGL filters and GIMP plug-ins in "
+"Include some files to help with building GEGL filters and Clay plug-ins in "
 "MSYS2"
 msgstr ""
-"შეიცავს რამდენიმე ფაილს GEGL ფილტრების, და GIMP-ის დამატებების MSYS2-ზე "
+"შეიცავს რამდენიმე ფაილს GEGL ფილტრების, და Clay-ის დამატებების MSYS2-ზე "
 "ასაგებად"
 
 #: build/windows/installer/lang/setup.isl.xml.in:116
@@ -164,9 +164,9 @@ msgid "Python scripting"
 msgstr "Python-ის სკრიპტები"
 
 #: build/windows/installer/lang/setup.isl.xml.in:128
-msgid "Allows you to use GIMP plugins written in Python scripting language."
+msgid "Allows you to use Clay plugins written in Python scripting language."
 msgstr ""
-"საშუალებას გაძლევთ გამოიყენოთ GIMP-ის დამატებები, რომლებიც Python-შია "
+"საშუალებას გაძლევთ გამოიყენოთ Clay-ის დამატებები, რომლებიც Python-შია "
 "დაწერილი."
 
 #: build/windows/installer/lang/setup.isl.xml.in:132
@@ -174,9 +174,9 @@ msgid "Lua scripting"
 msgstr "Lua-ის სკრიპტები"
 
 #: build/windows/installer/lang/setup.isl.xml.in:136
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
 msgstr ""
-"საშუალებას გაძლევთ გამოიყენოთ GIMP-ის დამატებები, რომლებიც Lua-შია დაწერილი."
+"საშუალებას გაძლევთ გამოიყენოთ Clay-ის დამატებები, რომლებიც Lua-შია დაწერილი."
 
 #: build/windows/installer/lang/setup.isl.xml.in:140
 msgid "JavaScript scripting"
@@ -184,9 +184,9 @@ msgstr "JavaScript-ის სკრიპტები"
 
 #: build/windows/installer/lang/setup.isl.xml.in:144
 msgid ""
-"Allows you to use GIMP plugins written in JavaScript scripting language."
+"Allows you to use Clay plugins written in JavaScript scripting language."
 msgstr ""
-"საშუალებას გაძლევთ გამოიყენოთ GIMP-ის დამატებები, რომლებიც JavaScript-შია "
+"საშუალებას გაძლევთ გამოიყენოთ Clay-ის დამატებები, რომლებიც JavaScript-შია "
 "დაწერილი."
 
 #: build/windows/installer/lang/setup.isl.xml.in:148
@@ -202,8 +202,8 @@ msgid "PostScript support"
 msgstr "PostScript-ის მხარდაჭერა"
 
 #: build/windows/installer/lang/setup.isl.xml.in:160
-msgid "Allow GIMP to load PostScript files"
-msgstr "GIMP-ში PostScript-ის ფაილების ჩატვირთვის მხარდაჭერა"
+msgid "Allow Clay to load PostScript files"
+msgstr "Clay-ში PostScript-ის ფაილების ჩატვირთვის მხარდაჭერა"
 
 #: build/windows/installer/lang/setup.isl.xml.in:165
 msgid "Additional icons:"
@@ -215,11 +215,11 @@ msgstr "სამუშაო &დაფაზე ხატულის შე�
 
 #: build/windows/installer/lang/setup.isl.xml.in:174
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"პრობლემა %1-ში GIMP-ის გარემოს განახლებისას. თუ დაინახავთ დამატებების "
-"ჩატვირთვის შეცდომას, სცადეთ GIMP-ი თავიდან დააყენოთ."
+"პრობლემა %1-ში Clay-ის გარემოს განახლებისას. თუ დაინახავთ დამატებების "
+"ჩატვირთვის შეცდომას, სცადეთ Clay-ი თავიდან დააყენოთ."
 
 #: build/windows/installer/lang/setup.isl.xml.in:178
 msgid "Error extracting temporary data."
@@ -238,24 +238,24 @@ msgid "Cleaning up old files..."
 msgstr "ძველი ფაილების გასუფთავება..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:195
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
-msgstr "დაიმახსოვრეთ; GIMP-ი უფასო პროგრამაა. %n%ეწვიეთ"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
+msgstr "დაიმახსოვრეთ; Clay-ი უფასო პროგრამაა. %n%ეწვიეთ"
 
 #: build/windows/installer/lang/setup.isl.xml.in:199
 msgid "for free updates."
 msgstr "უფასო განახლებებისათვის."
 
 #: build/windows/installer/lang/setup.isl.xml.in:203
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "GIMP Python-ის გაფართოების გარემოს მორგება..."
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Clay Python-ის გაფართოების გარემოს მორგება..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:206
-msgid "Setting up GIMP environment..."
-msgstr "GIMP-ის გარემოს მორგება..."
+msgid "Setting up Clay environment..."
+msgstr "Clay-ის გარემოს მორგება..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:211
-msgid "Launch GIMP"
-msgstr "GIMP-ის გაშვება"
+msgid "Launch Clay"
+msgstr "Clay-ის გაშვება"
 
 #: build/windows/installer/lang/setup.isl.xml.in:216
 msgid "Removing add-on"
@@ -263,10 +263,10 @@ msgstr "დამატების წაშლა"
 
 #: build/windows/installer/lang/setup.isl.xml.in:221
 msgid ""
-"Do you want to delete your personal GIMP files (e.g. settings, tool presets, "
+"Do you want to delete your personal Clay files (e.g. settings, tool presets, "
 "custom brushes)?%n%nA copy will be made on Desktop."
 msgstr ""
-"გნებავთ წაშალოთ თქვენი პირადი GIMP-ის ფაილები (ანუ: პარამეტრები, პრესეტები, "
+"გნებავთ წაშალოთ თქვენი პირადი Clay-ის ფაილები (ანუ: პარამეტრები, პრესეტები, "
 "მორგებული ფუნჯები)?%n%nასლი სამუშაო მაგიდაზე შეიქმნება."
 
 #: build/windows/installer/lang/setup.isl.xml.in:225

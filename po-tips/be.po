@@ -14,18 +14,18 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing the F1 key at any time. This also works "
+"You can get context-sensitive help for most of Clay's features by pressing the F1 key at any time. This also works "
 "inside the menus."
 msgstr ""
-"Для большасці функцый GIMP, можна атрымаць кантэкстную дапамогу, калі ў любы момант націснуць клавішу F1. Гэта працуе "
+"Для большасці функцый Clay, можна атрымаць кантэкстную дапамогу, калі ў любы момант націснуць клавішу F1. Гэта працуе "
 "і ў меню."
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of slides or filters, such that looking "
+"Clay uses layers to let you organize your image. Think of them as a stack of slides or filters, such that looking "
 "through them you see a composite of their contents."
 msgstr ""
-"GIMP складае відарыс са слаёў. Можна ўявіць гэта як накладзеныя адна на адну празрыстыя плёнкі з малюнкамі, такім "
+"Clay складае відарыс са слаёў. Можна ўявіць гэта як накладзеныя адна на адну празрыстыя плёнкі з малюнкамі, такім "
 "чынам, каб на прасвет было бачна змесціва ўсіх плёнак."
 
 #: data/tips/gimp-tips.xml.in:31
@@ -35,11 +35,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension <tt>.xcf</tt>). This preserves the layers and "
+"Saving an image uses XCF, Clay's native file format (file extension <tt>.xcf</tt>). This preserves the layers and "
 "many aspects of your work-in-progress, allowing to work on it again later. Once a project is completed, you can "
 "export it as JPEG, PNG, GIF, etc."
 msgstr ""
-"Пры захаванні відарысаў GIMP выкарыстоўвае ўласны фармат XCF (пашырэнне файла <tt>.xcf</tt>). У ім захоўваюцца ўсе "
+"Пры захаванні відарысаў Clay выкарыстоўвае ўласны фармат XCF (пашырэнне файла <tt>.xcf</tt>). У ім захоўваюцца ўсе "
 "слаі і розныя акалічнасці незавершанай працы, што дазваляе працягваць працу пазней. Калі праект завершаны, можна "
 "захаваць яго як JPEG, PNG, GIF і г.д."
 
@@ -81,10 +81,10 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color from the toolbox or from a color palette and "
+"You can drag and drop many things in Clay. For example, dragging a color from the toolbox or from a color palette and "
 "dropping it into an image will fill the current selection with that color."
 msgstr ""
-"У GIMP многія рэчы можна перацягваць. Напрыклад, калі перацягнуць колер з панэлі інструментаў або з палітры на "
+"У Clay многія рэчы можна перацягваць. Напрыклад, калі перацягнуць колер з панэлі інструментаў або з палітры на "
 "відарыс, гэтым колерам запоўніцца бягучая вобласць вылучэння."
 
 #: data/tips/gimp-tips.xml.in:89
@@ -124,10 +124,10 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you have bzip2 installed) to "
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or <tt>.bz2</tt>, if you have bzip2 installed) to "
 "the filename and your image will be saved compressed. Of course loading compressed images works too."
 msgstr ""
-"GIMP умее на ляту сціскаць файлы праз gzip. Проста дадайце да назвы файла <tt>.gz</tt> (або <tt>.bz2</tt>, калі "
+"Clay умее на ляту сціскаць файлы праз gzip. Проста дадайце да назвы файла <tt>.gz</tt> (або <tt>.bz2</tt>, калі "
 "ўсталявана bzip2), і відарыс будзе захаваны са сцісканнем. Загрузка сціснутых відарысаў, вядома, таксама працуе."
 
 #: data/tips/gimp-tips.xml.in:124
@@ -185,12 +185,12 @@ msgstr ""
 msgid ""
 "After you enabled \"Dynamic Keyboard Shortcuts\" in the Preferences dialog, you can reassign shortcut keys. Do so by "
 "bringing up the menu, selecting a menu item, and pressing the desired key combination. If \"Save Keyboard Shortcuts\" "
-"is enabled, the key bindings are saved when you exit GIMP. You should probably disable \"Dynamic Keyboard Shortcuts\" "
+"is enabled, the key bindings are saved when you exit Clay. You should probably disable \"Dynamic Keyboard Shortcuts\" "
 "afterwards, to prevent accidentally assigning/reassigning shortcuts."
 msgstr ""
 "Пасля ўключэння функцыі «Дынамічныя спалучэнні клавіш» у дыялогавым акне «Параметры» можна перапрызначаць хуткія "
 "клавішы. Для гэтага трэба адкрыць меню, выбраць патрэбны пункт і націснуць пажаданае спалучэнне клавіш. Калі ўключана "
-"функцыя «Захоўваць спалучэнні клавіш», спалучэнні захаваюцца пасля выхаду з GIMP. Потым лепш выключыць «Дынамічныя "
+"функцыя «Захоўваць спалучэнні клавіш», спалучэнні захаваюцца пасля выхаду з Clay. Потым лепш выключыць «Дынамічныя "
 "спалучэнні клавіш», каб пазбегнуць выпадковага прызначэння або перапрызначэння."
 
 #: data/tips/gimp-tips.xml.in:186

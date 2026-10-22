@@ -26,7 +26,7 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:18
 msgid ""
-"You can get context-sensitive help for most of GIMP's features by pressing "
+"You can get context-sensitive help for most of Clay's features by pressing "
 "the F1 key at any time. This also works inside the menus."
 msgstr ""
 "F1 を押すと、いつでもその機能のヘルプを呼び出すことができるんだ。これはメ"
@@ -34,11 +34,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:24
 msgid ""
-"GIMP uses layers to let you organize your image. Think of them as a stack of "
+"Clay uses layers to let you organize your image. Think of them as a stack of "
 "slides or filters, such that looking through them you see a composite of "
 "their contents."
 msgstr ""
-"GIMP ではレイヤーというものを使って画像をまとめているんだ。まぁ、アニメで使わ"
+"Clay ではレイヤーというものを使って画像をまとめているんだ。まぁ、アニメで使わ"
 "れるセル画を何枚か積み重ねたものを見ているようなものだと思ってくれればいい。"
 
 #: data/tips/gimp-tips.xml.in:31
@@ -51,12 +51,12 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:37
 msgid ""
-"Saving an image uses XCF, GIMP's native file format (file extension "
+"Saving an image uses XCF, Clay's native file format (file extension "
 "<tt>.xcf</tt>). This preserves the layers and many aspects of your work-in-"
 "progress, allowing to work on it again later. Once a project is completed, "
 "you can export it as JPEG, PNG, GIF, etc."
 msgstr ""
-"画像は GIMP 固有の XCF 形式 (拡張子は <tt>.xcf</tt>) で保存しよう ([ファイ"
+"画像は Clay 固有の XCF 形式 (拡張子は <tt>.xcf</tt>) で保存しよう ([ファイ"
 "ル] → [保存] または [ファイル] → [名前を付けて保存] だよ)。これは後から編集し"
 "直せるように、レイヤーやチャンネルといった、作業中の状態のすべてを記録してく"
 "れるんだ。画像を完成させてから JPEG、PNG、GIF やその他の形式の画像ファイルに"
@@ -112,11 +112,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:82
 msgid ""
-"You can drag and drop many things in GIMP. For example, dragging a color "
+"You can drag and drop many things in Clay. For example, dragging a color "
 "from the toolbox or from a color palette and dropping it into an image will "
 "fill the current selection with that color."
 msgstr ""
-"ウィンドウに GIMP の色々なものをドラッグ・アンド・ドロップすることができる"
+"ウィンドウに Clay の色々なものをドラッグ・アンド・ドロップすることができる"
 "よ。例えばツールボックスやカラーパレットから色アイコンをドラッグして画像ウィ"
 "ンドウにドロップすると、その色で画像や選択範囲が塗りつぶされるんだ。"
 
@@ -162,11 +162,11 @@ msgstr ""
 
 #: data/tips/gimp-tips.xml.in:116
 msgid ""
-"GIMP supports gzip compression on the fly. Just add <tt>.gz</tt> (or "
+"Clay supports gzip compression on the fly. Just add <tt>.gz</tt> (or "
 "<tt>.bz2</tt>, if you have bzip2 installed) to the filename and your image "
 "will be saved compressed. Of course loading compressed images works too."
 msgstr ""
-"GIMP は自動 gzip 圧縮をサポートしているよ。単に拡張子 <tt>.gz</tt> (bzip2 が"
+"Clay は自動 gzip 圧縮をサポートしているよ。単に拡張子 <tt>.gz</tt> (bzip2 が"
 "ある時には <tt>.bz2</tt> の方がいいかな) を付けるだけで、自動的に圧縮されるよ"
 "うになってるんだ。もちろん、読み込む時にも自動で展開されるよ。"
 

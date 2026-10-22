@@ -28611,7 +28611,7 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr ""
 
 #: app-tools/gimp-debug-tool.c:119
-msgid "GIMP Crash Debug"
+msgid "Clay Crash Debug"
 msgstr ""
 
 #: menus/brush-editor-menu.ui:6

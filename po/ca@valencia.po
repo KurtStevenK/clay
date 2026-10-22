@@ -25092,8 +25092,8 @@ msgstr ""
 "escriviu píxel: %d"
 
 #: ../tools/gimp-debug-tool.c:93
-msgid "GIMP Crash Debug"
-msgstr "Depuració de fallades del GIMP"
+msgid "Clay Crash Debug"
+msgstr "Depuració de fallades del Clay"
 
 #: ../data/tags/gimp-tags-default.xml.in.h:1
 msgid "round"

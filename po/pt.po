@@ -29157,8 +29157,8 @@ msgid "Error writing XCF: unsupported BPC when writing pixel: %d"
 msgstr "Erro ao escrever XCF: BPC não suportado ao escrever o pixel: %d"
 
 #: app-tools/gimp-debug-tool.c:87
-msgid "GIMP Crash Debug"
-msgstr "Depuração de falha de sistema do GIMP"
+msgid "Clay Crash Debug"
+msgstr "Depuração de falha de sistema do Clay"
 
 # Em vez de "Menu Editor de pincéis" é melhor "Menu do painel Editor de pincéis" para não gerar confusão com os tradicionais menus. Por exemplo existe o menu "Camada" na barra de menus e o menu "Camadas" que está no painel "Camadas". Noutro caso, o "Menu Texturas" não existe mas existe o "Menu do painel Texturas". Por isso é recomedável adicionar onde se encontra este menu. Aplica-se o mesmo a strings similares que começam com "Menu...". Isto devia ser alterado nos originais em inglês.
 #: menus/brush-editor-menu.ui:6
