@@ -96,6 +96,9 @@ def bundle(src_root, pattern, option="None", override=None):
         print(f"\033[33m(WARNING)\033[0m: {dest_path} seems to already exist and have permission problems")
     else:
       if not str(src_path).endswith(".typelib"):
+        ## Homebrew ships read-only files; make an existing copy writable so it can be replaced
+        if dest_path.is_file() and not dest_path.is_symlink():
+          os.chmod(dest_path, dest_path.stat().st_mode | stat.S_IWUSR)
         try:
           shutil.copy2(src_path, dest_path, follow_symlinks=symlink_cleanup)
         except shutil.Error as e:
@@ -206,7 +209,10 @@ bundle(GIMP_PREFIX, "lib/libbabl*-*.*.*.dylib")
 bundle(GIMP_PREFIX, "lib/babl-*")
 bundle(GIMP_PREFIX, "lib/libgegl*-*.*.*.dylib")
 bundle(GIMP_PREFIX, "lib/gegl-*")
-bundle(GIMP_PREFIX, "lib/libgimp*-*.*.*.dylib")
+bundle(GIMP_PREFIX, "lib/libclay*-*.*.*.dylib")
+### Runtime libs loaded by name or pulled in by Homebrew deps (SDL3 is dlopen-ed by GIMP, libomp by libraw-based GEGL ops)
+bundle(OPT_PREFIX, "lib/libSDL3*.dylib")
+bundle(OPT_PREFIX, "opt/libomp/lib/libomp.dylib", "--dest", "lib")
 bundle(GIMP_PREFIX, "lib/gimp")
 bundle(GIMP_PREFIX, "share/gimp")
 lang_array = [Path(f).stem for f in glob(str(Path(GIMP_SOURCE)/"po/*.po"))]
@@ -312,7 +318,7 @@ link_path.symlink_to(os.path.relpath(real_path, link_path.parent))
 
 ## MAIN EXECUTABLES AND DEPENDENCIES
 ### Minimal (and some additional) executables for the 'MacOS' folder
-bundle(GIMP_PREFIX, "bin/gimp*")
+bundle(GIMP_PREFIX, "bin/clay*")
 if os.path.exists(OPT_PREFIX / "bin/brew"):
   bundle(OPT_PREFIX, "Cellar/libarchive/*/lib/libarchive.*.dylib", "--dest", "lib")
 ### Bundled just to promote GEGL. See: https://gitlab.gnome.org/GNOME/gimp/-/issues/10580
@@ -366,7 +372,7 @@ clean(GIMP_DISTRIB, "lib/*.a")
 bundle(GIMP_PREFIX, "include/gimp-*", "--dest", "include")
 bundle(GIMP_PREFIX, "include/babl-*", "--dest", "include")
 bundle(GIMP_PREFIX, "include/gegl-*", "--dest", "include")
-bundle(GIMP_PREFIX, "lib/libgimp*-?.?.dylib", "--preserve-symlink")
+bundle(GIMP_PREFIX, "lib/libclay*-?.?.dylib", "--preserve-symlink")
 bundle(GIMP_PREFIX, "lib/libbabl-?.?.dylib", "--preserve-symlink")
 bundle(GIMP_PREFIX, "lib/libgegl-?.?.dylib", "--preserve-symlink")
 bundle(GIMP_PREFIX, "lib/pkgconfig/gimp*")
@@ -391,6 +397,7 @@ while pcs_to_process:
           bundle(OPT_PREFIX, pc_path)
           # Replace the hardcoded prefix with a relocatable one
           dest_pc = GIMP_DISTRIB / pc_path
+          os.chmod(dest_pc, dest_pc.stat().st_mode | stat.S_IWUSR)
           pc_content = dest_pc.read_text()
           new_pc_content = pc_content.replace(str(OPT_PREFIX), "${pcfiledir}/../..")
           dest_pc.write_text(new_pc_content)
@@ -449,6 +456,13 @@ for h_file in (GIMP_DISTRIB / "include").rglob("*.h"):
   if prefixed_include.search(h_content):
     h_file.write_text(prefixed_include.sub(r'\1\2', h_content), errors="surrogateescape")
 
+### Make the GIMP SDK .pc files relocatable (GIMP's own .pc files still carry the build prefix)
+for pc_file in (GIMP_DISTRIB / "lib/pkgconfig").glob("*.pc"):
+  pc_text = pc_file.read_text(errors="ignore")
+  if str(GIMP_PREFIX) in pc_text:
+    os.chmod(pc_file, pc_file.stat().st_mode | stat.S_IWUSR)
+    pc_file.write_text(pc_text.replace(str(GIMP_PREFIX), "${pcfiledir}/../.."))
+
 ### Test if all bundled .pc, libs and headers are fine
 print(f"Testing if GIMP SDK works")
 ####First we check if any hardcoded .pc or header would be passed to gimptool
@@ -472,7 +486,7 @@ gimpsdk_tests = {
 }
 for build_option, test_binary in gimpsdk_tests.items():
   test_source = os.path.splitext(test_binary)[0] + ".c"
-  result = subprocess.run([GIMP_DISTRIB / "MacOS/gimptool", build_option, clean_tests_path / test_source], env=clean_tests_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+  result = subprocess.run([GIMP_DISTRIB / "MacOS/claytool", build_option, clean_tests_path / test_source], env=clean_tests_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
   flags_output = result.stdout + result.stderr
   opt_prefix = os.getenv('OPT_PREFIX', "none")
   leaked_flags = [
