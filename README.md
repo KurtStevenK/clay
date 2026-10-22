@@ -18,7 +18,9 @@ Copyright in the program belongs to its contributors. Clay Design maintains this
 
 If you have a concern about attribution, a contribution, or the license, write immediately: [open an issue](https://github.com/KurtStevenK/clay/issues). We will cooperate to align with the law and respect everybody's contribution.
 
-GIMP and the Wilber mascot are names of the upstream project. This fork is Clay.
+GIMP and the Wilber mascot are names of the upstream project. This fork is Clay. It is not affiliated with the GIMP project; see [NOTICE](NOTICE).
+
+Clay keeps GIMP's plug-in interface (`libgimp`, the PDB procedure names, the `Gimp-3.0` introspection namespace and the `gimp-3.0` pkg-config files), so GIMP plug-ins and scripts keep working and Clay can still take upstream fixes. Everything users see is named Clay.
 
 ## Verify downloads
 
