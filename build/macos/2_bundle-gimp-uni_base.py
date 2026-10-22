@@ -215,9 +215,12 @@ bundle(GIMP_PREFIX, "lib/babl-*")
 bundle(GIMP_PREFIX, "lib/libgegl*-*.*.*.dylib")
 bundle(GIMP_PREFIX, "lib/gegl-*")
 bundle(GIMP_PREFIX, "lib/libclay*-*.*.*.dylib")
-### Runtime libs loaded by name or pulled in by Homebrew deps (SDL3 is dlopen-ed by GIMP, libomp by libraw-based GEGL ops)
-bundle(OPT_PREFIX, "lib/libSDL3*.dylib")
-bundle(OPT_PREFIX, "opt/libomp/lib/libomp.dylib", "--dest", "lib")
+### Runtime libs loaded by name or pulled in by Homebrew deps, when the build found them
+### (SDL3 is dlopen-ed by GIMP, libomp is needed by libraw-based GEGL ops)
+if glob(f"{OPT_PREFIX}/lib/libSDL3*.dylib"):
+  bundle(OPT_PREFIX, "lib/libSDL3*.dylib")
+if (OPT_PREFIX / "opt/libomp/lib/libomp.dylib").exists():
+  bundle(OPT_PREFIX, "opt/libomp/lib/libomp.dylib", "--dest", "lib")
 bundle(GIMP_PREFIX, "lib/gimp")
 bundle(GIMP_PREFIX, "share/gimp")
 lang_array = [Path(f).stem for f in glob(str(Path(GIMP_SOURCE)/"po/*.po"))]
