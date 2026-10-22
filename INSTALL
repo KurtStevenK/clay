@@ -1,32 +1,31 @@
 --------------------------------------
-Installation instructions for GIMP @GIMP_APP_VERSION@
+Installation instructions for Clay 3.36
 --------------------------------------
 
-There are some basic steps to building and installing GIMP.
+There are some basic steps to building and installing Clay, a fork of
+the GNU Image Manipulation Program.
 
-GIMP @GIMP_APP_VERSION@ replaces earlier GIMP versions. It is advised to uninstall
-them before installing GIMP @GIMP_APP_VERSION@. Since libgimp* libraries and data
-are all versioned anyway, it is possible to keep your older GIMP 2.x
-installation in parallel to GIMP @GIMP_APP_VERSION@ on a same prefix.
+Clay 3.36 replaces earlier Clay builds. Uninstall those first. The
+libgimp* libraries and data are still versioned, so an older GIMP 2.x
+install can sit on the same prefix as Clay 3.36.
 
-GIMP @GIMP_APP_VERSION@ is not backward compatible with GIMP 2 and earlier versions.
-Plug-ins and scripts written for GIMP 2.10, 2.8, 2.6 or earlier
-versions will not work because the API changed in GIMP 3.0.
+Clay 3.36 is not backward compatible with GIMP 2 and earlier. Plug-ins
+and scripts written for GIMP 2.10, 2.8, 2.6 or earlier will not work
+because this tree uses the GIMP 3.0 API.
 
 The most important part is to make sure the requirements for a build
 are fulfilled. We depend on a number of tools and libraries which are
 listed below. For libraries this means you need to also have the
 header files installed.
 
-This file is generated (versions are filled by our build system) and
-focuses on keeping an up-to-date list of dependencies intended to
-packagers, contributors or whoever wants to compile GIMP from source.
-Building and running self-built software often requires more setup, in
-particular environment variables so that your system knows where to
-find the various pieces of the software. The following document can
-help in that regard:
+This file is the source INSTALL for Clay 3.36.0. Dependency versions
+match meson.build. Update both when you bump the project or a minimum
+library version.
 
-  https://developer.gimp.org/core/setup/build/
+Building and running self-built software often requires extra
+environment variables so the system finds libraries, typelibs, and
+plug-ins. Clay-specific notes: https://claydesign.web.app/docs
+Windows, Linux, and macOS packaging scripts live under build/.
 
 
   ******************************************************************
@@ -46,7 +45,7 @@ help in that regard:
   2. You need gettext version 0.19.8 or newer. Older versions did not have support yet
      for certain file formats.
 
-  3. You need to have GEGL version @GEGL_REQUIRED_VERSION@ or newer and babl version @BABL_REQUIRED_VERSION@
+  3. You need to have GEGL version 0.4.66 or newer and babl version 0.1.118
      or newer. You can get them from https://gegl.org/ or clone them from the GNOME git repository:
 
        https://gitlab.gnome.org/GNOME/babl.git
@@ -60,7 +59,7 @@ help in that regard:
      GIR data is when cross-compiling because of the difficulty to make cross-tools
      for GObject Introspection.
      Nevertheless if you have working GIR cross-tools, you can force the expected
-     behavior with GIMP's meson option -Dcan-crosscompile-gir=true
+     behavior with Clay's meson option -Dcan-crosscompile-gir=true
 
      Optional:
 
@@ -76,24 +75,24 @@ help in that regard:
        "gegl:introspect" which is always built but deactivated unless
        the `dot` tool from graphviz is available (runtime dependency).
 
-  4. You need to have installed GTK version @GTK_REQUIRED_VERSION@ or newer.
-     GIMP also needs a recent version of GLib (>= @GLIB_REQUIRED_VERSION@), GDK-Pixbuf
-     (>= @GDK_PIXBUF_REQUIRED_VERSION@), and Pango (>= @PANGO_REQUIRED_VERSION@). Sources for these can be grabbed
+  4. You need to have installed GTK version 3.24.0 or newer.
+     Clay also needs a recent version of GLib (>= 2.70.0), GDK-Pixbuf
+     (>= 2.32.0), and Pango (>= 1.50.0). Sources for these can be grabbed
      from https://download.gnome.org/sources/.
 
-  5. We use cairo >= @CAIRO_REQUIRED_VERSION@, which is hosted at
+  5. We use cairo >= 1.14.0, which is hosted at
      https://www.cairographics.org/.
 
   6. We require PangoCairo, a Pango backend using Cairo. Make sure you
      have Cairo, FreeType2 and fontconfig installed before you compile
-     Pango. GIMP depends on freetype2 being newer than version @FREETYPE2_REQUIRED_VERSION@
-     and fontconfig @FONTCONFIG_REQUIRED_VERSION@ or newer. Older versions are known to have
-     bugs that seriously affect the stability of GIMP.
+     Pango. Clay depends on freetype2 being newer than version 2.1.7
+     and fontconfig 2.12.4 or newer. Older versions are known to have
+     bugs that seriously affect the stability of Clay.
 
      On Windows, we recommend fontconfig 2.13.95 (or over) where support
      of fonts in user directory (Windows 1809 feature) appeared.
 
-     We also require HarfBuzz @HARFBUZZ_REQUIRED_VERSION@ or newer, an OpenType text shaping
+     We also require HarfBuzz 2.8.2 or newer, an OpenType text shaping
      tool. As this is a dependency for Pango, you will likely have it
      installed, but you may have to install a development package for
      the headers.
@@ -101,8 +100,8 @@ help in that regard:
   7. The file-compressor plug-in requires zlib, libbzip2, and liblzma to
      be installed. All these libraries are required dependencies.
 
-  8. For metadata access, GIMP requires GExiv2 @GEXIV2_REQUIRED_VERSION@ or newer, but
-     below @GEXIV2_MAX_VERSION@ (as the API changed).
+  8. For metadata access, Clay requires GExiv2 0.14.0 or newer, but
+     below 0.15.0 (as the API changed).
      It is hosted at: https://gitlab.gnome.org/GNOME/gexiv2/
 
   9. libpng, libjpeg, libtiff, librsvg and lcms are hard dependencies
@@ -117,11 +116,11 @@ help in that regard:
      versions are in Rust which is not buildable on all platforms. Yet
      SVG support was deemed too important to be considered "optional"
      for a decent graphics activity. Nevertheless a packager really
-     intent to have GIMP running on an architecture with no Rust support
+     intent to have Clay running on an architecture with no Rust support
      could still:
 
      1) easily patch out the file-svg plug-in from build system;
-     2) build GIMP with -Dvector-icons=false. Ironically librsvg is
+     2) build Clay with -Dvector-icons=false. Ironically librsvg is
      needed at build time for this option, in order to create PNG
      variants of icons (making librsvg unneeded at runtime). So all it
      takes is to have a build machine with librsvg to create the PNG
@@ -131,7 +130,7 @@ help in that regard:
      first-class file format, yet explaining how you could ignore it if
      you really wanted or needed to.
 
- 10. For MyPaint brushes, brushlib (libmypaint) @LIBMYPAINT_REQUIRED_VERSION@ is used.
+ 10. For MyPaint brushes, brushlib (libmypaint) 1.5.0 is used.
      The libmypaint repository is hosted at:
 
         https://github.com/mypaint/libmypaint
@@ -142,7 +141,7 @@ help in that regard:
      from a tarball or from your favorite package manager.
 
      In particular, do NOT install tags or release tarballs versioned
-     "v2.y.z". GIMP depends on the version 1 of libmypaint and is
+     "v2.y.z". Clay depends on the version 1 of libmypaint and is
      incompatible with the version 2 (which is still experimental anyway
      and has no stable release at time of writing).
 
@@ -156,7 +155,7 @@ help in that regard:
      have to make sure your $PKG_CONFIG_PATH environment variable also
      lists `$PREFIX/share/pkgconfig/`.
 
- 12. GIMP uses GLib's GIO library to handle file URIs and any I/O in
+ 12. Clay uses GLib's GIO library to handle file URIs and any I/O in
      general, transparently, regardless where the file is stored, i.e.
      locally, remotely, with which scheme, and so on. GIO in turn
      supports various backends through modules. We don't know all the
@@ -178,7 +177,7 @@ help in that regard:
         https://gitlab.gnome.org/GNOME/glib-networking
 
      Of course there might be more modules providing support of more
-     storage backends. Ideally GIMP would have support to load from any
+     storage backends. Ideally Clay would have support to load from any
      backend so packaging together with more GIO modules or recommending
      them in a package manager would be ideal. In any case, installing
      the ones for HTTP and HTTPS seems like the minimum nowadays.
@@ -193,7 +192,7 @@ help in that regard:
 
         https://github.com/strukturag/libheif
 
-     GIMP supports several HEIF variants (different coding formats in
+     Clay supports several HEIF variants (different coding formats in
      the HEIF container), so you should make sure you build libheif with
      proper encoders and decoders for these:
 
@@ -215,13 +214,13 @@ help in that regard:
      GdkPixbuf, GEGL, GIO, GLib, GObject, GTK and Gexiv2.
 
  16. Windows builds can now generate backtrace logs upon a crash.
-     The logs will be available in: %APPDATA%\GIMP\@GIMP_APP_VERSION@\CrashLog\
+     The logs will be available in: %APPDATA%\GIMP\3.36\CrashLog\
      The feature depends on Dr.MinGW's ExcHndl library:
 
         https://github.com/jrfonseca/drmingw
 
  17. When optional language selection is configured in (i.e. iso-codes
-     is found), GIMP will use language data not only at runtime, but
+     is found), Clay will use language data not only at runtime, but
      will also use this package to self-localize the list of supported
      languages during build-time. It means that the build system must be
      set up for localization. In particular the build system will either
@@ -236,55 +235,55 @@ help in that regard:
      If this locale is installed, our build script will try and set it
      as temporary locale when current locale is C or POSIX.
 
- 18. Optional step if compiling GIMP from git (unneeded from tarball): you need
+ 18. Optional step if compiling Clay from git: you need
      to initialize submodules with command `git submodule update --init`.
 
- 19. Configure GIMP by running `meson _build`. You may want to pass some
+ 19. Configure Clay by running `meson _build`. You may want to pass some
      options to it, see below.
 
- 20. Build GIMP by running `ninja -C _build'.
+ 20. Build Clay by running `ninja -C _build'.
 
- 21. Install GIMP by running `ninja -C _build install'. In order to
-     avoid clashes with other versions of GIMP, we install a binary
-     called gimp-@GIMP_APP_VERSION@. By default there's also a link created so that
-     you can type 'gimp' to start gimp-@GIMP_APP_VERSION@.
+ 21. Install Clay by running `ninja -C _build install'. In order to
+     avoid clashes with other versions of Clay, we install a binary
+     called clay-3.36. By default there's also a link created so that
+     you can type 'clay' to start clay-3.36.
 
  22. Summary of required packages and what version you need:
 
      Package Name         Version
 
-     appstream            @APPSTREAM_REQUIRED_VERSION@
-     ATK                  @ATK_REQUIRED_VERSION@
-     babl                 @BABL_REQUIRED_VERSION@
-     cairo                @CAIRO_REQUIRED_VERSION@
-     Fontconfig           @FONTCONFIG_REQUIRED_VERSION@
-     freetype2            @FREETYPE2_REQUIRED_VERSION@
-     GDK-PixBuf           @GDK_PIXBUF_REQUIRED_VERSION@
-     GEGL                 @GEGL_REQUIRED_VERSION@
-     gexiv2               @GEXIV2_REQUIRED_VERSION@ (< @GEXIV2_MAX_VERSION@)
+     appstream            0.16.1
+     ATK                  2.4.0
+     babl                 0.1.118
+     cairo                1.14.0
+     Fontconfig           2.12.4
+     freetype2            2.1.7
+     GDK-PixBuf           2.32.0
+     GEGL                 0.4.66
+     gexiv2               0.14.0 (< 0.15.0)
      GIO
-     GLib                 @GLIB_REQUIRED_VERSION@
+     GLib                 2.70.0
      glib-networking
-     GTK                  @GTK_REQUIRED_VERSION@
+     GTK                  3.24.0
      gvfs (on Linux)
-     HarfBuzz             @HARFBUZZ_REQUIRED_VERSION@
-     json-glib            @JSON_GLIB_REQUIRED_VERSION@
+     HarfBuzz             2.8.2
+     json-glib            1.8.0
      libarchive
      libbzip2
      libjpeg
-     liblzma              @LIBLZMA_REQUIRED_VERSION@
-     libmypaint           @LIBMYPAINT_REQUIRED_VERSION@
-     libpng               @LIBPNG_REQUIRED_VERSION@
-     libpoppler-glib      @POPPLER_REQUIRED_VERSION@
-     librsvg              @RSVG_REQUIRED_VERSION@
-     libtiff              @LIBTIFF_REQUIRED_VERSION@
-     Little CMS           @LCMS_REQUIRED_VERSION@
+     liblzma              5.0.0
+     libmypaint           1.5.0
+     libpng               1.6.25
+     libpoppler-glib      0.69.0
+     librsvg              2.40.6
+     libtiff              4.0.0
+     Little CMS           2.8
      mypaint-brushes-2.0
-     pangocairo           @PANGO_REQUIRED_VERSION@
-     poppler-data         @POPPLER_DATA_REQUIRED_VERSION@
+     pangocairo           1.50.0
+     poppler-data         0.4.9
      Pycairo
-     PyGObject            @PYGOBJECT_REQUIRED_VERSION@
-     Python               @PYTHON3_REQUIRED_VERSION@
+     PyGObject            3.0
+     Python               3.6
      zlib
 
  23. Summary of optional packages:
@@ -293,23 +292,23 @@ help in that regard:
 
      bash-completion     -              Bash Completion script
      bison               -              Image Map plug-in
-     cairo-pdf           @CAIRO_PDF_REQUIRED_VERSION@         PDF export
+     cairo-pdf           1.12.2         PDF export
      cfitsio             -              FITS
      iso-codes           -              Language selection
      ExcHndl             -              Crash logs on Windows with Dr. MinGW
      flex                -              Image Map plug-in
      gs                  -              ghostscript
      libaa               -              ASCII art
-     libheif             @LIBHEIF_REQUIRED_VERSION@         HEIF (HEIC, AVIF)
+     libheif             1.15.1         HEIF (HEIC, AVIF)
      libilbm             -              Amiga IFF/ILBM
-     libjxl              @LIBJXL_REQUIRED_VERSION@          JPEG XL
+     libjxl              0.7.0          JPEG XL
      libmng              -              MNG
-     libwebp             @WEBP_REQUIRED_VERSION@          WebP (built with --enable-libwebpmux and --enable-libwebpdemux)
-     libwmf              @WMF_REQUIRED_VERSION@          WMF
+     libwebp             0.6.0          WebP (built with --enable-libwebpmux and --enable-libwebpdemux)
+     libwmf              0.2.8          WMF
      libXcursor          -              X11 Mouse Cursor
      libxpm              -              XPM
-     openexr             @OPENEXR_REQUIRED_VERSION@          OpenEXR
-     OpenJPEG            @OPENJPEG_REQUIRED_VERSION@          JPEG 2000
+     openexr             1.6.1          OpenEXR
+     OpenJPEG            2.1.0          JPEG 2000
      qoi                 -              QOI
      vala                -              Vala plug-ins
 
@@ -334,28 +333,29 @@ help in that regard:
 
 Generic instructions for configuring and compiling auto-configured
 packages are included below. Here is an illustration of commands that
-might be used to build and install GIMP. The actual configuration,
+might be used to build and install Clay. The actual configuration,
 compilation and installation output is not shown.
 
-  % tar xvf gimp-@GIMP_VERSION@.tar.xz       # unpack the sources
-  % cd gimp-@GIMP_VERSION@                   # change to the toplevel directory
-  % meson setup _build              # `configure' step
-  % ninja -C _build                 # build GIMP
-  % ninja -C _build install         # install GIMP
+  % git clone https://github.com/KurtStevenK/clay.git
+  % cd clay
+  % git submodule update --init
+  % meson setup _build              # configure
+  % ninja -C _build                 # build Clay
+  % ninja -C _build install         # install Clay
 
 
-The `setup' step examines your system, and adapts GIMP to run on
+The `setup' step examines your system, and adapts Clay to run on
 it. The script has many options, some of which are described in the
 generic instructions included at the end of this file. All of the
 options can be listed using the command `meson configure' if you
 successfully configured already, or by reading the file `meson_options.txt`.
-There are several special options the GIMP configure script recognizes.
+There are several special options the Clay meson setup recognizes.
 These are:
 
   -Dvector-icons=false  This option installs raster icons instead of
      vector icons.
 
-  -Drelocatable-bundle=yes  This option forces GIMP to search some
+  -Drelocatable-bundle=yes  This option forces Clay to search some
      resources (e.g. MyPaint brushes or libwmf fonts) relatively to the
      running prefix, rather than using build-time paths.
 
@@ -364,11 +364,11 @@ These are:
      checking to be disabled. NOTE: This option is intended primarily as
      a convenience for developers.
 
-  -Dgimpdir=DIR.  This option changes the default directory GIMP uses to
-     search for its configuration files from $XDG_CONFIG_HOME/GIMP/@GIMP_APP_VERSION@/
+  -Dgimpdir=DIR.  This option changes the default directory Clay uses to
+     search for its configuration files from $XDG_CONFIG_HOME/GIMP/3.36/
      (per XDG Base Directory Specification, $XDG_CONFIG_HOME defaults to
      the directory .config/ in the user's home directory) to
-     $XDG_CONFIG_HOME/DIR/@GIMP_APP_VERSION@/.
+     $XDG_CONFIG_HOME/DIR/3.36/.
      If DIR is an absolute path, the directory will be changed to DIR.
 
   -Dshmem-type=[none|sysv|posix|win32|auto].  This option allows you to
@@ -406,18 +406,18 @@ These are:
   -Denable-multiproc=false This option allows you to disable support for
      multiple processors. It is enabled by default.
 
-  -Dwith-sendmail[=PATH] This option is used to tell GIMP to send email
+  -Dwith-sendmail[=PATH] This option is used to tell Clay to send email
      through sendmail instead of xdg-email. You can optionally indicate
      where to find the sendmail command. Otherwise sendmail will simply
      be searched in your $PATH at runtime.
 
   -Denable-default-bin=false  Use this option if you don't want to make
-     gimp-@GIMP_APP_VERSION@ the default GIMP installation. Otherwise a link called
-     gimp pointing to the gimp-@GIMP_APP_VERSION@ executable will be installed.
+     clay-3.36 the default Clay installation. Otherwise a link called
+     clay pointing to the clay-3.36 executable will be installed.
 
   -Denable-console-bin=false  Use this option if you don't want the
-     gimp-console binary to be built in addition to the standard binary.
-     gimp-console is useful for command-line batch mode or as a server.
+     clay-console binary to be built in addition to the standard binary.
+     clay-console is useful for command-line batch mode or as a server.
 
   -Djavascript=disabled  If for some reason you don't want to install the
      JavaScript plug-ins, you can use -Djavascript=disabled.
@@ -438,14 +438,14 @@ The `ninja' command builds several things:
  - A bunch of public libraries in the directories starting with 'libgimp'.
  - The plug-in programs in the 'plug-ins' directory.
  - Some modules in the 'modules' subdirectory.
- - The main GIMP program 'gimp-@GIMP_APP_VERSION@' in `app'.
- - A CLI GIMP program 'gimp-console-@GIMP_APP_VERSION@' in `app' (unless
+ - The main Clay program 'clay-3.36' in `app'.
+ - A CLI Clay program 'clay-console-3.36' in `app' (unless
    -Denable-console-bin=false was set).
 
-The `ninja install' command installs the GIMP header files associated
-with the libgimp libraries, the plug-ins, some data files and the GIMP
-executable. After running `ninja install' and assuming the build process
-was successful you should be able to run `gimp'.
+The `ninja install' command installs the libgimp header files, the
+plug-ins, some data files and the Clay executable. After running
+`ninja install' and assuming the build process was successful you
+should be able to run `clay'.
 
 
 When configure fails
@@ -475,10 +475,8 @@ setup.
 When you use custom installation prefixes for dependencies, you will
 likely need to set more environment variables, such as LD_LIBRARY_PATH
 or GI_TYPELIB_PATH, either for the configuration to succeed, the build
-itself or to start GIMP at all.
-Please check out our building tutorial for more in-depth details:
-
-  https://developer.gimp.org/core/setup/build/
+itself or to start Clay at all.
+See https://claydesign.web.app/docs and the scripts under build/.
 
 
 About optional features
@@ -487,10 +485,10 @@ About optional features
 When the configure step succeeds, it will display a summary of which
 optional features or plug-ins will be installed.
 
-There are some GIMP features, in particular for the support of more
+There are some Clay features, in particular for the support of more
 recent or less used image formats, that need additional third-party
 libraries installed on your system. You need the related libraries and
-header files installed for these, otherwise the compiled GIMP will be a
+header files installed for these, otherwise the compiled Clay will be a
 minimal version without these features.
 
 Once you installed them, run the following command to trigger a

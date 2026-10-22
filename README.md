@@ -26,4 +26,4 @@ Every GitHub release is scanned on [VirusTotal](https://www.virustotal.com). The
 
 ## Building
 
-Desktop builds use the Meson files already in this tree: [build/windows](build/windows), [build/linux](build/linux), and [build/macos](build/macos). See [INSTALL](INSTALL) for the upstream build instructions.
+Desktop builds use the Meson files already in this tree: [build/windows](build/windows), [build/linux](build/linux), and [build/macos](build/macos). See [INSTALL](INSTALL) for Clay build instructions.

@@ -533,17 +533,17 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
   welcome_add_link (GTK_GRID (grid), size_group, 0, &row,
                     /* "globe with meridians" emoticone in UTF-8. */
                     "\xf0\x9f\x8c\x90",
-                    _("Clay website"), "https://www.gimp.org/");
+                    _("Clay website"), "https://claydesign.web.app/");
   welcome_add_link (GTK_GRID (grid), size_group, 0, &row,
                     /* "open book" emoticone in UTF-8. */
                     "\xf0\x9f\x93\x96",
                     _("Documentation"),
-                    "https://docs.gimp.org/");
+                    "https://claydesign.web.app/docs");
   welcome_add_link (GTK_GRID (grid), size_group, 0, &row,
                     /* "graduation cap" emoticone in UTF-8. */
                     "\xf0\x9f\x8e\x93",
                     _("Community Tutorials"),
-                    "https://www.gimp.org/tutorials/");
+                    "https://claydesign.web.app/tutorials");
 
   /* XXX: should we add API docs for plug-in developers once it's
    * properly set up? */
@@ -576,12 +576,12 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
                     /* "keyboard" emoticone in UTF-8. */
                     "\xe2\x8c\xa8",
                     _("Contributing"),
-                    "https://www.gimp.org/develop/");
+                    "https://claydesign.web.app/contributing");
   welcome_add_link (GTK_GRID (grid), size_group, 1, &row,
                     /* "love letter" emoticone in UTF-8. */
                     "\xf0\x9f\x92\x8c",
                     _("Donating"),
-                    "https://www.gimp.org/donating/");
+                    "https://claydesign.web.app/donate");
 
   g_object_unref (size_group);
 }
@@ -863,7 +863,7 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
-  button = gtk_link_button_new_with_label ("https://www.gimp.org/bugs/",
+  button = gtk_link_button_new_with_label ("https://github.com/KurtStevenK/clay/issues",
                                            _("Report Bugs"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
@@ -877,7 +877,7 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
-  button = gtk_link_button_new_with_label ("https://developer.gimp.org/",
+  button = gtk_link_button_new_with_label ("https://claydesign.web.app/contributing",
                                            _("Write Code"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
@@ -891,7 +891,7 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
-  button = gtk_link_button_new_with_label ("https://l10n.gnome.org/teams/",
+  button = gtk_link_button_new_with_label ("https://claydesign.web.app/contributing",
                                            _("Translate"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
@@ -909,7 +909,7 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
                                            _("Donate via Liberapay"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
-  button = gtk_link_button_new_with_label ("https://www.gimp.org/donating/",
+  button = gtk_link_button_new_with_label ("https://claydesign.web.app/donate",
                                            _("Other donation options"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);

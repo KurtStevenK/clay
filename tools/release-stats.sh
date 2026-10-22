@@ -301,7 +301,7 @@ count_contributors 'themes/*/*.css themes/*/*png' "%d theme designers: %s"
 # function. So I list all files explicitly.
 meson_builds=`find . -name meson.build -not -path gimp-data`
 count_contributors "meson_options.txt $meson_builds .gitlab-ci.yml build" "%d build, packaging or CI contributors: %s"
-count_contributors 'data/ etc/ desktop/ menus/ docs/ devel-docs/ NEWS INSTALL.in' "%d contributors on other types of resources: %s"
+count_contributors 'data/ etc/ desktop/ menus/ docs/ devel-docs/ NEWS INSTALL' "%d contributors on other types of resources: %s"
 count_repo_contributors "gimp-data" main "The gimp-data submodule had %d commits by %d contributors: %s" "" "" $int_date
 count_data_contributors 'images' "%d image creators: %s"
 count_data_contributors 'icons/*.svg icons/*.png' "%d icon designers: %s"

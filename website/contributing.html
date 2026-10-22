@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clay — Contributing</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#FFFCF0', surface: '#F2EFE4', footer: '#E5E2D8',
+          border: '#E5E2D8', 'border-strong': '#B7B5AC',
+          text: '#100F0F', 'text-secondary': '#454340',
+          accent: '#205EA6', 'accent-hover': '#4274B3', 'on-accent': '#FFFFFF',
+        },
+        fontFamily: {
+          mono: ['"JetBrains Mono"', 'monospace'],
+          geist: ['Geist', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .nav-blur { backdrop-filter: blur(8px); background-color: rgba(255, 252, 240, 0.9); }
+</style>
+</head>
+<body class="bg-base text-text font-mono antialiased leading-relaxed">
+  <nav class="fixed top-0 w-full z-50 border-b border-border nav-blur">
+    <div class="max-w-[1152px] mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="/" class="font-geist font-semibold text-lg tracking-tight flex items-center gap-2">
+          <img src="/favicon.svg" alt="" width="20" height="20">Clay
+        </a>
+        <div class="hidden md:flex gap-6 text-[15px] text-text-secondary">
+          <a href="/docs" class="hover:text-accent transition-colors duration-150">Docs</a>
+          <a href="/tutorials" class="hover:text-accent transition-colors duration-150">Tutorials</a>
+          <a href="/contributing" class="text-text">Contributing</a>
+          <a href="/donate" class="hover:text-accent transition-colors duration-150">Donate</a>
+        </div>
+      </div>
+      <a href="https://github.com/KurtStevenK/clay" target="_blank" class="bg-accent hover:bg-accent-hover text-on-accent h-10 px-4 flex items-center justify-center text-[15px] transition-colors duration-150">Source</a>
+    </div>
+  </nav>
+
+  <main class="pt-32 pb-24 max-w-[1152px] mx-auto px-6">
+    <h1 class="font-geist text-[28px] font-semibold tracking-tight mb-12">Contributing</h1>
+
+    <section class="mb-12 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">Report bugs</h2>
+      <p class="text-[15px] text-text-secondary mb-4">Clay is not bug-free. A report with steps, OS, and Clay version helps more than a screenshot alone.</p>
+      <p class="text-[15px] text-text-secondary">
+        <a class="text-accent hover:text-accent-hover" target="_blank" href="https://github.com/KurtStevenK/clay/issues">github.com/KurtStevenK/clay/issues</a>
+      </p>
+    </section>
+
+    <section class="mb-12 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">Write code</h2>
+      <p class="text-[15px] text-text-secondary mb-4">The program lives in one public GitHub repository. Fork it, branch, open a pull request. Keep existing copyright headers. Clay Design maintains the fork; it does not replace original authors.</p>
+      <p class="text-[15px] text-text-secondary">
+        <a class="text-accent hover:text-accent-hover" target="_blank" href="https://github.com/KurtStevenK/clay">github.com/KurtStevenK/clay</a>
+      </p>
+    </section>
+
+    <section class="mb-12 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">Translate</h2>
+      <p class="text-[15px] text-text-secondary">UI strings still live in the <span class="text-text">po/</span> gettext files. Send a pull request with your language file. There is no separate Clay translation portal yet. Do not file Clay translation work on GNOME’s l10n site unless you also contribute to upstream GIMP.</p>
+    </section>
+
+    <section class="mb-12 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">This website</h2>
+      <p class="text-[15px] text-text-secondary">Pages are static HTML under <span class="text-text">website/</span> and deploy to Firebase Hosting. Edit the page, open a pull request.</p>
+    </section>
+
+    <section class="mb-4 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">Share the program</h2>
+      <p class="text-[15px] text-text-secondary">Give people the installer and this source. Teaching Clay, writing a libre-licensed tutorial, or crediting Clay on a piece of art all count. Money is optional and lives on the
+        <a class="text-accent hover:text-accent-hover" href="/donate">donate</a> page.</p>
+    </section>
+  </main>
+
+  <footer class="bg-footer py-16">
+    <div class="max-w-[1152px] mx-auto px-6 py-8">
+      <div class="border-t border-border-strong pt-6 text-[13px] text-text flex flex-col sm:flex-row justify-between gap-2">
+        <span>© 2026 ClayDesign Contributors.</span>
+        <a href="/" class="hover:text-accent">claydesign.web.app</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

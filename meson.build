@@ -1785,54 +1785,6 @@ else
   gitversion_h = files('git-version.h')
 endif
 
-install_conf = configuration_data()
-install_conf.set('GIMP_APP_VERSION', gimp_app_version)
-install_conf.set('GIMP_PKGCONFIG_VERSION', gimp_version)
-install_conf.set('GIMP_VERSION', gimp_version)
-install_conf.set('APPSTREAM_REQUIRED_VERSION',    appstream_minver)
-install_conf.set('ATK_REQUIRED_VERSION',          atk_minver)
-install_conf.set('BABL_REQUIRED_VERSION',         babl_minver)
-install_conf.set('CAIRO_PDF_REQUIRED_VERSION',    cairopdf_minver)
-install_conf.set('CAIRO_REQUIRED_VERSION',        cairo_minver)
-install_conf.set('FONTCONFIG_REQUIRED_VERSION',   fontconfig_minver)
-install_conf.set('FREETYPE2_REQUIRED_VERSION',    freetype2_minver)
-install_conf.set('GDK_PIXBUF_REQUIRED_VERSION',   gdk_pixbuf_minver)
-install_conf.set('GEGL_REQUIRED_VERSION',         gegl_minver)
-install_conf.set('EXIV2_REQUIRED_VERSION',        exiv2_minver)
-install_conf.set('GEXIV2_REQUIRED_VERSION',       gexiv2_minver)
-install_conf.set('GEXIV2_MAX_VERSION',            gexiv2_maxver)
-install_conf.set('GLIB_REQUIRED_VERSION',         glib_minver)
-install_conf.set('GTK_REQUIRED_VERSION',          gtk3_minver)
-install_conf.set('HARFBUZZ_REQUIRED_VERSION',     harfbuzz_minver)
-install_conf.set('JSON_GLIB_REQUIRED_VERSION',    json_glib_minver)
-install_conf.set('LCMS_REQUIRED_VERSION',         lcms_minver)
-install_conf.set('LIBHEIF_REQUIRED_VERSION',      libheif_minver)
-install_conf.set('LIBJXL_REQUIRED_VERSION',       jpegxl_minver)
-install_conf.set('LIBLZMA_REQUIRED_VERSION',      liblzma_minver)
-install_conf.set('LIBTIFF_REQUIRED_VERSION',      libtiff_minver)
-install_conf.set('LIBMYPAINT_REQUIRED_VERSION',   libmypaint_minver)
-install_conf.set('LIBPNG_REQUIRED_VERSION',       libpng_minver)
-install_conf.set('OPENEXR_REQUIRED_VERSION',      openexr_minver)
-install_conf.set('OPENJPEG_REQUIRED_VERSION',     openjpeg_minver)
-install_conf.set('PANGO_REQUIRED_VERSION',        pango_minver)
-install_conf.set('POPPLER_DATA_REQUIRED_VERSION', poppler_data_minver)
-install_conf.set('POPPLER_REQUIRED_VERSION',      poppler_minver)
-install_conf.set('PYGOBJECT_REQUIRED_VERSION',    pygobject_minver)
-install_conf.set('PYTHON3_REQUIRED_VERSION',      python3_minver)
-install_conf.set('RSVG_REQUIRED_VERSION',         rsvg_minver)
-install_conf.set('WEBP_REQUIRED_VERSION',         webp_minver)
-install_conf.set('WMF_REQUIRED_VERSION',          wmf_minver)
-install_conf.set('XGETTEXT_REQUIRED_VERSION',     '0.19')
-
-if is_git_repository
-  # Tarballs won't have INSTALL.in, only the generated INSTALL.
-  INSTALL = configure_file(
-    input : 'INSTALL.in',
-    output: 'INSTALL',
-    configuration: install_conf
-  )
-endif
-
 if is_git_repository
   has_gimp_data = run_command(python, '-c',
     'import sys,os; sys.exit(0 if os.path.exists("gimp-data/meson.build") else 1)',

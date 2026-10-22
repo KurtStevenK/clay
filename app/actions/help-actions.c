@@ -59,7 +59,7 @@ static const GimpStringActionEntry help_online_actions[] =
   { "help-online-docs-web-site", GIMP_ICON_WEB,
     NC_("help-action", "_User Manual Web Site"), NULL, { NULL },
     NC_("help-action", "Bookmark to the Documentation web site"),
-    "https://docs.gimp.org/",
+    "https://claydesign.web.app/docs",
     GIMP_HELP_HELP },
 
   { "help-online-bug-tracker", GIMP_ICON_WEB,

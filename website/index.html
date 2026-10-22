@@ -1,87 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Clay — Image Beautification Program</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' fill='%231a1d2e'/%3E%3Cpath d='M190 70 A82 82 0 1 0 190 186' fill='none' stroke='%23f4f4f2' stroke-width='34' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --ink: #f4f4f2;
-      --navy: #1a1d2e;
-      --nebula: #c45b6a;
-      --muted: #b7b6c4;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clay — Image Beautification Program</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#FFFCF0',
+          surface: '#F2EFE4',
+          'surface-alt': '#F9F6EA',
+          footer: '#E5E2D8',
+          border: '#E5E2D8',
+          'border-strong': '#B7B5AC',
+          text: '#100F0F',
+          'text-secondary': '#454340',
+          'text-tertiary': '#555450',
+          accent: '#205EA6',
+          'accent-hover': '#4274B3',
+          'on-accent': '#FFFFFF',
+        },
+        fontFamily: {
+          mono: ['"JetBrains Mono"', 'monospace'],
+          geist: ['Geist', 'sans-serif'],
+        },
+        spacing: { content: '1152px', section: '96px' }
+      }
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
-    body {
-      background:
-        radial-gradient(900px 520px at 18% 40%, rgba(196, 91, 106, 0.28), transparent 60%),
-        radial-gradient(700px 480px at 78% 18%, rgba(92, 108, 184, 0.35), transparent 62%),
-        var(--navy);
-      color: var(--ink);
-      font-family: "Newsreader", "Iowan Old Style", Palatino, serif;
-      font-size: 1.2rem;
-      line-height: 1.45;
-    }
-    main {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 4rem;
-      align-items: end;
-      padding: 8vh 8vw 10vh;
-    }
-    .mark { width: min(28vh, 180px); height: auto; display: block; }
-    h1 {
-      font-family: "Fraunces", "Iowan Old Style", serif;
-      font-weight: 560;
-      font-size: clamp(4.5rem, 12vw, 9rem);
-      line-height: 0.85;
-      letter-spacing: -0.04em;
-      margin: 0;
-    }
-    .role {
-      margin: 0.8rem 0 0;
-      font-size: 1.35rem;
-      color: var(--muted);
-    }
-    p { max-width: 38rem; margin: 1.6rem 0 0; }
-    .where {
-      margin-top: 2.4rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem 1.4rem;
-      color: var(--muted);
-      font-size: 1.05rem;
-    }
-    a { color: var(--ink); }
-    @media (max-width: 720px) {
-      main { grid-template-columns: 1fr; gap: 2rem; align-items: start; }
-    }
-  </style>
+  }
+</script>
+<style>
+  .nav-blur {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 252, 240, 0.9);
+  }
+</style>
 </head>
-<body>
-  <main>
-    <svg class="mark" viewBox="0 0 256 256" aria-hidden="true">
-      <path d="M190 70 A82 82 0 1 0 190 186" fill="none" stroke="#f4f4f2" stroke-width="34" stroke-linecap="round"/>
-    </svg>
-    <div>
-      <h1>Clay</h1>
-      <p class="role">Image Beautification Program · 3.36</p>
-      <p>A free image editor, forked from the GNU Image Manipulation Program and shared under the GNU General Public License. The 3.36 release is for Windows. Linux and macOS build from the same source.</p>
-      <div class="where">
-        <span>Windows</span>
-        <span>Linux</span>
-        <span>macOS</span>
-        <span>iOS, Android, Huawei, and Microsoft — later</span>
-        <a href="https://github.com/KurtStevenK/clay">Source</a>
+<body class="bg-base text-text font-mono antialiased leading-relaxed">
+  <nav class="fixed top-0 w-full z-50 border-b border-border nav-blur">
+    <div class="max-w-[1152px] mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="/" class="font-geist font-semibold text-lg tracking-tight flex items-center gap-2">
+          <img src="/favicon.svg" alt="" width="20" height="20">Clay
+        </a>
+        <div class="hidden md:flex gap-6 text-[15px] text-text-secondary">
+          <a href="/docs" class="hover:text-accent transition-colors duration-150">Docs</a>
+          <a href="/tutorials" class="hover:text-accent transition-colors duration-150">Tutorials</a>
+          <a href="/contributing" class="hover:text-accent transition-colors duration-150">Contributing</a>
+          <a href="/donate" class="hover:text-accent transition-colors duration-150">Donate</a>
+        </div>
       </div>
-      <p class="role">© 2026 ClayDesign Contributors. GPL-3.0-or-later.</p>
+      <a href="https://github.com/KurtStevenK/clay" target="_blank" class="bg-accent hover:bg-accent-hover text-on-accent h-10 px-4 flex items-center justify-center text-[15px] transition-colors duration-150">Source</a>
     </div>
-  </main>
+  </nav>
+
+  <section class="relative min-h-svh pt-40 pb-section">
+    <div class="max-w-[1152px] mx-auto px-6 flex flex-col items-center text-center">
+      <div class="border border-accent text-accent px-3 py-1 text-[13px] mb-12 flex items-center gap-2 bg-base">
+        3.36 for Windows <iconify-icon icon="lucide:arrow-right" width="14"></iconify-icon>
+      </div>
+      <h1 class="text-[72px] md:text-[96px] leading-none tracking-tight mb-8 text-text">CLAY</h1>
+      <h2 class="font-geist text-[28px] font-semibold tracking-tight max-w-2xl mb-4">
+        A free image editor you can change.
+      </h2>
+      <p class="text-[15px] text-text-secondary max-w-xl mb-12">
+        Clay is an image beautification program for Windows, Linux, and macOS. It is a fork of the GNU Image Manipulation Program, shared under GPL-3.0-or-later.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <a href="https://github.com/KurtStevenK/clay" target="_blank" class="bg-accent hover:bg-accent-hover text-on-accent h-10 px-4 flex items-center justify-center gap-2 transition-colors duration-150 min-w-[160px]">
+          <iconify-icon icon="lucide:github"></iconify-icon>
+          Source
+        </a>
+        <a href="/docs" class="bg-base border border-border-strong text-text h-10 px-4 flex items-center justify-center gap-2 hover:bg-surface transition-colors duration-150 min-w-[160px]">
+          <iconify-icon icon="lucide:book-open"></iconify-icon>
+          Docs
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-section max-w-[1152px] mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-start">
+      <div>
+        <h3 class="font-geist text-[28px] font-semibold tracking-tight mb-6">Your pictures,<br>your program.</h3>
+        <p class="text-text-secondary text-[15px] mb-6">
+          Retouch a photo, draw, or assemble a layout. Clay keeps the layer, selection, and color tools from the program it forked, with a Clay theme and splash.
+        </p>
+        <p class="text-text-secondary text-[15px]">
+          Source stays public. If you ship a binary, you offer this source under the same license.
+        </p>
+      </div>
+      <div class="relative">
+        <div class="absolute inset-0 border border-border bg-surface-alt translate-x-2 translate-y-2"></div>
+        <div class="relative bg-base border border-border-strong p-8">
+          <p class="text-[15px] mb-6">
+            GIMP and the Wilber mascot are names of the upstream project. This fork is Clay. Original authors’ copyright notices stay in the source.
+          </p>
+          <div class="text-[13px]">
+            <div class="font-geist font-medium text-text">ClayDesign Contributors</div>
+            <div class="text-text-tertiary">GPL-3.0-or-later</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-section max-w-[1152px] mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="border-t border-border-strong pt-6">
+        <h4 class="font-geist font-medium text-text mb-4">Photo work</h4>
+        <p class="text-[13px] text-text-secondary">Curves, levels, masks, and color management for prints and screens.</p>
+      </div>
+      <div class="border-t border-border-strong pt-6">
+        <h4 class="font-geist font-medium text-text mb-4">Design pieces</h4>
+        <p class="text-[13px] text-text-secondary">Icons, mockups, and type on layers. Export PNG, JPEG, and the rest of the usual formats.</p>
+      </div>
+      <div class="border-t border-border-strong pt-6">
+        <h4 class="font-geist font-medium text-text mb-4">Scripts</h4>
+        <p class="text-[13px] text-text-secondary">Python, Script-Fu, and C plug-ins from the same tree. Change the program, then share the change.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-section bg-surface">
+    <div class="max-w-[1152px] mx-auto px-6">
+      <h3 class="font-geist text-[28px] font-semibold tracking-tight mb-8">Supported platforms</h3>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="border border-border p-6 flex flex-col items-center justify-center gap-3 bg-base">
+          <iconify-icon icon="lucide:monitor" class="text-2xl text-accent"></iconify-icon>
+          <span class="text-[15px]">Windows · 3.36</span>
+        </div>
+        <div class="border border-border p-6 flex flex-col items-center justify-center gap-3 bg-base">
+          <iconify-icon icon="lucide:terminal" class="text-2xl text-accent"></iconify-icon>
+          <span class="text-[15px]">Linux · source</span>
+        </div>
+        <div class="border border-border p-6 flex flex-col items-center justify-center gap-3 bg-base">
+          <iconify-icon icon="lucide:laptop" class="text-2xl text-accent"></iconify-icon>
+          <span class="text-[15px]">macOS · source</span>
+        </div>
+        <div class="border border-border p-6 flex flex-col items-center justify-center gap-3 bg-base">
+          <iconify-icon icon="lucide:smartphone" class="text-2xl text-text-tertiary"></iconify-icon>
+          <span class="text-[15px] text-text-tertiary">iOS · later</span>
+        </div>
+        <div class="border border-border p-6 flex flex-col items-center justify-center gap-3 bg-base">
+          <iconify-icon icon="lucide:smartphone" class="text-2xl text-text-tertiary"></iconify-icon>
+          <span class="text-[15px] text-text-tertiary">Android · later</span>
+        </div>
+        <div class="border border-border p-6 flex flex-col items-center justify-center gap-3 bg-base">
+          <iconify-icon icon="lucide:tablet-smartphone" class="text-2xl text-text-tertiary"></iconify-icon>
+          <span class="text-[15px] text-center text-text-tertiary">Huawei · later</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-footer py-16">
+    <div class="max-w-[1152px] mx-auto px-6 py-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+        <div>
+          <div class="font-geist font-semibold mb-4 text-text">Clay</div>
+          <div class="flex flex-col gap-2 text-[13px] text-text">
+            <a href="/docs" class="hover:text-accent">Docs</a>
+            <a href="https://github.com/KurtStevenK/clay" target="_blank" class="hover:text-accent">Source</a>
+            <a href="https://github.com/KurtStevenK/clay/releases" target="_blank" class="hover:text-accent">Releases</a>
+          </div>
+        </div>
+        <div>
+          <div class="font-geist font-semibold mb-4 text-text">Community</div>
+          <div class="flex flex-col gap-2 text-[13px] text-text">
+            <a href="/tutorials" class="hover:text-accent">Tutorials</a>
+            <a href="/contributing" class="hover:text-accent">Contributing</a>
+            <a href="/donate" class="hover:text-accent">Donate</a>
+          </div>
+        </div>
+        <div>
+          <div class="font-geist font-semibold mb-4 text-text">License</div>
+          <div class="flex flex-col gap-2 text-[13px] text-text">
+            <a href="https://github.com/KurtStevenK/clay/blob/master/COPYING" target="_blank" class="hover:text-accent">GPL-3.0-or-later</a>
+            <a href="https://github.com/KurtStevenK/clay/issues" target="_blank" class="hover:text-accent">Issues</a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-border-strong pt-6 text-[13px] text-text flex flex-col sm:flex-row justify-between gap-2">
+        <span>© 2026 ClayDesign Contributors.</span>
+        <span>Fork of the GNU Image Manipulation Program.</span>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clay — Donate</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#FFFCF0', surface: '#F2EFE4', footer: '#E5E2D8',
+          border: '#E5E2D8', 'border-strong': '#B7B5AC',
+          text: '#100F0F', 'text-secondary': '#454340',
+          accent: '#205EA6', 'accent-hover': '#4274B3', 'on-accent': '#FFFFFF',
+        },
+        fontFamily: {
+          mono: ['"JetBrains Mono"', 'monospace'],
+          geist: ['Geist', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .nav-blur { backdrop-filter: blur(8px); background-color: rgba(255, 252, 240, 0.9); }
+</style>
+</head>
+<body class="bg-base text-text font-mono antialiased leading-relaxed">
+  <nav class="fixed top-0 w-full z-50 border-b border-border nav-blur">
+    <div class="max-w-[1152px] mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a href="/" class="font-geist font-semibold text-lg tracking-tight flex items-center gap-2">
+          <img src="/favicon.svg" alt="" width="20" height="20">Clay
+        </a>
+        <div class="hidden md:flex gap-6 text-[15px] text-text-secondary">
+          <a href="/docs" class="hover:text-accent transition-colors duration-150">Docs</a>
+          <a href="/tutorials" class="hover:text-accent transition-colors duration-150">Tutorials</a>
+          <a href="/contributing" class="hover:text-accent transition-colors duration-150">Contributing</a>
+          <a href="/donate" class="text-text">Donate</a>
+        </div>
+      </div>
+      <a href="https://github.com/KurtStevenK/clay" target="_blank" class="bg-accent hover:bg-accent-hover text-on-accent h-10 px-4 flex items-center justify-center text-[15px] transition-colors duration-150">Source</a>
+    </div>
+  </nav>
+
+  <main class="pt-32 pb-24 max-w-[1152px] mx-auto px-6">
+    <h1 class="font-geist text-[28px] font-semibold tracking-tight mb-12">Donate</h1>
+
+    <section class="mb-12 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">Why money helps</h2>
+      <p class="text-[15px] text-text-secondary">Donating keeps Clay’s hosting, signing, and release work going. It does not buy a different license. The program stays GPL-3.0-or-later.</p>
+    </section>
+
+    <section class="mb-12 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">SumUp</h2>
+      <p class="text-[15px] text-text-secondary mb-6">Donate via SumUp to ClayDesign Contributors.</p>
+      <a href="https://pay.sumup.com/b2c/Q1AFL84G" target="_blank" class="inline-flex bg-accent hover:bg-accent-hover text-on-accent h-10 px-4 items-center justify-center text-[15px] transition-colors duration-150">Donate on Liberapay</a>
+    </section>
+
+    <section class="mb-4 max-w-2xl">
+      <h2 class="font-geist text-lg font-medium mb-3">Not GIMP fundraising</h2>
+      <p class="text-[15px] text-text-secondary">Do not send Clay donations to the GNOME Foundation, ZeMarmot, or GIMP Patreon pages. Those fund the upstream project. If you want to support GIMP itself, use GIMP’s own donate page — separately from Clay.</p>
+    </section>
+  </main>
+
+  <footer class="bg-footer py-16">
+    <div class="max-w-[1152px] mx-auto px-6 py-8">
+      <div class="border-t border-border-strong pt-6 text-[13px] text-text flex flex-col sm:flex-row justify-between gap-2">
+        <span>© 2026 ClayDesign Contributors.</span>
+        <a href="/" class="hover:text-accent">claydesign.web.app</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
