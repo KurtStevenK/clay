@@ -23,16 +23,16 @@ msgid "License Agreement"
 msgstr "Contrat de licence utilisateur final"
 
 #: build/windows/installer/lang/setup.isl.xml.in:10
-msgid "Setup built by GIMP team, gimp.org"
-msgstr "Installeur créé par l’équipe GIMP, gimp.org"
+msgid "Setup built by Clay team, claydesign.web.app"
+msgstr "Installeur créé par l’équipe Clay, claydesign.web.app"
 
 #: build/windows/installer/lang/setup.isl.xml.in:17
 msgid ""
-"You are trying to directly downgrade from GIMP %1 to %2.%n%nPlease remove "
-"GIMP yourself before installing this version."
+"You are trying to directly downgrade from Clay %1 to %2.%n%nPlease remove "
+"Clay yourself before installing this version."
 msgstr ""
-"Vous essayez de passer directement de la version %1 de GIMP à la version "
-"%2.%n%nVeuillez désinstaller GIMP avant d’installer cette version."
+"Vous essayez de passer directement de la version %1 de Clay à la version "
+"%2.%n%nVeuillez désinstaller Clay avant d’installer cette version."
 
 #: build/windows/installer/lang/setup.isl.xml.in:22
 msgid "Development version"
@@ -40,20 +40,20 @@ msgstr "Version de développement"
 
 #: build/windows/installer/lang/setup.isl.xml.in:27
 msgid ""
-"This is a development version of GIMP where some features may not be "
-"finished, or it may be unstable.%nThis version of GIMP is not intended for "
+"This is a development version of Clay where some features may not be "
+"finished, or it may be unstable.%nThis version of Clay is not intended for "
 "day-to-day work as it may be unstable, and you could lose your work.%nIf you "
 "encounter any problems, first verify that they haven't already been fixed in "
-"GIT before you contact the developers or report it in GIMP gitlab:%n_https://"
+"GIT before you contact the developers or report it on GitHub:%n_https://"
 "gitlab.gnome.org/GNOME/gimp/issues%n%nDo you wish to continue with "
 "installation anyway?"
 msgstr ""
-"Ceci est une version de développement de GIMP et certaines fonctions peuvent "
-"ne pas être au point, ou être instables.%nCette version de GIMP n’est pas "
+"Ceci est une version de développement de Clay et certaines fonctions peuvent "
+"ne pas être au point, ou être instables.%nCette version de Clay n’est pas "
 "destinée au travail de tous les jours, car elle est instable et vous courez "
 "le risque de perdre votre travail.%nSi vous rencontrez des problèmes, "
 "assurez-vous d’abord qu’ils n’ont pas déjà été réglés dans GIT avant de "
-"contacter les développeurs ou de les rapporter dans le gitlab GIMP :"
+"contacter les développeurs ou de les rapporter dans le gitlab Clay :"
 "%n_https://gitlab.gnome.org/GNOME/gimp/issues%n%nSouhaitez-vous tout de même "
 "poursuivre l’installation ?"
 
@@ -73,12 +73,12 @@ msgstr "Problème de paramètres d’affichage"
 #: build/windows/installer/lang/setup.isl.xml.in:40
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before "
 "continuing."
 msgstr ""
 "L’installateur a détecté que Windows ne s’exécute pas en affichage 32 bits "
-"par pixel. C’est une cause connue d’instabilité de GIMP, nous vous "
+"par pixel. C’est une cause connue d’instabilité de Clay, nous vous "
 "recommandons de changer la profondeur d’affichage de couleurs en 32BPP avant "
 "de poursuivre."
 
@@ -123,21 +123,21 @@ msgid "Description"
 msgstr "Description"
 
 #: build/windows/installer/lang/setup.isl.xml.in:84
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:88
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP et tous les greffons par défaut"
+msgid "Clay and all default plug-ins"
+msgstr "Clay et tous les greffons par défaut"
 
 #: build/windows/installer/lang/setup.isl.xml.in:92
 msgid "Run-time libraries"
 msgstr "Bibliothèques d’exécution"
 
 #: build/windows/installer/lang/setup.isl.xml.in:96
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
 msgstr ""
-"Bibliothèques d’exécution utilisées par GIMP, y compris l’environnement "
+"Bibliothèques d’exécution utilisées par Clay, y compris l’environnement "
 "d’exécution GTK"
 
 #: build/windows/installer/lang/setup.isl.xml.in:100
@@ -145,8 +145,8 @@ msgid "Debug symbols"
 msgstr "Symboles de débogage"
 
 #: build/windows/installer/lang/setup.isl.xml.in:104
-msgid "Include information to help with debugging GIMP"
-msgstr "Inclut des informations aidant à déboguer GIMP"
+msgid "Include information to help with debugging Clay"
+msgstr "Inclut des informations aidant à déboguer Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:108
 msgid "Resource development files"
@@ -154,11 +154,11 @@ msgstr "Fichiers ressource de développement"
 
 #: build/windows/installer/lang/setup.isl.xml.in:112
 msgid ""
-"Include some files to help with building GEGL filters and GIMP plug-ins in "
+"Include some files to help with building GEGL filters and Clay plug-ins in "
 "MSYS2"
 msgstr ""
 "Ajouter quelques fichiers pour faciliter la compilation des filtres GEGL et "
-"des extensions GIMP dans MSYS2"
+"des extensions Clay dans MSYS2"
 
 #: build/windows/installer/lang/setup.isl.xml.in:116
 #: build/windows/installer/lang/setup.isl.xml.in:120
@@ -170,16 +170,16 @@ msgid "Python scripting"
 msgstr "Prise en charge des scripts Python"
 
 #: build/windows/installer/lang/setup.isl.xml.in:128
-msgid "Allows you to use GIMP plugins written in Python scripting language."
-msgstr "Permet la prise en charge des greffons GIMP écrits en langage Python."
+msgid "Allows you to use Clay plugins written in Python scripting language."
+msgstr "Permet la prise en charge des greffons Clay écrits en langage Python."
 
 #: build/windows/installer/lang/setup.isl.xml.in:132
 msgid "Lua scripting"
 msgstr "Prise en charge des scripts Lua"
 
 #: build/windows/installer/lang/setup.isl.xml.in:136
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
-msgstr "Permet la prise en charge des greffons GIMP écrits en langage Lua."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
+msgstr "Permet la prise en charge des greffons Clay écrits en langage Lua."
 
 #: build/windows/installer/lang/setup.isl.xml.in:140
 msgid "MyPaint brushes"
@@ -194,8 +194,8 @@ msgid "PostScript support"
 msgstr "Prise en charge de PostScript"
 
 #: build/windows/installer/lang/setup.isl.xml.in:152
-msgid "Allow GIMP to load PostScript files"
-msgstr "Permet le chargement de fichiers PostScript dans GIMP"
+msgid "Allow Clay to load PostScript files"
+msgstr "Permet le chargement de fichiers PostScript dans Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:157
 msgid "Additional icons:"
@@ -207,12 +207,12 @@ msgstr "Créer une icône sur le &bureau"
 
 #: build/windows/installer/lang/setup.isl.xml.in:166
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"Une erreur s’est produite lors de la mise à jour de l’environnement de GIMP "
+"Une erreur s’est produite lors de la mise à jour de l’environnement de Clay "
 "dans %1. Si des erreurs surviennent au chargement des greffons, tentez de "
-"désinstaller puis réinstaller GIMP."
+"désinstaller puis réinstaller Clay."
 
 #: build/windows/installer/lang/setup.isl.xml.in:170
 msgid "Error extracting temporary data."
@@ -232,24 +232,24 @@ msgid "Cleaning up old files..."
 msgstr "Nettoyage des anciens fichiers…"
 
 #: build/windows/installer/lang/setup.isl.xml.in:187
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
-msgstr "GIMP est un Logiciel Libre.%n%nVisitez"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
+msgstr "Clay est un Logiciel Libre.%n%nVisitez"
 
 #: build/windows/installer/lang/setup.isl.xml.in:191
 msgid "for free updates."
 msgstr "pour des mises à jour gratuites."
 
 #: build/windows/installer/lang/setup.isl.xml.in:195
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "Configuration de l’environnement d’extension de GIMP en Python…"
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Configuration de l’environnement d’extension de Clay en Python…"
 
 #: build/windows/installer/lang/setup.isl.xml.in:198
-msgid "Setting up GIMP environment..."
-msgstr "Configuration de l’environnement GIMP…"
+msgid "Setting up Clay environment..."
+msgstr "Configuration de l’environnement Clay…"
 
 #: build/windows/installer/lang/setup.isl.xml.in:203
-msgid "Launch GIMP"
-msgstr "Exécuter GIMP"
+msgid "Launch Clay"
+msgstr "Exécuter Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:208
 msgid "Removing add-on"
@@ -257,10 +257,10 @@ msgstr "Suppression de l’extension"
 
 #: build/windows/installer/lang/setup.isl.xml.in:213
 msgid ""
-"Do you want to delete your personal GIMP files (e.g. settings, tool presets, "
+"Do you want to delete your personal Clay files (e.g. settings, tool presets, "
 "custom brushes)?%n%nA copy will be made on Desktop."
 msgstr ""
-"Souhaitez-vous supprimer vos fichiers GIMP personnels (p. ex. paramètres, "
+"Souhaitez-vous supprimer vos fichiers Clay personnels (p. ex. paramètres, "
 "préréglages d’outils, pinceaux personnalisés) ?%n%nUne copie sera créée sur "
 "le Bureau."
 

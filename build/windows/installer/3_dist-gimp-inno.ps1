@@ -89,7 +89,7 @@ if (Test-Path $CLEANCONFIG_PATH)
 (Get-Content $CONFIG_PATH -Raw) -replace '/\*[\s\S]*?\*/', '' | Set-Content $CLEANCONFIG_PATH
 
 ## Get namespace (same as DefaultDirName of gimp-setup.iss)
-$GIMP_INSTALL_LOCATION="GIMP $GIMP_MUTEX_VERSION"
+$GIMP_INSTALL_LOCATION="Clay $GIMP_MUTEX_VERSION"
 
 ## Get CUSTOM_GIMP_VERSION (GIMP version as we display for users in installer)
 $CUSTOM_GIMP_VERSION = $GIMP_VERSION

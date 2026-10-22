@@ -7,24 +7,24 @@
       <value>License Agreement</value>
     </config>
     <config name="AboutSetupNote">
-      <value>Setup built by GIMP team, gimp.org</value>
+      <value>Setup built by Clay team, claydesign.web.app</value>
     </config>
   </section>
 
   <section name="CustomMessages">
-    <!-- Shown when the user tries to downgrade without unninstalling GIMP -->
+    <!-- Shown when the user tries to downgrade without unninstalling Clay -->
     <config name="DowngradeError">
-      <value>You are trying to directly downgrade from GIMP %1 to %2.%n%nPlease remove GIMP yourself before installing this version.</value>
+      <value>You are trying to directly downgrade from Clay %1 to %2.%n%nPlease remove Clay yourself before installing this version.</value>
     </config>
 
-    <!-- Shown before the wizard starts on development versions of GIMP -->
+    <!-- Shown before the wizard starts on development versions of Clay -->
     <config name="DevelopmentWarningTitle">
       <value>Development version</value>
     </config>
 
-    <!-- Shown before the wizard starts on development versions of GIMP -->
+    <!-- Shown before the wizard starts on development versions of Clay -->
     <config name="DevelopmentWarning">
-      <value>This is a development version of GIMP where some features may not be finished, or it may be unstable.%nThis version of GIMP is not intended for day-to-day work as it may be unstable, and you could lose your work.%nIf you encounter any problems, first verify that they haven't already been fixed in GIT before you contact the developers or report it in GIMP gitlab:%n_https://www.gimp.org/bugs%n%nDo you wish to continue with installation anyway?</value>
+      <value>This is a development version of Clay where some features may not be finished, or it may be unstable.%nThis version of Clay is not intended for day-to-day work as it may be unstable, and you could lose your work.%nIf you encounter any problems, first verify that they haven't already been fixed in GIT before you contact the developers or report it on GitHub:%n_https://github.com/KurtStevenK/clay/issues%n%nDo you wish to continue with installation anyway?</value>
     </config>
     <config name="DevelopmentButtonContinue">
       <value>&amp;Continue</value>
@@ -37,7 +37,7 @@
       <value>Display settings problem</value>
     </config>
     <config name="Require32BPP">
-      <value>Setup has detected that your Windows is not running in 32 bits-per-pixel display mode. This has been known to cause stability problems with GIMP, so it's recommended to change the display colour depth to 32BPP before continuing.</value>
+      <value>Setup has detected that your Windows is not running in 32 bits-per-pixel display mode. This has been known to cause stability problems with Clay, so it's recommended to change the display colour depth to 32BPP before continuing.</value>
     </config>
     <config name="Require32BPPContinue">
       <value>&amp;Continue</value>
@@ -81,11 +81,11 @@
     </config>
     <!-- Components -->
     <config name="ComponentsGimp">
-      <value>GIMP</value>
+      <value>Clay</value>
     </config>
     <!-- Components -->
     <config name="ComponentsGimpDescription">
-      <value>GIMP and all default plug-ins</value>
+      <value>Clay and all default plug-ins</value>
     </config>
     <!-- Components -->
     <config name="ComponentsDeps">
@@ -93,7 +93,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsDepsDescription">
-      <value>Run-time libraries used by GIMP, including GTK Run-time Environment</value>
+      <value>Run-time libraries used by Clay, including GTK Run-time Environment</value>
     </config>
     <!-- Components -->
     <config name="ComponentsDebug">
@@ -101,7 +101,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsDebugDescription">
-      <value>Include information to help with debugging GIMP</value>
+      <value>Include information to help with debugging Clay</value>
     </config>
     <!-- Components -->
     <config name="ComponentsDev">
@@ -109,7 +109,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsDevDescription">
-      <value>Include some files to help with building GEGL filters and GIMP plug-ins in MSYS2</value>
+      <value>Include some files to help with building GEGL filters and Clay plug-ins in MSYS2</value>
     </config>
     <!-- Components -->
     <config name="ComponentsTranslations">
@@ -125,7 +125,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsPythonDescription">
-      <value>Allows you to use GIMP plugins written in Python scripting language.</value>
+      <value>Allows you to use Clay plugins written in Python scripting language.</value>
     </config>
     <!-- Components -->
     <config name="ComponentsLua">
@@ -133,7 +133,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsLuaDescription">
-      <value>Allows you to use GIMP plugins written in Lua scripting language.</value>
+      <value>Allows you to use Clay plugins written in Lua scripting language.</value>
     </config>
     <!-- Components -->
     <config name="ComponentsJavaScript">
@@ -141,7 +141,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsJavaScriptDescription">
-      <value>Allows you to use GIMP plugins written in JavaScript scripting language.</value>
+      <value>Allows you to use Clay plugins written in JavaScript scripting language.</value>
     </config>
     <!-- Components -->
     <config name="ComponentsMyPaint">
@@ -157,7 +157,7 @@
     </config>
     <!-- Components -->
     <config name="ComponentsGhostscriptDescription">
-      <value>Allow GIMP to load PostScript files</value>
+      <value>Allow Clay to load PostScript files</value>
     </config>
 
     <!-- Additional installation tasks -->
@@ -171,7 +171,7 @@
 
     <!-- %1 is replaced by file name; this message should never appear (unless user runs out of disk space at the exact right moment) -->
     <config name="ErrorChangingEnviron">
-      <value>There was a problem updating GIMP's environment in %1. If you get any errors loading the plug-ins, try uninstalling and re-installing GIMP.</value>
+      <value>There was a problem updating Clay's environment in %1. If you get any errors loading the plug-ins, try uninstalling and re-installing Clay.</value>
     </config>
     <!-- This message should never appear (unless user runs out of disk space at the exact right moment) -->
     <config name="ErrorExtractingTemp">
@@ -192,23 +192,23 @@
 
     <!-- Displayed while the files are being extracted; note the capitalisation! -->
     <config name="Billboard1">
-      <value>Remember: GIMP is Free Software.%n%nPlease visit</value>
+      <value>Remember: Clay is Free Software.%n%nPlease visit</value>
     </config>
-    <!-- www.gimp.org (displayed between Billboard1 and Billboard2) -->
+    <!-- claydesign.web.app (displayed between Billboard1 and Billboard2) -->
     <config name="Billboard2">
       <value>for free updates.</value>
     </config>
 
     <config name="SettingUpPyGimp">
-      <value>Setting up environment for GIMP Python extension...</value>
+      <value>Setting up environment for Clay Python extension...</value>
     </config>
     <config name="SettingUpEnvironment">
-      <value>Setting up GIMP environment...</value>
+      <value>Setting up Clay environment...</value>
     </config>
 
     <!-- Displayed on last page -->
     <config name="LaunchGimp">
-      <value>Launch GIMP</value>
+      <value>Launch Clay</value>
     </config>
 
     <!-- Shown during uninstall when removing add-ons -->
@@ -218,7 +218,7 @@
 
     <!-- Shown after uninstall -->
     <config name="UninstallConfig">
-      <value>Do you want to delete your personal GIMP files (e.g. settings, tool presets, custom brushes)?%n%nA copy will be made on Desktop.</value>
+      <value>Do you want to delete your personal Clay files (e.g. settings, tool presets, custom brushes)?%n%nA copy will be made on Desktop.</value>
     </config>
 
     <config name="InternalError">

@@ -24,16 +24,16 @@ msgid "License Agreement"
 msgstr "Licenčna pogodba"
 
 #: build/windows/installer/lang/setup.isl.xml.in:10
-msgid "Setup built by GIMP team, gimp.org"
-msgstr "Namestilnik, ki ga je pripravila ekipa GIMP, gimp.org"
+msgid "Setup built by Clay team, claydesign.web.app"
+msgstr "Namestilnik, ki ga je pripravila ekipa Clay, claydesign.web.app"
 
 #: build/windows/installer/lang/setup.isl.xml.in:17
 msgid ""
-"You are trying to directly downgrade from GIMP %1 to %2.%n%nPlease remove "
-"GIMP yourself before installing this version."
+"You are trying to directly downgrade from Clay %1 to %2.%n%nPlease remove "
+"Clay yourself before installing this version."
 msgstr ""
-"Poskušate neposredno povrniti starejšo različico z GIMP %1 na %2.%n%n. Pred "
-"namestitvijo te različice sami odstranite GIMP."
+"Poskušate neposredno povrniti starejšo različico z Clay %1 na %2.%n%n. Pred "
+"namestitvijo te različice sami odstranite Clay."
 
 #: build/windows/installer/lang/setup.isl.xml.in:22
 msgid "Development version"
@@ -41,19 +41,19 @@ msgstr "Razvojna različica"
 
 #: build/windows/installer/lang/setup.isl.xml.in:27
 msgid ""
-"This is a development version of GIMP where some features may not be "
-"finished, or it may be unstable.%nThis version of GIMP is not intended for "
+"This is a development version of Clay where some features may not be "
+"finished, or it may be unstable.%nThis version of Clay is not intended for "
 "day-to-day work as it may be unstable, and you could lose your work.%nIf you "
 "encounter any problems, first verify that they haven't already been fixed in "
-"GIT before you contact the developers or report it in GIMP gitlab:%n_https://"
-"www.gimp.org/bugs%n%nDo you wish to continue with installation anyway?"
+"GIT before you contact the developers or report it on GitHub:%n_https://"
+"claydesign.web.app/bugs%n%nDo you wish to continue with installation anyway?"
 msgstr ""
-"To je razvojna različica programa GIMP, katere funkcije niso dokončane ali "
-"so nestabilne.%nTa izdaja GIMP-a ni namenjena vsakodnevnemu delu, ker je "
+"To je razvojna različica programa Clay, katere funkcije niso dokončane ali "
+"so nestabilne.%nTa izdaja Clay-a ni namenjena vsakodnevnemu delu, ker je "
 "morda nestabilna in lahko povzroči izgubo vašega dela%nČe naletite na "
 "kakršne koli težave, najprej preverite, da že niso odpravljene v GIT-u, "
-"preden stopite v stik z razvijalcih ali o njih poročate v gitlab-u za GIMP "
-"gitlab:%n_https://www.gimp.org/bugs%n%nAli želite vseeno nadaljevati z "
+"preden stopite v stik z razvijalcih ali o njih poročate v gitlab-u za Clay "
+"gitlab:%n_https://github.com/KurtStevenK/clay/issues%n%nAli želite vseeno nadaljevati z "
 "namestitvijo?"
 
 #: build/windows/installer/lang/setup.isl.xml.in:30
@@ -72,12 +72,12 @@ msgstr "Težava z zaslonskimi nastavitvami"
 #: build/windows/installer/lang/setup.isl.xml.in:40
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before "
 "continuing."
 msgstr ""
 "Namestitveni program je zaznal, da Windows ne deluje v 32-bitnem barvnem "
-"načinu. Takšne nastavitve lahko povzročijo nestabilnost programa GIMP, zato "
+"načinu. Takšne nastavitve lahko povzročijo nestabilnost programa Clay, zato "
 "je priporočljivo da pred nadaljevanjem spremenite barvno globino zaslona na "
 "32 bitov."
 
@@ -122,28 +122,28 @@ msgid "Description"
 msgstr "Opis"
 
 #: build/windows/installer/lang/setup.isl.xml.in:84
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:88
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP z vsemi privzetimi vtičniki"
+msgid "Clay and all default plug-ins"
+msgstr "Clay z vsemi privzetimi vtičniki"
 
 #: build/windows/installer/lang/setup.isl.xml.in:92
 msgid "Run-time libraries"
 msgstr "Podporne knjižnice"
 
 #: build/windows/installer/lang/setup.isl.xml.in:96
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
-msgstr "Podporne knjižnice za GIMP, vključno z izvajalnim okoljem GTK+"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
+msgstr "Podporne knjižnice za Clay, vključno z izvajalnim okoljem GTK+"
 
 #: build/windows/installer/lang/setup.isl.xml.in:100
 msgid "Debug symbols"
 msgstr "Simboli za razhroščevanje"
 
 #: build/windows/installer/lang/setup.isl.xml.in:104
-msgid "Include information to help with debugging GIMP"
-msgstr "Vključi podatke, ki pomagajo razhroščevati GIMP"
+msgid "Include information to help with debugging Clay"
+msgstr "Vključi podatke, ki pomagajo razhroščevati Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:108
 msgid "Resource development files"
@@ -151,10 +151,10 @@ msgstr "Razvojne datoteke vira"
 
 #: build/windows/installer/lang/setup.isl.xml.in:112
 msgid ""
-"Include some files to help with building GEGL filters and GIMP plug-ins in "
+"Include some files to help with building GEGL filters and Clay plug-ins in "
 "MSYS2"
 msgstr ""
-"Vključi datoteke, ki pomagajo pri izdelavi filtrov GEGL in vstavkov GIMP v "
+"Vključi datoteke, ki pomagajo pri izdelavi filtrov GEGL in vstavkov Clay v "
 "MSYS2"
 
 #: build/windows/installer/lang/setup.isl.xml.in:116
@@ -167,18 +167,18 @@ msgid "Python scripting"
 msgstr "Podpora za Python"
 
 #: build/windows/installer/lang/setup.isl.xml.in:128
-msgid "Allows you to use GIMP plugins written in Python scripting language."
+msgid "Allows you to use Clay plugins written in Python scripting language."
 msgstr ""
-"Omogoča izvajanje vtičnikov za GIMP, napisanih v programskem jeziku Python."
+"Omogoča izvajanje vtičnikov za Clay, napisanih v programskem jeziku Python."
 
 #: build/windows/installer/lang/setup.isl.xml.in:132
 msgid "Lua scripting"
 msgstr "Podpora za skripte Lua"
 
 #: build/windows/installer/lang/setup.isl.xml.in:136
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
 msgstr ""
-"Omogoča izvajanje vtičnikov za GIMP, napisanih v programskem jeziku Lua."
+"Omogoča izvajanje vtičnikov za Clay, napisanih v programskem jeziku Lua."
 
 #: build/windows/installer/lang/setup.isl.xml.in:140
 msgid "JavaScript scripting"
@@ -186,9 +186,9 @@ msgstr "Podpora za skripte JavaScript"
 
 #: build/windows/installer/lang/setup.isl.xml.in:144
 msgid ""
-"Allows you to use GIMP plugins written in JavaScript scripting language."
+"Allows you to use Clay plugins written in JavaScript scripting language."
 msgstr ""
-"Omogoča izvajanje vtičnikov za GIMP, napisanih v programskem jeziku "
+"Omogoča izvajanje vtičnikov za Clay, napisanih v programskem jeziku "
 "JavaScript."
 
 #: build/windows/installer/lang/setup.isl.xml.in:148
@@ -204,7 +204,7 @@ msgid "PostScript support"
 msgstr "Podpora za PostScript"
 
 #: build/windows/installer/lang/setup.isl.xml.in:160
-msgid "Allow GIMP to load PostScript files"
+msgid "Allow Clay to load PostScript files"
 msgstr "Omogoči nalaganje PostScript datotek"
 
 #: build/windows/installer/lang/setup.isl.xml.in:165
@@ -217,12 +217,12 @@ msgstr "Ustvari ikono na n&amizju"
 
 #: build/windows/installer/lang/setup.isl.xml.in:174
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"Prišlo je do težav pri posodabljanju okolja za GIMP v datoteki %1. Če se pri "
+"Prišlo je do težav pri posodabljanju okolja za Clay v datoteki %1. Če se pri "
 "nalaganju vtičnikov pojavijo sporočila o napakah, poizkusite odstraniti in "
-"ponovno namestiti GIMP."
+"ponovno namestiti Clay."
 
 #: build/windows/installer/lang/setup.isl.xml.in:178
 msgid "Error extracting temporary data."
@@ -241,24 +241,24 @@ msgid "Cleaning up old files..."
 msgstr "Čiščenje starih datotek ..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:195
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
-msgstr "GIMP spada med prosto programje.%n%nObiščite"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
+msgstr "Clay spada med prosto programje.%n%nObiščite"
 
 #: build/windows/installer/lang/setup.isl.xml.in:199
 msgid "for free updates."
 msgstr "za brezplačne posodobitve."
 
 #: build/windows/installer/lang/setup.isl.xml.in:203
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "Pripravljam okolje za GIMP Python..."
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Pripravljam okolje za Clay Python..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:206
-msgid "Setting up GIMP environment..."
-msgstr "Pripravljam okolje za GIMP..."
+msgid "Setting up Clay environment..."
+msgstr "Pripravljam okolje za Clay..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:211
-msgid "Launch GIMP"
-msgstr "Zaženi GIMP"
+msgid "Launch Clay"
+msgstr "Zaženi Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:216
 msgid "Removing add-on"
@@ -266,10 +266,10 @@ msgstr "Odstranjujem dodatek"
 
 #: build/windows/installer/lang/setup.isl.xml.in:221
 msgid ""
-"Do you want to delete your personal GIMP files (e.g. settings, tool presets, "
+"Do you want to delete your personal Clay files (e.g. settings, tool presets, "
 "custom brushes)?%n%nA copy will be made on Desktop."
 msgstr ""
-"Ali želite izbrisati svoje osebne datoteke GIMP (npr. nastavitve, "
+"Ali želite izbrisati svoje osebne datoteke Clay (npr. nastavitve, "
 "prednastavitve orodij, čopiče po meri)?%n%nKopija bo narejena na namizju."
 
 #: build/windows/installer/lang/setup.isl.xml.in:225

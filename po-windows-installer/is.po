@@ -31,8 +31,8 @@ msgstr "Uppsetning gerð af Jernej Simonèiè, jernej-gimp@ena.si"
 #| msgid ""
 #| "This version of GIMP requires Windows 7, or a newer version of Windows."
 msgid ""
-"This version of GIMP requires Windows 10, or a newer version of Windows."
-msgstr "Þessi útgáfa GIMP krefst Windows 10 eða nýrri útgáfu Windows."
+"This version of Clay requires Windows 10, or a newer version of Windows."
+msgstr "Þessi útgáfa Clay krefst Windows 10 eða nýrri útgáfu Windows."
 
 #: build/windows/installer/lang/setup.isl.xml.in:23
 msgid "Development version"
@@ -40,20 +40,20 @@ msgstr "Þróunarútgáfa"
 
 #: build/windows/installer/lang/setup.isl.xml.in:28
 msgid ""
-"This is a development version of GIMP where some features may not be "
-"finished, or it may be unstable.%nThis version of GIMP is not intended for "
+"This is a development version of Clay where some features may not be "
+"finished, or it may be unstable.%nThis version of Clay is not intended for "
 "day-to-day work as it may be unstable, and you could lose your work.%nIf you "
 "encounter any problems, first verify that they haven't already been fixed in "
-"GIT before you contact the developers or report it in GIMP gitlab:%n_https://"
+"GIT before you contact the developers or report it on GitHub:%n_https://"
 "gitlab.gnome.org/GNOME/gimp/issues%n%nDo you wish to continue with "
 "installation anyway?"
 msgstr ""
-"Þetta er þróunarútgáfa GIMP þar sem einhverjir eiginleikar eru ókláraðir eða "
-"gætu verið óstöðugir.%nÞessi útgáfa GIMP er ekki ætluð til almennrar "
+"Þetta er þróunarútgáfa Clay þar sem einhverjir eiginleikar eru ókláraðir eða "
+"gætu verið óstöðugir.%nÞessi útgáfa Clay er ekki ætluð til almennrar "
 "vinnslu, þar sem óstöðugleiki hennar gæti hugsanlega leitt til þess að gögn "
 "muni tapast.%nEf þú rekst á einhver vandamál, skaltu fyrst athuga hvort ekki "
 "sé búið að lagfæra þau í GIT áður en þú hefur samband við forritarana eða "
-"tilkynnir þau á GIMP-gitlab:%n_https://gitlab.gnome.org/GNOME/gimp/"
+"tilkynnir þau á Clay-gitlab:%n_https://gitlab.gnome.org/GNOME/gimp/"
 "issues%n%nViltu samt halda áfram með uppsetninguna?"
 
 #: build/windows/installer/lang/setup.isl.xml.in:31
@@ -67,8 +67,8 @@ msgstr "Hætta"
 
 #: build/windows/installer/lang/setup.isl.xml.in:44
 msgid ""
-"This version of GIMP requires a processor that supports SSE instructions."
-msgstr "Þessi útgáfa GIMP krefst örgjörva sem styður SSE-skipanir."
+"This version of Clay requires a processor that supports SSE instructions."
+msgstr "Þessi útgáfa Clay krefst örgjörva sem styður SSE-skipanir."
 
 #: build/windows/installer/lang/setup.isl.xml.in:48
 msgid "Display settings problem"
@@ -77,13 +77,13 @@ msgstr "Vandamál með skjástillingar"
 #: build/windows/installer/lang/setup.isl.xml.in:51
 msgid ""
 "Setup has detected that your Windows is not running in 32 bits-per-pixel "
-"display mode. This has been known to cause stability problems with GIMP, so "
+"display mode. This has been known to cause stability problems with Clay, so "
 "it's recommended to change the display colour depth to 32BPP before "
 "continuing."
 msgstr ""
 "Uppsetningarforritið hefur greint að Windows uppsetningin þín er ekki að "
 "keyra í 32 bitum-á-mynddíl skjáham. Slíkt er vitað til að geti valdið "
-"óstöðugleika í GIMP, þannig að við mælum eindregið með því að litadýpt "
+"óstöðugleika í Clay, þannig að við mælum eindregið með því að litadýpt "
 "skjásins sé breytt í 32BPP áður en lengra er haldið."
 
 #: build/windows/installer/lang/setup.isl.xml.in:57
@@ -92,11 +92,11 @@ msgstr "&Hætta"
 
 #: build/windows/installer/lang/setup.isl.xml.in:61
 msgid ""
-"GIMP is now ready to be installed. Click the Install now button to install "
+"Clay is now ready to be installed. Click the Install now button to install "
 "using the default settings, or click the Customize button if you'd like to "
 "have more control over what gets installed."
 msgstr ""
-"GIMP er núna tilbúið til uppsetningar. Smelltu á 'Setja upp' hnappinn til að "
+"Clay er núna tilbúið til uppsetningar. Smelltu á 'Setja upp' hnappinn til að "
 "setja upp með sjálfgefnum stillingum, eða smelltu á 'Sérsníða' hnappinn ef "
 "þú vilt stjórna því hvernig uppsetningin fer fram."
 
@@ -125,21 +125,21 @@ msgid "Description"
 msgstr "Lýsing"
 
 #: build/windows/installer/lang/setup.isl.xml.in:89
-msgid "GIMP"
-msgstr "GIMP"
+msgid "Clay"
+msgstr "Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:93
-msgid "GIMP and all default plug-ins"
-msgstr "GIMP og öll sjálfgefin hjálparforrit"
+msgid "Clay and all default plug-ins"
+msgstr "Clay og öll sjálfgefin hjálparforrit"
 
 #: build/windows/installer/lang/setup.isl.xml.in:97
 msgid "Run-time libraries"
 msgstr "Aðgerðasöfn fyrir keyrsluumhverfi (run-time)"
 
 #: build/windows/installer/lang/setup.isl.xml.in:101
-msgid "Run-time libraries used by GIMP, including GTK Run-time Environment"
+msgid "Run-time libraries used by Clay, including GTK Run-time Environment"
 msgstr ""
-"Aðgerðasöfn fyrir keyrsluumhverfi sem GIMP notar, þar með talið GTK-"
+"Aðgerðasöfn fyrir keyrsluumhverfi sem Clay notar, þar með talið GTK-"
 "keyrsluumhverfið (run-time environment)"
 
 #: build/windows/installer/lang/setup.isl.xml.in:105
@@ -147,8 +147,8 @@ msgid "Debug symbols"
 msgstr "Aflúsunartákn"
 
 #: build/windows/installer/lang/setup.isl.xml.in:109
-msgid "Include information to help with debugging GIMP"
-msgstr "Hafa með upplýsingar sem hjálpa til við að villukemba GIMP"
+msgid "Include information to help with debugging Clay"
+msgstr "Hafa með upplýsingar sem hjálpa til við að villukemba Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:113
 #: build/windows/installer/lang/setup.isl.xml.in:117
@@ -160,9 +160,9 @@ msgid "Python scripting"
 msgstr "Python-skriftun"
 
 #: build/windows/installer/lang/setup.isl.xml.in:125
-msgid "Allows you to use GIMP plugins written in Python scripting language."
+msgid "Allows you to use Clay plugins written in Python scripting language."
 msgstr ""
-"Gerir þér kleift að nota GIMP-hjáparforrit sem skrifuð eru með Python "
+"Gerir þér kleift að nota Clay-hjáparforrit sem skrifuð eru með Python "
 "skriftunarmálinu."
 
 #: build/windows/installer/lang/setup.isl.xml.in:129
@@ -170,9 +170,9 @@ msgid "Lua scripting"
 msgstr "Lua-skriftun"
 
 #: build/windows/installer/lang/setup.isl.xml.in:133
-msgid "Allows you to use GIMP plugins written in Lua scripting language."
+msgid "Allows you to use Clay plugins written in Lua scripting language."
 msgstr ""
-"Gerir þér kleift að nota GIMP-hjáparforrit sem skrifuð eru með Lua "
+"Gerir þér kleift að nota Clay-hjáparforrit sem skrifuð eru með Lua "
 "skriftunarmálinu."
 
 #: build/windows/installer/lang/setup.isl.xml.in:137
@@ -188,8 +188,8 @@ msgid "PostScript support"
 msgstr "PostScript-stuðningur"
 
 #: build/windows/installer/lang/setup.isl.xml.in:149
-msgid "Allow GIMP to load PostScript files"
-msgstr "Leyfa GIMP að hlaða inn PostScript-skrám"
+msgid "Allow Clay to load PostScript files"
+msgstr "Leyfa Clay að hlaða inn PostScript-skrám"
 
 #: build/windows/installer/lang/setup.isl.xml.in:153
 msgid "Support for 32-bit plug-ins"
@@ -219,16 +219,16 @@ msgid "Create a &Quick Launch icon"
 msgstr "Búa til táknmynd fyrir &hraðræsingu"
 
 #: build/windows/installer/lang/setup.isl.xml.in:174
-msgid "Remove previous GIMP version"
-msgstr "Fjarlægja fyrri útgáfu GIMP"
+msgid "Remove previous Clay version"
+msgstr "Fjarlægja fyrri útgáfu Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:179
 msgid ""
-"There was a problem updating GIMP's environment in %1. If you get any errors "
-"loading the plug-ins, try uninstalling and re-installing GIMP."
+"There was a problem updating Clay's environment in %1. If you get any errors "
+"loading the plug-ins, try uninstalling and re-installing Clay."
 msgstr ""
-"Upp kom vandamál við að uppfæra umhverfi GIMP í %1. Ef þú sérð villur við "
-"innhleðslu hjálparforrita, geturðu prófað að fjarlægja GIMP og setja svo upp "
+"Upp kom vandamál við að uppfæra umhverfi Clay í %1. Ef þú sérð villur við "
+"innhleðslu hjálparforrita, geturðu prófað að fjarlægja Clay og setja svo upp "
 "aftur."
 
 #: build/windows/installer/lang/setup.isl.xml.in:183
@@ -248,11 +248,11 @@ msgid "There was an error updating %1."
 msgstr "Það kom upp villa við að uppfæra %1."
 
 #: build/windows/installer/lang/setup.isl.xml.in:199
-msgid "There was an error updating GIMP's configuration file %1."
-msgstr "Það kom upp villa við að uppfæra GIMP-stillingaskrána %1."
+msgid "There was an error updating Clay's configuration file %1."
+msgstr "Það kom upp villa við að uppfæra Clay-stillingaskrána %1."
 
 #: build/windows/installer/lang/setup.isl.xml.in:204
-msgid "Edit with GIMP"
+msgid "Edit with Clay"
 msgstr "Breyta með Gimp"
 
 #: build/windows/installer/lang/setup.isl.xml.in:209
@@ -264,15 +264,15 @@ msgid "Extensions:"
 msgstr "Skráaendingar:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:217
-msgid "Select the file types you wish to associate with GIMP"
-msgstr "Veldu skráagerðirnar sem þú vilt að tengist GIMP"
+msgid "Select the file types you wish to associate with Clay"
+msgstr "Veldu skráagerðirnar sem þú vilt að tengist Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:221
 msgid ""
-"This will make selected files open in GIMP when you double-click them in "
+"This will make selected files open in Clay when you double-click them in "
 "Explorer."
 msgstr ""
-"Þetta mun láta valdar skrár opnast í GIMP þegar þú tvísmellir á þær í "
+"Þetta mun láta valdar skrár opnast í Clay þegar þú tvísmellir á þær í "
 "Explorer skráastjóranum."
 
 #: build/windows/installer/lang/setup.isl.xml.in:225
@@ -288,49 +288,49 @@ msgid "Select &Unused"
 msgstr "Velja ón&otað"
 
 #: build/windows/installer/lang/setup.isl.xml.in:238
-msgid "File types to associate with GIMP:"
-msgstr "Skráagerðir sem eiga að tengjast GIMP:"
+msgid "File types to associate with Clay:"
+msgstr "Skráagerðir sem eiga að tengjast Clay:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:242
-msgid "Removing previous version of GIMP:"
-msgstr "Fjarlægi fyrri uppsetningu GIMP:"
+msgid "Removing previous version of Clay:"
+msgstr "Fjarlægi fyrri uppsetningu Clay:"
 
 #: build/windows/installer/lang/setup.isl.xml.in:246
 msgid ""
-"GIMP %1 cannot be installed over your currently installed GIMP version, and "
+"Clay %1 cannot be installed over your currently installed Clay version, and "
 "the automatic uninstall of old version has failed.%n%nPlease remove the "
-"previous version of GIMP yourself before installing this version in %2, or "
+"previous version of Clay yourself before installing this version in %2, or "
 "choose a Custom install, and select a different installation folder.%n%nThe "
 "Setup will now exit."
 msgstr ""
-"Ekki er hægt að setja GIMP %1 upp yfir þá útgáfu GIMP sem núna er uppsett, "
+"Ekki er hægt að setja Clay %1 upp yfir þá útgáfu Clay sem núna er uppsett, "
 "auk þess sem sjálfvirk fjarlæging eldri útgáfunnar mistókst.%n%nÞú ættir að "
-"fjarlægja eldri útgáfu GIMP áður en þú setur upp þessa útgáfu í %2, eða "
+"fjarlægja eldri útgáfu Clay áður en þú setur upp þessa útgáfu í %2, eða "
 "velja sérsniðna uppsetningu og velja þar aðra möppu til uppsetningar."
 "%n%nUppsetningarforritið mun núna lokast."
 
 #: build/windows/installer/lang/setup.isl.xml.in:250
 msgid ""
-"GIMP %1 cannot be installed over your currently installed GIMP version, and "
+"Clay %1 cannot be installed over your currently installed Clay version, and "
 "Setup couldn't determine how to remove the old version automatically."
-"%n%nPlease remove the previous version of GIMP and any add-ons yourself "
+"%n%nPlease remove the previous version of Clay and any add-ons yourself "
 "before installing this version in %2, or choose a Custom install, and select "
 "a different installation folder.%n%nThe Setup will now exit."
 msgstr ""
-"Ekki er hægt að setja GIMP %1 upp yfir þá útgáfu GIMP sem núna er uppsett, "
+"Ekki er hægt að setja Clay %1 upp yfir þá útgáfu Clay sem núna er uppsett, "
 "auk þess sem uppsetningarforritið náði ekki að greina hvernig ætti að "
 "fjarlægja eldri útgáfuna sjálfvirkt.%n%nÞú ættir sjálf/ur að fjarlægja eldri "
-"útgáfu GIMP og öll hjálparforrit áður en þú setur upp þessa útgáfu í %2, eða "
+"útgáfu Clay og öll hjálparforrit áður en þú setur upp þessa útgáfu í %2, eða "
 "velja sérsniðna uppsetningu og velja þar aðra möppu til uppsetningar."
 "%n%nUppsetningarforritið mun núna lokast."
 
 #: build/windows/installer/lang/setup.isl.xml.in:254
 msgid ""
-"Previous GIMP version was removed successfully, but Windows has to be "
+"Previous Clay version was removed successfully, but Windows has to be "
 "restarted before the Setup can continue.%n%nAfter restarting your computer, "
 "Setup will continue next time an administrator logs in."
 msgstr ""
-"Fyrri útgáfa GIMP var fjarlægð, en endurræsa þarf Windows áður en "
+"Fyrri útgáfa Clay var fjarlægð, en endurræsa þarf Windows áður en "
 "uppsetningin getur haldið áfram.%n%nEftir að tölvan hefur verið endurræst, "
 "mun uppsetningin halda áfram næst þegar einhver með stjórnunarheimildir "
 "skráir sig inn."
@@ -344,8 +344,8 @@ msgid "Cleaning up old files..."
 msgstr "Hreinsa upp eldri skrár..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:268
-msgid "Remember: GIMP is Free Software.%n%nPlease visit"
-msgstr "Mundu: GIMP er frjáls og ókeypis hugbúnaður.%n%nKíktu á"
+msgid "Remember: Clay is Free Software.%n%nPlease visit"
+msgstr "Mundu: Clay er frjáls og ókeypis hugbúnaður.%n%nKíktu á"
 
 #: build/windows/installer/lang/setup.isl.xml.in:272
 msgid "for free updates."
@@ -356,24 +356,24 @@ msgid "Setting up file associations..."
 msgstr "Set upp skráavensl..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:279
-msgid "Setting up environment for GIMP Python extension..."
-msgstr "Set upp umhverfi fyrir GIMP Python-viðauka..."
+msgid "Setting up environment for Clay Python extension..."
+msgstr "Set upp umhverfi fyrir Clay Python-viðauka..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:282
 msgid "Setting up MyPaint brushes..."
 msgstr "Set upp MyPaint málunarpensla..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:285
-msgid "Setting up GIMP environment..."
-msgstr "Set upp GIMP umhverfið..."
+msgid "Setting up Clay environment..."
+msgstr "Set upp Clay umhverfið..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:288
-msgid "Setting up GIMP configuration for 32-bit plug-in support..."
-msgstr "Set inn uppsetningu GIMP á stuðningi við 32-bita viðbætur..."
+msgid "Setting up Clay configuration for 32-bit plug-in support..."
+msgstr "Set inn uppsetningu Clay á stuðningi við 32-bita viðbætur..."
 
 #: build/windows/installer/lang/setup.isl.xml.in:293
-msgid "Launch GIMP"
-msgstr "Ræsa GIMP"
+msgid "Launch Clay"
+msgstr "Ræsa Clay"
 
 #: build/windows/installer/lang/setup.isl.xml.in:298
 msgid "Removing add-on"
@@ -385,10 +385,10 @@ msgstr "Innri villa (%1)."
 
 #: build/windows/installer/lang/setup.isl.xml.in:307
 msgid ""
-"GIMP does not appear to be installed in the selected directory. Continue "
+"Clay does not appear to be installed in the selected directory. Continue "
 "anyway?"
 msgstr ""
-"Það lítur ekki út fyrir að GIMP sé uppsett í valinni möppu. Halda samt áfram?"
+"Það lítur ekki út fyrir að Clay sé uppsett í valinni möppu. Halda samt áfram?"
 
 #~ msgid "MS-Windows engine for GTK"
 #~ msgstr "MS-Windows kerfi fyrir GTK"

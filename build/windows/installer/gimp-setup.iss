@@ -188,9 +188,9 @@ AppPublisherURL=https://claydesign.web.app
 AppSupportURL=https://claydesign.web.app
 #if Defined(GIMP_UNSTABLE)
   ;ControlPanel 'URLUpdateInfo'
-  AppUpdatesURL=https://www.gimp.org/downloads/devel/
+  AppUpdatesURL=https://github.com/KurtStevenK/clay/releases
 #else
-  AppUpdatesURL=https://www.gimp.org/downloads/
+  AppUpdatesURL=https://github.com/KurtStevenK/clay/releases
 #endif
 
 
@@ -371,30 +371,30 @@ Source: "{#ASSETS_DIR}\installsplash_bottom.bmp"; Flags: dontcopy
 
 ;Required arch-neutral files (compact install)
 #define OPTIONAL_EXT="*.pdb,*.lua,*.py,*.js"
-Source: "{#MAIN_BUNDLE}\etc\gimp\*"; DestDir: "{app}\etc\gimp"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ\default.env"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\gimp-script-fu-interpreter*.interp"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\extensions\*"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\extensions"; Excludes: "*.dll,*.exe,{#OPTIONAL_EXT}"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\plug-ins\*"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\plug-ins"; Excludes: "*.dll,*.exe,{#OPTIONAL_EXT}"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\share\gimp\*"; DestDir: "{app}\share\gimp"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS} createallsubdirs
+Source: "{#MAIN_BUNDLE}\etc\clay\*"; DestDir: "{app}\etc\clay"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ\default.env"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\gimp-script-fu-interpreter*.interp"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\extensions\*"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\extensions"; Excludes: "*.dll,*.exe,{#OPTIONAL_EXT}"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\plug-ins\*"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\plug-ins"; Excludes: "*.dll,*.exe,{#OPTIONAL_EXT}"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\share\clay\*"; DestDir: "{app}\share\clay"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS} createallsubdirs
 Source: "{#MAIN_BUNDLE}\share\icons\hicolor\*"; DestDir: "{app}\share\icons\hicolor"; Components: {#GIMP_ARCHS}; Flags: {#COMMON_FLAGS}
 Source: "{#MAIN_BUNDLE}\etc\*"; DestDir: "{app}\etc"; Excludes: "gimp,ssl"; Components: {#DEPS_ARCHS}; Flags: {#COMMON_FLAGS}
 Source: "{#MAIN_BUNDLE}\share\*"; DestDir: "{app}\share"; Excludes: "gimp,icons\hicolor,locale\*,mypaint-data"; Components: {#DEPS_ARCHS}; Flags: {#COMMON_FLAGS} createallsubdirs
 
 ;Optional arch-neutral files (full install)
 #ifdef LUA
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\lua.interp"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#LUA_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\*.lua"; DestDir: "{app}"; Excludes: "share\gimp\*.lua"; Components: {#LUA_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\lua.interp"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#LUA_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\*.lua"; DestDir: "{app}"; Excludes: "share\clay\*.lua"; Components: {#LUA_ARCHS}; Flags: {#COMMON_FLAGS}
 #endif
 #ifdef PYTHON
 Source: "{#MAIN_BUNDLE}\etc\ssl\*"; DestDir: "{app}\etc\ssl"; Components: {#PY_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ\py*.env"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ"; Components: {#PY_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\pygimp*.interp"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#PY_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ\py*.env"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ"; Components: {#PY_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\pygimp*.interp"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#PY_ARCHS}; Flags: {#COMMON_FLAGS}
 Source: "{#MAIN_BUNDLE}\*.py"; DestDir: "{app}"; Components: {#PY_ARCHS}; Flags: {#COMMON_FLAGS}
 #endif
 #ifdef JAVASCRIPT
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\gjs*.interp"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#JS_ARCHS}; Flags: {#COMMON_FLAGS}
-Source: "{#MAIN_BUNDLE}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\*.js"; DestDir: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}"; Components: {#JS_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\gjs*.interp"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters"; Components: {#JS_ARCHS}; Flags: {#COMMON_FLAGS}
+Source: "{#MAIN_BUNDLE}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\*.js"; DestDir: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}"; Components: {#JS_ARCHS}; Flags: {#COMMON_FLAGS}
 #endif
 Source: "{#MAIN_BUNDLE}\share\locale\*"; DestDir: "{app}\share\locale"; Components: loc; Flags: dontcopy {#COMMON_FLAGS}
 #include ASSETS_DIR + "\base_po-files.list"
@@ -426,8 +426,8 @@ Source: "{#MAIN_BUNDLE}\share\mypaint-data\*"; DestDir: "{app}\share\mypaint-dat
 ; Required arch-specific components (compact installation)
 Source: "{#BUNDLE}\bin\libgimp*.dll"; DestDir: "{app}\bin"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
 Source: "{#BUNDLE}\bin\gimp*.exe"; DestDir: "{app}\bin"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
-Source: "{#BUNDLE}\lib\gimp\*.dll"; DestDir: "{app}\lib\gimp"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
-Source: "{#BUNDLE}\lib\gimp\*.exe"; DestDir: "{app}\lib\gimp"; Excludes: "{#OPTIONAL_EXE}"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
+Source: "{#BUNDLE}\lib\clay\*.dll"; DestDir: "{app}\lib\clay"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
+Source: "{#BUNDLE}\lib\clay\*.exe"; DestDir: "{app}\lib\clay"; Excludes: "{#OPTIONAL_EXE}"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
 Source: "{#BUNDLE}\lib\girepository-1.0\Gimp*.typelib"; DestDir: "{app}\lib\girepository-1.0"; Components: gimp{#COMPONENT}; Flags: {#COMMON_FLAGS}
 
 Source: "{#BUNDLE}\bin\*"; DestDir: "{app}\bin"; Excludes: "libgimp*.dll,gimp*.exe,*.pdb,{#OPTIONAL_DLL},{#OPTIONAL_EXE}"; Components: deps{#COMPONENT}; Flags: {#COMMON_FLAGS}
@@ -496,7 +496,7 @@ Source: "{code:GetExternalConfDir}\{#FileName}"; DestDir: "{app}\{#ConfigDir}"; 
   #endif
 #endsub
 #define public BaseDir MAIN_BUNDLE
-#define public ConfigDir "etc\gimp\" + GIMP_PKGCONFIG_VERSION
+#define public ConfigDir "etc\clay\" + GIMP_PKGCONFIG_VERSION
 #expr ProcessConfigDir
 #define public ConfigDir "etc\fonts"
 #expr ProcessConfigDir
@@ -517,7 +517,7 @@ Type: filesandordirs; Name: "{app}\lib\python{#PYTHON_VERSION}\*"
 Type: filesandordirs; Name: "{app}\lib\python{#PREVIOUS_PYTHON_VERSION}\*"
 ;Wintel support was dropped in 3.2.2
 Type: filesandordirs; Name: "{app}\32\*"
-Type: filesandordirs; Name: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\plug-ins\twain\*"
+Type: filesandordirs; Name: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\plug-ins\twain\*"
 ;get previous GIMP icon name from uninstall name in Registry
 Type: files; Name: "{autoprograms}\{reg:HKA\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-{#GIMP_MUTEX_VERSION}_is1,DisplayName|GIMP {#GIMP_MUTEX_VERSION}}.lnk"; Check: CheckRegValueExists('SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-{#GIMP_MUTEX_VERSION}_is1','DisplayName')
 Type: files; Name: "{autodesktop}\{reg:HKA\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-{#GIMP_MUTEX_VERSION}_is1,DisplayName|GIMP {#GIMP_MUTEX_VERSION}}.lnk"; Check: CheckRegValueExists('SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-{#GIMP_MUTEX_VERSION}_is1','DisplayName')
@@ -525,9 +525,9 @@ Type: files; Name: "{autodesktop}\{reg:HKA\SOFTWARE\Microsoft\Windows\CurrentVer
 
 [UninstallDelete]
 Type: files; Name: "{app}\uninst\uninst.inf"
-Type: files; Name: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\lua.interp"
-Type: files; Name: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ\pygimp.env"
-Type: files; Name: "{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ\pygimp_win.env"
+Type: files; Name: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\lua.interp"
+Type: files; Name: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ\pygimp.env"
+Type: files; Name: "{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ\pygimp_win.env"
 
 
 ;4.3 KEYS TO BE REGISTERED
@@ -1991,10 +1991,10 @@ end;
 //7.2 INSTALL: show GIMP text (aka billboard) above progress bar
 #if Defined(GIMP_UNSTABLE)
 const
-  GIMP_URL = 'https://gimp.org/downloads/devel/';
+  GIMP_URL = 'https://github.com/KurtStevenK/clay/releases';
 #else
 const
-  GIMP_URL = 'https://gimp.org/downloads/';
+  GIMP_URL = 'https://github.com/KurtStevenK/clay/releases';
 #endif
 
 procedure lblURL_OnClick(Sender: TObject);
@@ -2111,7 +2111,7 @@ begin
     StatusLabel(CustomMessage('SettingUpPyGimp'),'');
 
     //python.exe is needed for plug-ins error output if `gimp*.exe` is run from console
-    InterpFile := ExpandConstant('{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\pygimp.interp');
+    InterpFile := ExpandConstant('{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\pygimp.interp');
         DebugMsg('PrepareInterp','Writing interpreter file for gimp-python: ' + InterpFile);
     InterpContent := 'python=' + ExpandConstant('{app}\bin\python.exe') + #10 +
                      'python3=' + ExpandConstant('{app}\bin\python.exe') + #10 +
@@ -2125,7 +2125,7 @@ begin
     end;
 
     //pythonw.exe is needed to run plug-ins silently if `gimp*.exe` is run from shortcut
-    InterpFile := ExpandConstant('{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\pygimp_win.interp');
+    InterpFile := ExpandConstant('{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\pygimp_win.interp');
         DebugMsg('PrepareInterp','Writing interpreter file for gimp-python: ' + InterpFile);
     InterpContent := 'python=' + ExpandConstant('{app}\bin\pythonw.exe') + #10 +
                      'python3=' + ExpandConstant('{app}\bin\pythonw.exe') + #10 +
@@ -2143,7 +2143,7 @@ begin
 #ifdef LUA
   if WizardIsComponentSelected('luaARM64') or WizardIsComponentSelected('lua64') then
   begin
-    InterpFile := ExpandConstant('{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\lua.interp');
+    InterpFile := ExpandConstant('{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\lua.interp');
     DebugMsg('PrepareInterp','Writing interpreter file for lua: ' + InterpFile);
 
     LuaBin := 'luajit.exe'
@@ -2164,7 +2164,7 @@ begin
 
 // !!! use comma for binfmt delimiter and full Windows path in interpreter field of binfmt
 begin
-  InterpFile := ExpandConstant('{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\gimp-script-fu-interpreter.interp');
+  InterpFile := ExpandConstant('{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\gimp-script-fu-interpreter.interp');
   DebugMsg('PrepareInterp','Writing interpreter file for gimp-script-fu-interpreter: ' + InterpFile);
   InterpContent := 'gimp-script-fu-interpreter=' + ExpandConstant('{app}\bin\gimp-script-fu-interpreter-{#GIMP_PKGCONFIG_VERSION}.exe') + #10 +
                    'gimp-script-fu-interpreter-{#GIMP_PKGCONFIG_VERSION}=' + ExpandConstant('{app}\bin\gimp-script-fu-interpreter-{#GIMP_PKGCONFIG_VERSION}.exe') + #10 +
@@ -2177,7 +2177,7 @@ begin
     SuppressibleMsgBox(CustomMessage('ErrorUpdatingScriptFu') + ' (2)',mbInformation,mb_ok,IDOK);
   end;
 
-  InterpFile := ExpandConstant('{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\interpreters\gimp-script-fu-interpreter_win.interp');
+  InterpFile := ExpandConstant('{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\interpreters\gimp-script-fu-interpreter_win.interp');
   DebugMsg('PrepareInterp','Writing interpreter file for gimp-script-fu-interpreter: ' + InterpFile);
   InterpContent := 'gimp-script-fu-interpreter=' + ExpandConstant('{app}\bin\gimp-script-fu-interpreter-{#GIMP_PKGCONFIG_VERSION}.exe') + #10 +
                    'gimp-script-fu-interpreter-{#GIMP_PKGCONFIG_VERSION}=' + ExpandConstant('{app}\bin\gimp-script-fu-interpreter-{#GIMP_PKGCONFIG_VERSION}.exe') + #10 +
@@ -2199,7 +2199,7 @@ begin
   StatusLabel(CustomMessage('SettingUpEnvironment'),'');
 
   //set PATH to be used by plug-ins
-  EnvFile := ExpandConstant('{app}\lib\gimp\{#GIMP_PKGCONFIG_VERSION}\environ\default.env');
+  EnvFile := ExpandConstant('{app}\lib\clay\{#GIMP_PKGCONFIG_VERSION}\environ\default.env');
   DebugMsg('PrepareGimpEnvironment','Setting environment in ' + EnvFile);
 
   Env := #10'PATH=${gimp_installation_dir}\bin';
@@ -2215,7 +2215,7 @@ begin
   end;
 
   // Set revision
-  EnvFile := ExpandConstant('{app}\share\gimp\{#GIMP_PKGCONFIG_VERSION}\gimp-release');
+  EnvFile := ExpandConstant('{app}\share\clay\{#GIMP_PKGCONFIG_VERSION}\gimp-release');
   DebugMsg('PrepareGimpEnvironment','Setting revision number {#REVISION} in ' + EnvFile);
 
   //LoadStringFromUTF8File(EnvFile,Env);
@@ -2231,7 +2231,7 @@ begin
   // Disable check-update when run with specific option
   if ExpandConstant('{param:disablecheckupdate|false}') = 'true' then
   begin
-    EnvFile := ExpandConstant('{app}\share\gimp\{#GIMP_PKGCONFIG_VERSION}\gimp-release');
+    EnvFile := ExpandConstant('{app}\share\clay\{#GIMP_PKGCONFIG_VERSION}\gimp-release');
     DebugMsg('DisableCheckUpdate','Disabling check-update in ' + EnvFile);
 
     Env := 'check-update=false'
@@ -2639,15 +2639,15 @@ begin
   end;
   usPostUninstall:
   begin
-    //Offer option to remove %AppData%/GIMP/GIMP_APP_VERSION dir so have a future clean install
+    //Offer option to remove %AppData%/Clay/GIMP_APP_VERSION dir so have a future clean install
     if not IsAdminInstallMode() then begin
             gimp_directory := GetEnv('GIMP{#API_MAJOR}_DIRECTORY');
       if gimp_directory = '' then begin
-        gimp_directory := ExpandConstant('{userappdata}\GIMP\{#GIMP_APP_VERSION}');
+        gimp_directory := ExpandConstant('{userappdata}\Clay\{#GIMP_APP_VERSION}');
       end;
       if DirExists(gimp_directory + '\') then begin
         if SuppressibleMsgBox(CustomMessage('UninstallConfig'), mbError, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES then begin
-          CopyFiles(gimp_directory, ExpandConstant('{userdesktop}\gimp_{#GIMP_APP_VERSION}_backup_' + Format('%d', [Time(0)])), '');
+          CopyFiles(gimp_directory, ExpandConstant('{userdesktop}\clay_{#GIMP_APP_VERSION}_backup_' + Format('%d', [Time(0)])), '');
           DelTree(gimp_directory, True, True, True);
         end;
       end;
