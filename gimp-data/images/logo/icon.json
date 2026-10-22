@@ -4,12 +4,12 @@
     {
       "layers" : [
         {
-          "image-name" : "gimp-logo.svg",
-          "name" : "gimp-logo",
+          "image-name" : "clay-logo.svg",
+          "name" : "clay-logo",
           "position" : {
-            "scale" : 10.6,
+            "scale" : 1,
             "translation-in-points" : [
-              -25,
+              0,
               0
             ]
           }

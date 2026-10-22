@@ -403,7 +403,7 @@ if get_option('dmg')
                                    configuration : gen_conf)
   gimp_icns = custom_target('gimp.icns',
                             input : [ gen_gimp_icns_py ],
-                            depend_files: [ 'gimp-logo.svg' ],
+                            depend_files: [ 'clay-logo.svg' ],
                             depends: [ gimp_exe_depends ],
                             output: [ 'gimp.icns' ],
                             command: [ gimp_exe,'-nidfs',
@@ -424,12 +424,12 @@ if get_option('dmg')
                   '@INPUT@', meson.current_build_dir() / 'AppIcon.icon' / 'icon.json'
                 ],
                 build_by_default: true)
-  custom_target('copy-gimp-logo',
-                input: 'gimp-logo.svg',
-                output: 'gimp-logo.svg',
+  custom_target('copy-clay-logo',
+                input: 'clay-logo.svg',
+                output: 'clay-logo.svg',
                 command: [
                   python, '-c', 'import shutil, sys, os; os.makedirs(os.path.dirname(sys.argv[2]), exist_ok=True); shutil.copy2(sys.argv[1], sys.argv[2])',
-                  '@INPUT@', meson.current_build_dir() / 'AppIcon.icon/Assets' / 'gimp-logo.svg'
+                  '@INPUT@', meson.current_build_dir() / 'AppIcon.icon/Assets' / 'clay-logo.svg'
                 ],
                 build_by_default: true)
 
