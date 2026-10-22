@@ -57,7 +57,7 @@ jobs:
             exit 1
           fi
 
-      - name: Set up paths and Xcode
+      - name: Set up paths
         run: |
           {
             echo "GIMP_PREFIX=$RUNNER_TEMP/_install"
@@ -67,9 +67,8 @@ jobs:
             echo "XDG_DATA_DIRS=$RUNNER_TEMP/_install/share:$OPT_PREFIX/share"
             echo "GI_TYPELIB_PATH=$RUNNER_TEMP/_install/lib/girepository-1.0:$OPT_PREFIX/lib/girepository-1.0"
           } >> "$GITHUB_ENV"
-          # actool needs Xcode 26+ to compile the AppIcon.icon (Liquid Glass) source
-          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
-          sudo xcode-select -s "$xcode"
+          # The runner's default Xcode: newer ones may crash in actool on this macOS.
+          # Without the Liquid Glass icon the app falls back to AppIcon.icns.
           xcodebuild -version
 
       - name: Import Developer ID certificate

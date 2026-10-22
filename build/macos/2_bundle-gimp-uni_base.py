@@ -164,7 +164,12 @@ GIMP_DISTRIB.mkdir(parents=True, exist_ok=True)
 shutil.copy2(Path(f"{GIMP_SOURCE}/build/macos/Info.plist"), GIMP_DISTRIB)
 ### FIXME: Icon (generate Assets.car for Liquid Glass: https://gitlab.gnome.org/Infrastructure/Infrastructure/-/issues/2159)
 (GIMP_DISTRIB / "Resources").mkdir(parents=True, exist_ok=True)
-subprocess.run(["xcrun","actool",str(Path(f"{BUILD_DIR}/gimp-data/images/logo/AppIcon.icon")),"--output-format","human-readable-text","--compile",f"{GIMP_DISTRIB / 'Resources'}","--include-all-app-icons","--enable-on-demand-resources","NO","--enable-icon-stack-fallback-generation","NO","--development-region","en","--target-device","mac","--platform","macosx","--minimum-deployment-target",os.getenv('MACOSX_DEPLOYMENT_TARGET', ".".join(platform.mac_ver()[0].split(".")[:2]))], check=True)
+try:
+  subprocess.run(["xcrun","actool",str(Path(f"{BUILD_DIR}/gimp-data/images/logo/AppIcon.icon")),"--output-format","human-readable-text","--compile",f"{GIMP_DISTRIB / 'Resources'}","--include-all-app-icons","--enable-on-demand-resources","NO","--enable-icon-stack-fallback-generation","NO","--development-region","en","--target-device","mac","--platform","macosx","--minimum-deployment-target",os.getenv('MACOSX_DEPLOYMENT_TARGET', ".".join(platform.mac_ver()[0].split(".")[:2]))], check=True)
+except (subprocess.CalledProcessError, OSError):
+  # Older Xcode can not compile .icon, and some Xcode/macOS pairs crash in actool;
+  # macOS then uses AppIcon.icns (clay-dist-local.sh drops CFBundleIconName)
+  print("\033[33m(WARNING)\033[0m: actool could not compile AppIcon.icon, using AppIcon.icns only")
 shutil.copy2(Path(f"{BUILD_DIR}/gimp-data/images/logo/gimp.icns"), GIMP_DISTRIB / "Resources/AppIcon.icns")
 shutil.copy2(Path(f"{BUILD_DIR}/build/macos/fileicon-xcf.icns"), GIMP_DISTRIB / "Resources/fileicon-xcf.icns")
 shutil.copy2(Path(f"{BUILD_DIR}/build/macos/fileicon.icns"), GIMP_DISTRIB / "Resources/fileicon.icns")
@@ -210,9 +215,12 @@ bundle(GIMP_PREFIX, "lib/babl-*")
 bundle(GIMP_PREFIX, "lib/libgegl*-*.*.*.dylib")
 bundle(GIMP_PREFIX, "lib/gegl-*")
 bundle(GIMP_PREFIX, "lib/libclay*-*.*.*.dylib")
-### Runtime libs loaded by name or pulled in by Homebrew deps (SDL3 is dlopen-ed by GIMP, libomp by libraw-based GEGL ops)
-bundle(OPT_PREFIX, "lib/libSDL3*.dylib")
-bundle(OPT_PREFIX, "opt/libomp/lib/libomp.dylib", "--dest", "lib")
+### Runtime libs loaded by name or pulled in by Homebrew deps, when the build found them
+### (SDL3 is dlopen-ed by GIMP, libomp is needed by libraw-based GEGL ops)
+if glob(f"{OPT_PREFIX}/lib/libSDL3*.dylib"):
+  bundle(OPT_PREFIX, "lib/libSDL3*.dylib")
+if (OPT_PREFIX / "opt/libomp/lib/libomp.dylib").exists():
+  bundle(OPT_PREFIX, "opt/libomp/lib/libomp.dylib", "--dest", "lib")
 bundle(GIMP_PREFIX, "lib/gimp")
 bundle(GIMP_PREFIX, "share/gimp")
 lang_array = [Path(f).stem for f in glob(str(Path(GIMP_SOURCE)/"po/*.po"))]
