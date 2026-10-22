@@ -10,8 +10,9 @@
 #   build/macos/dmg/clay-dist-local.sh <meson build dir> [bundle]
 #
 # .env.local (git-ignored) may define APPLE_ID, APPLE_TEAM_ID and
-# APPLE_APP_PASS (an app-specific password). Without them the DMG is
-# signed but not notarized. CODESIGN_IDENTITY overrides the identity.
+# APPLE_APP_PASS (an app-specific password). Without them, or with
+# SKIP_NOTARIZE=1, the DMG is signed but not notarized.
+# CODESIGN_IDENTITY overrides the identity.
 
 set -euo pipefail
 
@@ -21,7 +22,7 @@ if [ ! -f build/macos/dmg/clay-dist-local.sh ]; then
 fi
 
 BUILD_DIR="${1:-}"
-APP="${2:-gimp-$(uname -m).app}"
+APP="${2:-clay-$(uname -m).app}"
 DIST_DIR="${DIST_DIR:-$PWD/../dist}"
 BUNDLE_IDENTIFIER="xyz.kainzmayer.clay"
 BUNDLE_NAME="Clay"
@@ -79,7 +80,14 @@ langs = [l.split()[0].replace("_", "-") for l in open(linguas) if l.strip() and 
 text = text.replace("%LOCALIZATIONS%", "".join(f"<string>{l}</string>" for l in dict.fromkeys(langs)))
 open(plist, "w").write(text)
 EOF
+## The real minimum macOS is the highest one any bundled binary was built for
+## (Homebrew builds for the OS it runs on), so macOS refuses to start it on older
+## systems instead of letting it crash
+MIN_MACOS=$(find "$C" -type f \( -name "*.dylib" -o -name "*.so" -o -path "*/MacOS/*" \) -exec otool -l {} \; 2>/dev/null \
+            | awk '/LC_BUILD_VERSION/ {f=1} f && $1 == "minos" {print $2; f=0}' | sort -V | tail -1)
+plutil -replace LSMinimumSystemVersion -string "${MIN_MACOS:-11.0}" "$C/Info.plist"
 plutil -lint "$C/Info.plist" >/dev/null
+printf "(INFO): minimum macOS: ${MIN_MACOS:-11.0}\n"
 
 
 # 2. SIGN (inside-out: every Mach-O by header, then Python.framework, then the app)
@@ -115,17 +123,73 @@ codesign --verify --deep --strict "$APP"
 # 3. CREATE DMG
 mkdir -p "$DIST_DIR"
 DMG="$DIST_DIR/Clay-$GIMP_VERSION-macOS-$(uname -m).dmg"
+VOLNAME="$BUNDLE_NAME $GIMP_APP_VERSION"
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
-ditto "$APP" "$STAGE/$BUNDLE_NAME.app"
-ln -s /Applications "$STAGE/Applications"
-rm -f "$DMG"
-hdiutil create -volname "$BUNDLE_NAME $GIMP_APP_VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+mkdir "$STAGE/dmg"
+ditto "$APP" "$STAGE/dmg/$BUNDLE_NAME.app"
+ln -s /Applications "$STAGE/dmg/Applications"
+
+## Background and icon layout (ported from 3_dist-gimp-apple.sh, needs no Finder)
+BG_PATH="$BUILD_DIR/gimp-data/images/logo/gimp-dmg.png"
+if [ -f "$BG_PATH" ]; then
+  cp "$BG_PATH" "$STAGE/dmg/.background.png"
+  python3 -m venv "$STAGE/venv"
+  "$STAGE/venv/bin/pip" install -q --disable-pip-version-check ds_store biplist mac_alias
+  "$STAGE/venv/bin/python" - "$STAGE/dmg/.DS_Store" "$VOLNAME" "$BUNDLE_NAME.app" <<'EOF'
+import sys
+from datetime import datetime, timezone
+import biplist, ds_store, mac_alias
+ds_path, volname, app_name = sys.argv[1:4]
+def create_alias(filename):
+  volume = mac_alias.VolumeInfo(volname, datetime.now(timezone.utc),
+                                fs_type=mac_alias.ALIAS_HFS_VOLUME_SIGNATURE, disk_type=mac_alias.ALIAS_FIXED_DISK,
+                                attribute_flags=0, fs_id=bytes(2))
+  target = mac_alias.TargetInfo(mac_alias.ALIAS_KIND_FILE, filename, folder_cnid=0, cnid=0,
+                                creation_date=datetime.now(timezone.utc), creator_code=bytes(4), type_code=bytes(4),
+                                folder_name=volname, carbon_path=f"{volname}:{filename}")
+  return mac_alias.Alias(volume=volume, target=target)
+store = ds_store.DSStore.open(ds_path, "w+")
+store["."]["vSrn"] = ("long", 1)
+store["."]["icvl"] = ("type", "icnv")
+store["."]["icvp"] = {
+  "backgroundType": 2, "backgroundColorRed": 1.0, "backgroundColorGreen": 1.0, "backgroundColorBlue": 1.0,
+  "backgroundImageAlias": biplist.Data(create_alias(".background.png").to_bytes()),
+  "viewOptionsVersion": 1, "gridSpacing": 100.0, "gridOffsetX": 0.0, "gridOffsetY": 0.0,
+  "scrollPositionY": 0.0, "arrangeBy": "none", "labelOnBottom": True, "showItemInfo": False,
+  "showIconPreview": False, "iconSize": 110.0, "textSize": 16.0,
+}
+store["."]["bwsp"] = {"WindowBounds": "{{100, 100}, {640, 512}}", "ShowToolbar": False,
+                      "ShowPathbar": False, "ShowStatusBar": False}
+store[app_name]["Iloc"] = (192, 282)
+store["Applications"]["Iloc"] = (448, 282)
+store[".background.png"]["Iloc"] = (524, 0)
+store[".VolumeIcon.icns"]["Iloc"] = (524, 0)
+store.flush()
+store.close()
+EOF
+fi
+
+## Read-write image first: the volume icon needs the custom-icon flag on the mounted root
+rm -f "$DMG" "$STAGE/rw.dmg"
+hdiutil create -volname "$VOLNAME" -srcfolder "$STAGE/dmg" -ov -format UDRW "$STAGE/rw.dmg" >/dev/null
+VOLUME_ICON="$BUILD_DIR/build/macos/.VolumeIcon.icns"
+if [ -f "$VOLUME_ICON" ]; then
+  MOUNT=$(hdiutil attach -nobrowse -noautoopen "$STAGE/rw.dmg" | tail -1 | cut -f3-)
+  cp "$VOLUME_ICON" "$MOUNT/.VolumeIcon.icns"
+  SetFile -a C "$MOUNT"
+  hdiutil detach "$MOUNT" >/dev/null
+fi
+hdiutil convert "$STAGE/rw.dmg" -format UDZO -o "$DMG" >/dev/null
 codesign --force --timestamp -s "$SIGN_ID" "$DMG"
 printf "(INFO): signed $DMG\n"
 
 
 # 4. NOTARIZE AND STAPLE
+if [ -n "${SKIP_NOTARIZE:-}" ]; then
+  printf '(INFO): SKIP_NOTARIZE is set; DMG is signed but not notarized\n'
+  exit 0
+fi
 if [ -f .env.local ]; then
   set -a; . ./.env.local; set +a
 fi
