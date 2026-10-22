@@ -6,8 +6,8 @@ if echo "$GIMP_CI_MACOS" | grep -q '[1-9]' && [ "$CI_PIPELINE_SOURCE" != 'schedu
   export REVISION="$GIMP_CI_MACOS"
 fi
 BUILD_DIR="$2"
-ARM64_BUNDLE=${3:-gimp-arm64.app}
-X86_64_BUNDLE=${4:-gimp-x86_64.app}
+ARM64_BUNDLE=${3:-clay-arm64.app}
+X86_64_BUNDLE=${4:-clay-x86_64.app}
 
 # Ensure the script work properly
 case $(readlink /proc/$$/exe) in
@@ -81,7 +81,7 @@ printf "\e[0Ksection_end:`date +%s`:mac_info\r\e[0K\n"
 
 # 3. PREPARE FILES
 for APP in $(echo "$supported_archs" | tr ' ' '\n'); do
-export ARCH=$(echo $APP | sed -e 's|gimp-||' -e 's|./||' -e 's|.app||')
+export ARCH=$(echo $APP | sed -e 's|clay-||' -e 's|./||' -e 's|.app||')
 printf "\e[0Ksection_start:`date +%s`:${ARCH}_files[collapsed=true]\r\e[0KPreparing GIMP files in $ARCH DMG\n"
 ## Create temporary .dmg
 APPVER="GIMP $CUSTOM_GIMP_VERSION install"

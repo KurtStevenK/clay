@@ -5,7 +5,7 @@ gi.require_version('Gegl', '0.4')
 from gi.repository import Gegl
 
 dmg_base    = '@SRCDIR@/dmg-base.svg'
-logo        = '@SRCDIR@/gimp-logo.svg'
+logo        = '@SRCDIR@/clay-logo.svg'
 output_path = '@BUILDDIR@/../../../build/macos/.VolumeIcon.icns'
 export_path = '@BUILDDIR@/../../../build/macos/'
 sizes       = [ 16, 18, 24, 32, 36, 48, 64, 128, 256, 512, 1024 ]

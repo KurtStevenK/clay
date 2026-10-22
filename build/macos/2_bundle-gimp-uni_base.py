@@ -45,7 +45,7 @@ GIMP_PREFIX = Path(os.getenv("MESON_INSTALL_DESTDIR_PREFIX"))
 ## Bundle dir: we make a "perfect" bundle separated from GIMP_PREFIX
 #NOTE: The bundling script need to set $OPT_PREFIX to our dist scripts
 #fallback code be able to identify what arch they are distributing
-GIMP_DISTRIB = Path(GIMP_SOURCE) / f"gimp-{platform.machine()}.app" / "Contents"
+GIMP_DISTRIB = Path(GIMP_SOURCE) / f"clay-{platform.machine()}.app" / "Contents"
 
 def bundle(src_root, pattern, option="None", override=None):
   ## Search for targets in search path
@@ -393,12 +393,16 @@ while pcs_to_process:
 
         #1.Bundle the pkgconfig file (.pc)
         pc_path = f"lib/pkgconfig/{dep}.pc"
-        if (OPT_PREFIX / pc_path).exists() and not (GIMP_DISTRIB / pc_path).exists():
-          bundle(OPT_PREFIX, pc_path)
+        # Homebrew keeps header-only .pc files (e.g. xproto) in share/pkgconfig
+        src_pc_path = pc_path if (OPT_PREFIX / pc_path).exists() else f"share/pkgconfig/{dep}.pc"
+        if (OPT_PREFIX / src_pc_path).exists() and not (GIMP_DISTRIB / pc_path).exists():
+          bundle(OPT_PREFIX, src_pc_path, "--dest", "lib/pkgconfig")
           # Replace the hardcoded prefix with a relocatable one
           dest_pc = GIMP_DISTRIB / pc_path
           os.chmod(dest_pc, dest_pc.stat().st_mode | stat.S_IWUSR)
           pc_content = dest_pc.read_text()
+          # Homebrew .pc files point into Cellar/<name>/<version> or opt/<name>, but the bundle is flat
+          pc_content = re.sub(rf'{re.escape(str(OPT_PREFIX))}/(?:Cellar/[^/\s]+/[^/\s]+|opt/[^/\s]+)(?=[/\s]|$)', "${pcfiledir}/../..", pc_content, flags=re.MULTILINE)
           new_pc_content = pc_content.replace(str(OPT_PREFIX), "${pcfiledir}/../..")
           dest_pc.write_text(new_pc_content)
 
@@ -408,8 +412,12 @@ while pcs_to_process:
             for arg in libs.stdout.split():
               if arg.startswith("-l"):
                 lib_name = f"lib/lib{arg[2:]}.dylib"
-                if os.path.lexists(OPT_PREFIX / lib_name) and not os.path.lexists(GIMP_DISTRIB / lib_name) and (GIMP_DISTRIB / "lib" / os.path.basename(os.readlink(OPT_PREFIX / lib_name))).exists():
-                  bundle(OPT_PREFIX, lib_name, "--preserve-symlink")
+                if os.path.lexists(OPT_PREFIX / lib_name) and not os.path.lexists(GIMP_DISTRIB / lib_name):
+                  # Resolve fully: Homebrew links point into Cellar, which is not bundled
+                  versioned_lib = os.path.basename(os.path.realpath(OPT_PREFIX / lib_name))
+                  if (GIMP_DISTRIB / "lib" / versioned_lib).exists():
+                    print(f"Bundling {OPT_PREFIX / lib_name} to {GIMP_DISTRIB / 'lib'}")
+                    (GIMP_DISTRIB / lib_name).symlink_to(versioned_lib)
 
           #3.Bundle the headers (.h)
           includedir = subprocess.run(["pkg-config", "--cflags-only-I", dep], capture_output=True, text=True)

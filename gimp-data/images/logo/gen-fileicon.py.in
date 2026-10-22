@@ -40,7 +40,7 @@ def export_img(sizes, type='none', type_param='none'):
             tmp_image.delete()
 
             # 2. Loading Wilber.
-            config.set_property("file", Gio.file_new_for_path('@SRCDIR@/gimp-logo-shadow.svg'))
+            config.set_property("file", Gio.file_new_for_path('@SRCDIR@/clay-logo.svg'))
             wilber_size = base_size * 7 / 8
             config.set_property("width",  wilber_size)
             config.set_property("height", wilber_size)

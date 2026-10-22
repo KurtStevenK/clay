@@ -128,7 +128,7 @@ if get_option('windows-installer')
                                        configuration : gen_fileicon_ico_conf)
   fileicon_ico = custom_target('fileicon.ico',
                                input : [ gen_fileicon_ico_py ],
-                               depend_files: [ 'gimp-logo-shadow.svg', 'fileicon-base-xcf.svg', 'fileicon-base.svg' ],
+                               depend_files: [ 'clay-logo.svg', 'fileicon-base-xcf.svg', 'fileicon-base.svg' ],
                                depends: [ gimp_exe_depends ],
                                output: [ 'stamp-fileicon.ico', ],
                                command: [ gimp_exe,'-nidfs',
@@ -373,7 +373,7 @@ if get_option('ms-store')
                                        configuration : gen_fileicon_png_conf)
   custom_target('fileicon.png',
                 input : [ gen_fileicon_png_py ],
-                depend_files: [ 'gimp-logo-shadow.svg', 'fileicon-base-xcf.svg', 'fileicon-base.svg' ],
+                depend_files: [ 'clay-logo.svg', 'fileicon-base-xcf.svg', 'fileicon-base.svg' ],
                 depends: [ gimp_exe_depends ],
                 output: [ 'stamp-fileicon.png' ],
                 command: [ gimp_exe, '-nidfs',
@@ -442,7 +442,7 @@ if get_option('dmg')
                                        configuration : gen_fileicon_icns_conf)
   fileicon_icns = custom_target('fileicon.icns',
                                 input : [ gen_fileicon_icns_py ],
-                                depend_files: [ 'gimp-logo-shadow.svg', 'fileicon-base-xcf.svg', 'fileicon-base.svg' ],
+                                depend_files: [ 'clay-logo.svg', 'fileicon-base-xcf.svg', 'fileicon-base.svg' ],
                                 depends: [ gimp_exe_depends ],
                                 output: [ 'stamp-fileicon.icns' ],
                                 command: [ gimp_exe, '-nidfs',
@@ -460,7 +460,7 @@ if get_option('dmg')
                                         configuration : gen_conf)
   gimp_dmg_icns = custom_target('.VolumeIcon.icns',
                                 input : [ gen_gimp_dmg_icns_py ],
-                                depend_files: [ 'gimp-logo.svg', 'dmg-base.svg' ],
+                                depend_files: [ 'clay-logo.svg', 'dmg-base.svg' ],
                                 depends: [ gimp_exe_depends ],
                                 output: [ '.VolumeIcon.icns' ],
                                 command: [ gimp_exe,'-nidfs',
@@ -481,7 +481,7 @@ if get_option('dmg')
                                    configuration : gen_gimp_dmg_conf)
   gimp_dmg = custom_target('gimp-dmg.png',
                            input : [ gen_gimp_dmg_py ],
-                           depend_files: [ 'gimp-logo-shadow.svg', '../macos/gimp-dmg.xcf.xz' ],
+                           depend_files: [ 'clay-logo.svg', '../macos/gimp-dmg.xcf.xz' ],
                            depends: [ gimp_exe_depends ],
                            output: [ 'gimp-dmg.png' ],
                            command: [ gimp_exe,'-nidfs',

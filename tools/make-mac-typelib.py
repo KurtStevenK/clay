@@ -37,6 +37,8 @@ def get_lib_path(p):
     return f"@rpath/{name}"
   else: # "in-build"
     folder = name.split('-')[0]
+    #Clay renames the libraries (libclay*) but keeps the libgimp* build dirs
+    folder = folder.replace("libclay", "libgimp", 1)
     #Exception: libgimpui is built inside the 'libgimp' directory
     if folder == "libgimpui":
       folder = "libgimp"
