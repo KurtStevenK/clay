@@ -86,6 +86,11 @@ EOF
 MIN_MACOS=$(find "$C" -type f \( -name "*.dylib" -o -name "*.so" -o -path "*/MacOS/*" \) -exec otool -l {} \; 2>/dev/null \
             | awk '/LC_BUILD_VERSION/ {f=1} f && $1 == "minos" {print $2; f=0}' | sort -V | tail -1)
 plutil -replace LSMinimumSystemVersion -string "${MIN_MACOS:-11.0}" "$C/Info.plist"
+## Without the Liquid Glass Assets.car (actool failed) macOS must use AppIcon.icns
+if [ ! -f "$C/Resources/Assets.car" ]; then
+  plutil -remove CFBundleIconName "$C/Info.plist"
+  printf '(INFO): no Assets.car, using AppIcon.icns\n'
+fi
 plutil -lint "$C/Info.plist" >/dev/null
 printf "(INFO): minimum macOS: ${MIN_MACOS:-11.0}\n"
 
