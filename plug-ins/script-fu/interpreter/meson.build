@@ -42,6 +42,14 @@ if not meson.is_cross_build()
                                      win_subsystem: 'windows',
                                      install: true)
 
+  # Scripts and third-party plug-ins name the interpreter by its GIMP name in their
+  # shebang (Windows maps it in gimp-script-fu-interpreter.interp instead)
+  if not platform_windows
+    install_symlink('gimp-script-fu-interpreter-' + gimp_api_version,
+                    pointing_to: executable_name,
+                    install_dir: get_option('bindir'))
+  endif
+
   # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
   plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
