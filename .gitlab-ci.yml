@@ -736,7 +736,7 @@ gimp-macos:
     - arch -${ARCH} sh build/macos/2_build-gimp-macports.sh
   artifacts:
     paths:
-      - gimp-*.app
+      - clay-*.app
       - _build*/meson-logs/meson-log.txt
       - _build*/done-dylib.list
       - _build*/done-symbols.list
