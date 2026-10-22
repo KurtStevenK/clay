@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="addon">
   <id>org.gimp.extension.goat-exercises</id>
-  <extends>xyz.kainzmayer.ClayDesign</extends>
+  <extends>xyz.kainzmayer.clay</extends>
   <name>Goat Exercises</name>
   <summary>Official Demo Plug-ins</summary>
   <description>
@@ -22,7 +22,7 @@
    <release version="1.0.0" date="2020-10-08" />
   </releases>
   <requires>
-   <id version="2.99.0" compare="ge">xyz.kainzmayer.ClayDesign</id>
+   <id version="2.99.0" compare="ge">xyz.kainzmayer.clay</id>
   </requires>
   <custom>
    <value key="GIMP::plug-in-path">@GOAT_EXERCISES@</value>

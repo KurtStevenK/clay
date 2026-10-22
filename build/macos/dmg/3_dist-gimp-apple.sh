@@ -95,7 +95,7 @@ DMG_MOUNT=$(hdiutil attach "temp_$ARCH.dmg" | grep "$APPVER" | cut -f3-)
 mv -f "$DMG_MOUNT/$APP" "$DMG_MOUNT/$BUNDLE_NAME.app"
 
 ## Set revision (this does the same as '-Drevision' build option)
-gimp_release="$(echo "$DMG_MOUNT/$BUNDLE_NAME.app"/Contents/Resources/gimp/*/gimp-release)"
+gimp_release="$(echo "$DMG_MOUNT/$BUNDLE_NAME.app"/Contents/Resources/clay/*/gimp-release)"
 before=$(cat "$gimp_release" | grep 'revision')
 after="revision=$REVISION"
 sed -i '' "s|$before|$after|" "$gimp_release"

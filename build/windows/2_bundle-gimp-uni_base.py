@@ -136,8 +136,8 @@ bundle(GIMP_PREFIX, "lib/babl-*")
 bundle(GIMP_PREFIX, "bin/libgegl*.dll")
 bundle(GIMP_PREFIX, "lib/gegl-*")
 bundle(GIMP_PREFIX, "bin/libgimp*.dll")
-bundle(GIMP_PREFIX, "lib/gimp")
-bundle(GIMP_PREFIX, "share/gimp")
+bundle(GIMP_PREFIX, "lib/clay")
+bundle(GIMP_PREFIX, "share/clay")
 lang_array = [Path(f).stem for f in glob(str(Path(GIMP_SOURCE)/"po/*.po"))]
 for lang in lang_array:
   bundle(GIMP_PREFIX, f"share/locale/{lang}/LC_MESSAGES/*.mo")
@@ -147,7 +147,7 @@ for lang in lang_array:
   # For language list in text tool options
   if glob(f"{MSYSTEM_PREFIX}/share/locale/{lang}/LC_MESSAGES/iso_639_3.mo"):
     bundle(MSYSTEM_PREFIX, f"share/locale/{lang}/LC_MESSAGES/iso_639_3.mo")
-bundle(GIMP_PREFIX, "etc/gimp")
+bundle(GIMP_PREFIX, "etc/clay")
 
 
 ## OTHER FEATURES AND PLUG-INS.

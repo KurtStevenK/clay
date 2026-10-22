@@ -221,8 +221,8 @@ if glob(f"{OPT_PREFIX}/lib/libSDL3*.dylib"):
   bundle(OPT_PREFIX, "lib/libSDL3*.dylib")
 if (OPT_PREFIX / "opt/libomp/lib/libomp.dylib").exists():
   bundle(OPT_PREFIX, "opt/libomp/lib/libomp.dylib", "--dest", "lib")
-bundle(GIMP_PREFIX, "lib/gimp")
-bundle(GIMP_PREFIX, "share/gimp")
+bundle(GIMP_PREFIX, "lib/clay")
+bundle(GIMP_PREFIX, "share/clay")
 lang_array = [Path(f).stem for f in glob(str(Path(GIMP_SOURCE)/"po/*.po"))]
 for lang in lang_array:
   bundle(GIMP_PREFIX, f"share/locale/{lang}/LC_MESSAGES/*.mo")
@@ -239,7 +239,7 @@ gtk_locale_link = GIMP_DISTRIB / "Resources" / "share" / "locale"
 gtk_locale_link.parent.mkdir(parents=True, exist_ok=True)
 gtk_locale_link.unlink(missing_ok=True)
 gtk_locale_link.symlink_to(Path("..") / "locale")
-bundle(GIMP_PREFIX, "etc/gimp")
+bundle(GIMP_PREFIX, "etc/clay")
 
 
 ## OTHER FEATURES AND PLUG-INS.
@@ -327,6 +327,8 @@ link_path.symlink_to(os.path.relpath(real_path, link_path.parent))
 ## MAIN EXECUTABLES AND DEPENDENCIES
 ### Minimal (and some additional) executables for the 'MacOS' folder
 bundle(GIMP_PREFIX, "bin/clay*")
+### Script-Fu scripts call the interpreter by its GIMP name in their shebang
+bundle(GIMP_PREFIX, "bin/gimp-script-fu-interpreter*")
 if os.path.exists(OPT_PREFIX / "bin/brew"):
   bundle(OPT_PREFIX, "Cellar/libarchive/*/lib/libarchive.*.dylib", "--dest", "lib")
 ### Bundled just to promote GEGL. See: https://gitlab.gnome.org/GNOME/gimp/-/issues/10580

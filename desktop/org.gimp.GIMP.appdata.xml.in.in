@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 1995-2017 Spencer Kimball, Peter Mattis, and others -->
 <component type="desktop">
-  <id>xyz.kainzmayer.ClayDesign</id>
+  <id>@GIMP_DESKTOP_NAME@</id>
 
   <!--
       The tag 'metadata_license' means the licence of this file, not the whole
@@ -37,11 +37,11 @@
     </p>
   </description>
   <url type="bugtracker">@BUG_REPORT_URL@</url>
-  <url type="donation">https://www.gimp.org/donating/</url>
-  <url type="help">https://www.gimp.org/docs/</url>
-  <url type="homepage">https://www.gimp.org/</url>
-  <url type="vcs-browser">https://gitlab.gnome.org/GNOME/gimp/</url>
-  <url type="contribute">https://www.gimp.org/develop/</url>
+  <url type="donation">https://claydesign.web.app</url>
+  <url type="help">https://github.com/KurtStevenK/clay#readme</url>
+  <url type="homepage">https://claydesign.web.app</url>
+  <url type="vcs-browser">https://github.com/KurtStevenK/clay</url>
+  <url type="contribute">https://github.com/KurtStevenK/clay/blob/master/CONTRIBUTING.md</url>
   <screenshots>
     <screenshot type="default">
       <image>https://www.gimp.org/screenshots/Screenshot-gimp-3.0-painting.jpg</image>
@@ -65,7 +65,6 @@
     <color type="primary" scheme_preference="dark">#293a56</color>
   </branding>
   <keywords>
-    <keyword>GIMP</keyword>
     <keyword>Photoshop</keyword>
   </keywords>
   <kudos>

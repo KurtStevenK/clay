@@ -77,12 +77,12 @@ foreach size : desktop_sizes
                            build_by_default: true,
                            install: false)
   meson.add_install_script(python, '-c',
-                           'from pathlib import Path; from shutil import copy2; import sys, os; target_dir = Path(os.environ.get("MESON_INSTALL_DESTDIR_PREFIX")) / sys.argv[2]; target_dir.mkdir(parents=True, exist_ok=True); copy2(sys.argv[1], target_dir / "gimp.png")', app_icon.full_path(), installdir)
+                           'from pathlib import Path; from shutil import copy2; import sys, os; target_dir = Path(os.environ.get("MESON_INSTALL_DESTDIR_PREFIX")) / sys.argv[2]; target_dir.mkdir(parents=True, exist_ok=True); copy2(sys.argv[1], target_dir / sys.argv[3])', app_icon.full_path(), installdir, gimp_desktop_name + '.png')
 endforeach
 
 install_data('clay-letter.svg',
              install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
-             rename: 'gimp.svg')
+             rename: gimp_desktop_name + '.svg')
 
 
 ################################################################################

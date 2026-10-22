@@ -440,7 +440,7 @@ gimp_extension_load (GimpExtension  *extension,
 
   extends = as_component_get_extends (component);
   if (success &&
-      ! g_ptr_array_find_with_equal_func (extends, "org.gimp.Clay",
+      ! g_ptr_array_find_with_equal_func (extends, GIMP_DESKTOP_NAME,
                                           g_str_equal, NULL))
     {
       /* Properly setting the <extends> will allow extensions to be
@@ -449,7 +449,8 @@ gimp_extension_load (GimpExtension  *extension,
       if (error && *error == NULL)
         *error = g_error_new (GIMP_EXTENSION_ERROR,
                               GIMP_EXTENSION_BAD_APPDATA,
-                              _("Extension AppData must extend \"org.gimp.Clay\"."));
+                              _("Extension AppData must extend \"%s\"."),
+                              GIMP_DESKTOP_NAME);
       success = FALSE;
     }
 
@@ -503,7 +504,7 @@ gimp_extension_load (GimpExtension  *extension,
           AsRelation *relation = g_ptr_array_index(relations, i);
 
           if (as_relation_get_item_kind(relation) == AS_RELATION_ITEM_KIND_ID &&
-              g_strcmp0(as_relation_get_value_str(relation), "org.gimp.Clay") == 0)
+              g_strcmp0(as_relation_get_value_str(relation), GIMP_DESKTOP_NAME) == 0)
             {
               has_require = TRUE;
 
@@ -532,7 +533,8 @@ gimp_extension_load (GimpExtension  *extension,
         {
           *error = g_error_new (GIMP_EXTENSION_ERROR,
                                 GIMP_EXTENSION_FAILED,
-                                _("<requires><id>org.gimp.Clay</id></requires> for version comparison is mandatory."));
+                                _("<requires><id>%s</id></requires> for version comparison is mandatory."),
+                                GIMP_DESKTOP_NAME);
         }
     }
 
