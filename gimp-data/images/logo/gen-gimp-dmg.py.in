@@ -5,11 +5,12 @@ import sys
 @VARS@
 
 base_path   = '@SRCDIR@/../macos/gimp-dmg.xcf.xz'
-wilber_path = '@SRCDIR@/gimp-logo-shadow.svg'
+wilber_path = '@SRCDIR@/clay-logo.svg'
 splash_path = '@SRCDIR@/../gimp-splash.xcf.xz'
 output_path = '@BUILDDIR@/gimp-dmg.png'
-wilber_size = 155
-offset_y    = 77
+#The square Clay logo is drawn smaller than Wilber so it fits inside the ring
+wilber_size = 112
+offset_y    = 98
 
 
 # 1. Loading the base dmg elements.
