@@ -1,27 +1,26 @@
 # Windows specific
 
-configure_file(
+clay_plugins_rc_configured = configure_file(
   input : 'clay-plug-ins.rc.in',
-  output: 'clay-plug-ins.rc',
+  output: 'clay-plug-ins.rc.configured',
   configuration: versionconfig,
 )
 
-configure_file(
+clay_app_rc_configured = configure_file(
   input : 'clay.rc.in',
-  output: 'clay.rc',
+  output: 'clay.rc.configured',
   configuration: versionconfig,
 )
 
-# Basically, the build rules below do nothing (a mere `python -c 'exit()'` call).
-# But because they depends on `git-version.h`, meson ensure that it gets built first,
-# Then the result of this targets is used in 35+ resource compiler build rules.
-#
-# Nasty trick indeed, but it fixes race condition issue described in GNOME/Clay#6257.
+# The copy depends on git-version.h so that header exists before windres
+# runs. The configured .rc is the real file; windres includes git-version.h
+# from it. See GNOME/gimp#6257.
 
 clay_plugins_rc = custom_target('clay_plugins_rc',
   build_by_default: true,
   build_always_stale: true,
-  command: [python, '-c', 'exit()'],
+  input: clay_plugins_rc_configured,
+  command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
   depends: generate_version_h ? [gitversion_h] : [],
   output:  ['clay-plug-ins.rc']
 )
@@ -29,7 +28,8 @@ clay_plugins_rc = custom_target('clay_plugins_rc',
 clay_app_rc = custom_target('clay_app_rc',
   build_by_default: true,
   build_always_stale: true,
-  command: [python, '-c', 'exit()'],
+  input: clay_app_rc_configured,
+  command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
   depends: generate_version_h ? [gitversion_h] : [],
   output:  ['clay.rc']
 )

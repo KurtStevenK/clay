@@ -13,8 +13,12 @@
   100% { color: #7B2FF7; }
 }
 
+/* Step the colour instead of interpolating it. A linear animation changes
+ * the colour every frame, and GTK rebuilds each symbolic icon and queues
+ * a resize for that, which pins a core while the toolbox is idle.
+ */
 toolbutton button image {
-  animation: clay-galaxy-cycle 8s linear infinite;
+  animation: clay-galaxy-cycle 8s steps(6, end) infinite;
 }
 
 toolbutton:nth-child(6n+1) button image { animation-delay: 0.0s; }
